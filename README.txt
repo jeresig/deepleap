@@ -8,8 +8,8 @@ Scrabble Dictionary Files:
  - See also: http://mike.pietdepsi.com/scrabble/lexicons/
 
 OpenOffice Dictionaries:
- - http://wiki.services.openoffice.org/wiki/Dictionaries
- - English: http://ftp.services.openoffice.org/pub/OpenOffice.org/contrib/dictionaries/en_US.zip
+ - http://ftp.osuosl.org/pub/openoffice/contrib/dictionaries/
+ - English: http://ftp.osuosl.org/pub/openoffice/contrib/dictionaries/en_US.zip
  - Post-process: dict/ooo/
 
 Wiktionary:

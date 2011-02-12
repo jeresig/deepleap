@@ -1,15 +1,13 @@
 <?php
 	$letters = "";
 
-	# $lines = array();
-	$handle = fopen("ospd3.txt", "r");
+	$handle = fopen("dict.txt", "r");
 	while (!feof($handle)) {
 		$letters .= trim(fgets($handle));
 	}
 	fclose($handle);
 
 	$letters = str_split($letters);
-	#sort($letters);
 
 	$nums = array();
 
@@ -28,17 +26,6 @@
 		}
 		$pre += $num;
 		echo $i . ":" . $num;
-		#for ( $j = 0; $j < $num; $j++ ) {
-			#echo $i;
-		#}
 	}
 	echo "],total:" . $pre . "}";
-
-
-	#$letters = implode("", $letters);
-
-	#print_r($nums);
-
-	#echo $letters;
-
 ?>
