@@ -158,7 +158,7 @@ $(function(){
 	function saveWord(word, li, left){
 		$.ajax({
 			type: "GET",
-			url: "/words.php",
+			url: "words.php",
 			data: { word: word },
 			error: function(){
 				setTimeout(function(){
