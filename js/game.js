@@ -39,6 +39,9 @@ $(function(){
 	var numLetters = 0;
 	var maxLetters = 75;
 
+	// Ajax stuff
+	var server = window.location.href.replace( /^(https?:..[^\/:]+).*/, "$1" ) + ":8338/";
+
 	// Random generation
 	var initSeed = Math.round(Math.random() * 1000);
 	var numGames = 1000000;
@@ -64,15 +67,40 @@ $(function(){
 		addLetter();
 	}
 
+	$("#letters").sortable({
+		stop: function(){
+			letters = $("#letters span").map(function(){ return this.firstChild.nodeValue; }).get();
+			findWord();
+		}
+	});
+
 	function update(){
 		if ( letters.length === 0 && numLetters > maxLetters ) {
 			alert("Game Over!");
 			return;
 		}
 
-		if ( !doRemove ) {
+		if ( doRemove && foundWord ) {
+			if ( curFind ) {
+				// Trigger on find done
+			} else {
+				saveWord(
+					foundWord,
+					$("<li>Calculating score for <strong>" + foundWord + "</strong>.</li>").prependTo("#words"),
+					letters.length
+				);
+
+				doRemove = false;
+				letters.splice( 0, foundWord.length );
+				$("#letters span").slice( 0, foundWord.length ).remove();
+				foundWord = "";
+
+				update();
+			}
+
+		} else if ( !doRemove ) {
 			addLetter();
-			updateLetters();
+			//updateLetters();
 			updateMultiplier();
 
 			var delay = endPause / 2;
@@ -84,7 +112,8 @@ $(function(){
 					//endPause = 100;
 
 				doRemove = true;
-				$("#letters span:first").animate({ backgroundColor: "red" }, endPause);
+				// Temporarily disable the red background fade
+				//$("#letters span:first").animate({ backgroundColor: "red" }, endPause);
 				delay = endPause;
 			}
 
@@ -99,18 +128,26 @@ $(function(){
 				}
 				count++;
 			}, delay / rate);
+
 		} else {
 			var li = $("<li></li>").prependTo("#words");
 			addPoints(false, letters[0], getPoint(letters[0]), letters.length, li);
 			letters.shift();
-			$("#letters span:first").animate({ marginLeft: -100 }, 250, arguments.callee);
 			multiplier = 1;
 			doRemove = false;
+			
+			// Temporarily diabling the animation
+			//$("#letters span:first").animate({ marginLeft: -100 }, 250, update);
+			$("#letters span:first").remove();
+			update();
 		}
+
+		findWord();
 	}
 
 	update();
 
+/*
 	$("form").submit(function(){
 		var word = $("#word").val().toLowerCase(),
 			l = word.split(""), spanLetters = $("#letters span");
@@ -154,16 +191,45 @@ $(function(){
 
 		return false;
 	});
+*/
+
+	var curFind, foundWord = "";
+
+	function findWord() {
+		var spanLetters = $("#letters span"),
+			word = spanLetters.map(function(){ return this.firstChild.nodeValue; }).get().join("");
+
+		if ( curFind ) {
+			curFind.abort();
+		}
+
+		curFind = $.ajax({
+			type: "GET",
+			url: server,
+			dataType: "jsonp",
+			data: { word: word },
+			cache: true,
+			success: function(state){
+				spanLetters.removeClass( "found" );
+				foundWord = "";
+
+				if ( state.pass && state.word.length > 2 ) {
+					foundWord = state.word;
+					spanLetters.slice( 0, state.word.length ).addClass( "found" );
+				}
+
+				curFind = null;
+			}
+		});
+	}
 
 	function saveWord(word, li, left){
-		var server = window.location.href.replace( /^(https?:..[^\/:]+).*/, "$1" ) + ":8338/";
-
 		$.ajax({
 			type: "GET",
 			url: server,
 			dataType: "jsonp",
 			data: { word: word },
-			cache: false,
+			cache: true,
 			error: function(){
 				setTimeout(function(){
 					saveWord(word, li, left);
@@ -252,6 +318,12 @@ $(function(){
 				if ( purityControl.length > 4 ) {
 					purityControl = purityControl.slice(1);
 				}
+
+				$("#letters").append( "<span>" + letter +
+					// Disable animation in
+					// (i === letters.length - 1 && numLetters <= maxLetters ? " class='last'" : "") +
+					"<b>" + getPoint(letter) +
+					" point" + (getPoint(letter) > 1 ? "s" : "") + "</b></span>" );
 			} else {
 				numLetters--;
 				return addLetter();
@@ -269,14 +341,16 @@ $(function(){
 	function updateLetters(){
 		var html = jQuery.map(letters, function(l,i){
 			return "<span" + 
-				(i === letters.length - 1 && numLetters <= maxLetters ? " class='last'" : "") +
+				// Disable animation in
+				// (i === letters.length - 1 && numLetters <= maxLetters ? " class='last'" : "") +
 				">" + l +
 				"<b>" + getPoint(l) + " point" + (getPoint(l) > 1 ? "s" : "") + "</b></span>"; }).join(" ");
 
 		$("#letters").html( html );
 
 		if ( numLetters <= maxLetters ) {
-			$("#letters span.last").animate({ top: 0 }, 250);
+			// Disable animation in
+			// $("#letters span.last").animate({ top: 0 }, 250);
 		}
 	}
 

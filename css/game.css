@@ -87,6 +87,12 @@ li.fail, li.drop {
 	/*text-transform: uppercase;*/
 }
 
+#letters span.found {
+	border: 3px outset green;
+	color: white;
+	background: darkgreen;
+}
+
 #letters span b {
 	font-size: 10px;
 	line-height: 10px;

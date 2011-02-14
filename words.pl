@@ -9,18 +9,29 @@ use base qw(Net::Server::HTTP);
 __PACKAGE__->run( port => 8338 );
 
 sub process_http_request {
+	print "Content-type: text/javascript\n\n";
+
 	my $cgi = CGI->new;
 
 	my $word = $cgi->param( "word" );
 	$word =~ s/\W//g;
 
+	my $orig = $word;
+
 	my $callback = $cgi->param( "callback" );
 	$callback =~ s/\W//g;
 
-	print "Content-type: text/javascript\n\n";
+	# Find the word that we're looking for
+	while ( $word ) {
+		if ( defined $words{ $word } ) {
+			last;
+		}
+
+		chop $word;
+	}
 
 	if ( $word && $callback ) {
-		print $callback . '({"word":"' . $word .
-			'","pass":' . (defined $words{ $word } ? 'true' : 'false') . '})';
+		print $callback . '({"word":"' . ($word || $orig) .
+			'","pass":' . ($word ? 'true' : 'false') . '})';
 	}
 }
