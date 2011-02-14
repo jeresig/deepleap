@@ -101,7 +101,7 @@ $(function(){
 			}, delay / rate);
 		} else {
 			var li = $("<li></li>").prependTo("#words");
-			addPoints("drop", letters[0], getPoint(letters[0]), letters.length, li);
+			addPoints(false, letters[0], getPoint(letters[0]), letters.length, li);
 			letters.shift();
 			$("#letters span:first").animate({ marginLeft: -100 }, 250, arguments.callee);
 			multiplier = 1;
@@ -156,10 +156,16 @@ $(function(){
 	});
 
 	function saveWord(word, li, left){
+		var server = window.location.href.replace( /^(https?:..[^\/:]+).*/, "$1" ) + ":8338/";
+
+		console.log( server );
+
 		$.ajax({
 			type: "GET",
-			url: "words.php",
+			url: server,
+			dataType: "jsonp",
 			data: { word: word },
+			cache: false,
 			error: function(){
 				setTimeout(function(){
 					saveWord(word, li, left);
@@ -168,7 +174,7 @@ $(function(){
 			success: function(state){
 				var l = word.split(""), total = 0;
 
-				if ( state === "fail" ) {
+				if ( state.pass ) {
 					multiplier = 1;
 				}
 
@@ -176,9 +182,9 @@ $(function(){
 					total += getPoint( l[i] );
 				}
 
-				addPoints( state, word, Math.round(total), left, li );
+				addPoints( state.pass, word, Math.round(total), left, li );
 
-				if ( state === "pass" ) {
+				if ( state.pass ) {
 					multiplier += 1 / (Math.floor(multiplier) * 10);
 				}
 
@@ -207,18 +213,18 @@ $(function(){
 	};
 
 	function addPoints(state, word, total, left, li){
-		var num = state != "pass" ? -1 * total : total * multiplier * lengths[word.length] * (left === 0 ? 2 : 1);
+		var num = !state ? -1 * total : total * multiplier * lengths[word.length] * (left === 0 ? 2 : 1);
 		num = Math.round(num);
 		points += num;
 
-		li.addClass( state ).html(
+		li.addClass( state ? "pass" : "fail" ).html(
 			"<b>" + (num >= 0 ? "+" : "" ) + num + ": " + word + ".</b> " + 
-			( state === "pass" ?
+			( state ?
 				total + " Points " +
 				(lengths[word.length] > 1 ? "+" + lengths[word.length].toFixed(1) + "x Word Length. " : "") +
 				(multiplier > 1 ? "+" + multiplier.toFixed(1) + "x Multiplier. " : "") +
 				(left === 0 ? "+2.0x Clean Slate. " : "") :
-				state === "fail" ?
+				word.length > 1 ?
 					"Word not in dictionary." :
 					"Letter not used." )
 		);
