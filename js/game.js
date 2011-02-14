@@ -158,8 +158,6 @@ $(function(){
 	function saveWord(word, li, left){
 		var server = window.location.href.replace( /^(https?:..[^\/:]+).*/, "$1" ) + ":8338/";
 
-		console.log( server );
-
 		$.ajax({
 			type: "GET",
 			url: server,
