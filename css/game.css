@@ -93,6 +93,10 @@ li.fail, li.drop {
 	background: darkgreen;
 }
 
+#letters span.active {
+	top: -15px;
+}
+
 #letters span b {
 	font-size: 10px;
 	line-height: 10px;
