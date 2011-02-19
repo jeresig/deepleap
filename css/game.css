@@ -23,7 +23,7 @@ h1 span {
 
 #main {
 	padding: 8px;
-	width: 775px;
+	width: 960px;
 }
 
 #gameinfo {
@@ -71,15 +71,15 @@ li.fail, li.drop {
 
 #letters span {
 	display: block;
-	width: 70px;
-	height: 80px;
-	font-size: 70px;
-	line-height: 70px;
+	width: 90px;
+	height: 90px;
+	font-size: 80px;
+	line-height: 80px;
 	text-align: center;
 	background: #F4D1A3;
 	float: left;
 	border: 3px outset black;
-	margin: 5px;
+	margin: 5px 6px 5px 5px;
 	position: relative;
 	top: 0px;
 	left: 0px;
@@ -104,7 +104,7 @@ li.fail, li.drop {
 	position: absolute;
 	bottom: 0px;
 	left: 0px;
-	width: 70px;
+	width: 100%;
 	height: 12px;
 	text-align: center;
 }
@@ -116,11 +116,11 @@ li.fail, li.drop {
 #letters {
 	overflow: visible;
 	position: relative;
-	height: 98px;
+	height: 108px;
 	background: brown;
 	border: 4px solid black;
-	width: 774px;
-	_width: 780px;
+	width: 984px;
+	_width: 960px;
 	margin-bottom: 8px;
 }
 

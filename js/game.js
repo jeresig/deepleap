@@ -64,7 +64,7 @@ $(function(){
 	// Timer control
 	var doRemove = false;
 	var timer;
-	var updateRate = 1000;
+	var updateRate = 2000;
 
 	function update(){
 		if ( letters.length === 0 && numLetters > maxLetters ) {
@@ -88,6 +88,8 @@ $(function(){
 			for ( var i = 0; i < curLetters; i++ ) {
 				addLetter();
 			}
+
+			findWord();
 
 			var totalTime = updateRate * letters.length;
 			var endWarning = totalTime / 4;
