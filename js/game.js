@@ -23,12 +23,42 @@ $(function(){
 
 			// Make sure we aren't trying to swap with itself
 			if ( activeTile !== this ) {
-				// Swap tiles
-				$(this).clone().insertAfter( activeTile );
-				$(this).replaceWith( activeTile );
+				// Remember the original positions of the tiles
+				var origPos = $(activeTile).position(),
+					swapPos = $(this).position(),
 
-				// Move the tile only
-				//$(this).before( activeTile );
+					// Figure out which element's margins we should be padding
+					adjacent = activeTile.nextSibling === this && this.nextSibling ||
+						this.nextSibling === activeTile && activeTile.nextSibling ||
+						[ activeTile.nextSibling, this.nextSibling ],
+
+					// Reset everything after the animation is done
+					swapDone = function() {
+						$(adjacent).css( "marginLeft", "" );
+						$(this).removeClass( "swapping" ).css( "left", "" );
+					};
+
+				// Dynamically calculate what the margin should be
+				$(adjacent).css( "marginLeft",
+					Math.abs( $(adjacent).position().left - (adjacent.nodeType ?
+						Math.min( origPos.left, swapPos.left ) :
+						Math.max( origPos.left, swapPos.left )) ) +
+						parseFloat( $(adjacent).css("marginLeft") ) );
+
+				// Move the current tile (via cloning)
+				$(this)
+					.clone()
+					.insertAfter( activeTile )
+					.addClass( "swapping" )
+					.css( "left", swapPos.left )
+					.animate( { left: origPos.left }, 350, swapDone );
+
+				// Finally move the originally selected tile
+				$(activeTile)
+					.replaceAll( this )
+					.addClass( "swapping" )
+					.css( "left", origPos.left )
+					.animate( { left: swapPos.left }, 350, swapDone );
 
 				// Regenerate the list of letters
 				letters = $("#letters span").map(function(){ return this.firstChild.nodeValue; }).get();

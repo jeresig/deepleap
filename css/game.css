@@ -97,6 +97,11 @@ li.fail, li.drop {
 	top: -15px;
 }
 
+#letters span.swapping {
+	position: absolute;
+	z-index: 11;
+}
+
 #letters span b {
 	font-size: 10px;
 	line-height: 10px;
