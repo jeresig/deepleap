@@ -114,7 +114,7 @@ $(function(){
 			}
 
 		} else if ( !doRemove ) {
-			var curLetters = max - $("#letters span").length;
+			var curLetters = max - letters.length;
 			for ( var i = 0; i < curLetters; i++ ) {
 				addLetter();
 			}
@@ -158,12 +158,36 @@ $(function(){
 			
 			// Temporarily diabling the animation
 			//$("#letters span:first").animate({ marginLeft: -100 }, 250, update);
-			letters.shift();
-			$("#letters span:first").remove();
-			
+			removeLetters( 1 );
+
 			findWord();
 			update();
 		}
+	}
+
+
+
+	function removeLetters( num ) {
+		var spans = $("#letters span"),
+			next = spans.eq( num ),
+			pos = next.position();
+
+		next
+			.css( "marginLeft", pos.left )
+			.animate( { marginLeft: 5 }, 500 );
+		
+		letters.splice( 0, num );
+
+		$( spans.slice( 0, num ).get().reverse() ).css({
+			position: "absolute",
+			left: function() {
+				return $(this).position().left;
+			}
+		})
+		.addClass( "leaving" )
+		.fadeOut( 500, function() {
+			$(this).remove();
+		});
 	}
 	
 
@@ -175,8 +199,7 @@ $(function(){
 	function extractWord() {
 		if ( foundWord ) {
 			// Extract the word
-			letters.splice( 0, foundWord.length );
-			$("#letters span").slice( 0, foundWord.length ).remove();
+			removeLetters( foundWord.length );
 			
 			// Split it up to calculate the score
 			var l = foundWord.split(""), total = 0;
@@ -202,35 +225,42 @@ $(function(){
 	
 	
 	
-	// Ajax stuff
-	var server = window.location.href.replace( /^(https?:..[^\/:]+).*/, "$1" ) + ":8338/";
+	// Load in the dictionary
+	var dict = {};
 
-	function findWord() {
-		var spanLetters = $("#letters span"),
-			word = letters.join("");
+	$.get( "dict/dict.txt", function( txt ) {
+		var words = txt.split( "\n" );
 
-		if ( curFind ) {
-			curFind.abort();
+		for ( var i = 0; i < words.length; i++ ) {
+			dict[ words[i] ] = true;
 		}
 
-		curFind = $.ajax({
-			type: "GET",
-			url: server,
-			dataType: "jsonp",
-			data: { word: word },
-			cache: true,
-			success: function(state){
-				spanLetters.removeClass( "found" );
-				foundWord = "";
+		update();
+	});
 
-				if ( state.pass && state.word.length > 2 ) {
-					foundWord = state.word;
-					spanLetters.slice( 0, state.word.length ).addClass( "found" );
-				}
+	function findWord() {
+		var spanLetters = $("#letters span").removeClass("found").not(".leaving")
+			curLetters = letters.slice( 0 ),
+			word = "";
 
-				curFind = null;
+		console.log( curLetters, spanLetters );
+
+		foundWord = "";
+
+		while ( curLetters.length > 2 ) {
+			word = curLetters.join("");
+			
+			if ( dict[ word ] ) {
+				foundWord = word;
+				break;
 			}
-		});
+
+			curLetters.pop();
+		}
+
+		if ( foundWord ) {
+			spanLetters.slice( 0, word.length ).addClass( "found" );
+		}
 	}
 	
 	
@@ -335,11 +365,11 @@ $(function(){
 				letters.push( letter );
 
 				// Inject new letter into the UI
-				$("#letters").append( "<span>" + letter +
-					// Disable animation in
-					// (i === letters.length - 1 && numLetters <= maxLetters ? " class='last'" : "") +
+				$( "<span>" + letter +
 					"<b>" + getPoint(letter) +
-					" point" + (getPoint(letter) > 1 ? "s" : "") + "</b></span>" );
+					" point" + (getPoint(letter) > 1 ? "s" : "") + "</b></span>" )
+					.css( "backgroundPosition", Math.round( Math.random() * 1400 ) + "px" )
+					.appendTo("#letters");
 			
 			// The letter didn't match the criteria so try again
 			} else {
@@ -419,5 +449,5 @@ $(function(){
 	}
 	
 	// Start the game
-	update();
+	// update();
 });

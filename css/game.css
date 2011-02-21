@@ -1,5 +1,5 @@
 html, body {
-	background: #FFF;
+	background: #BBB url(../images/linen-background.jpg);
 	color: #000;
 	font-family: Helvetica, Arial, Sans-Serif;
 	font-size: 14px;
@@ -76,21 +76,19 @@ li.fail, li.drop {
 	font-size: 80px;
 	line-height: 80px;
 	text-align: center;
-	background: #F4D1A3;
+	background: #F4D1A3 url(../images/wood-tile.jpg);
 	float: left;
-	border: 3px outset black;
-	margin: 5px 6px 5px 5px;
+	margin: 5px 9px 0px 5px;
 	position: relative;
 	top: 0px;
 	left: 0px;
 	overflow: hidden;
-	/*text-transform: uppercase;*/
+	border-radius: 6px;
+	text-shadow: 1px 1px #F4D1A3, -1px -1px #444;
 }
 
 #letters span.found {
-	border: 3px outset green;
 	color: white;
-	background: darkgreen;
 }
 
 #letters span.active {
@@ -112,6 +110,7 @@ li.fail, li.drop {
 	width: 100%;
 	height: 12px;
 	text-align: center;
+	display: none;
 }
 
 #letters span.last {
@@ -119,14 +118,40 @@ li.fail, li.drop {
 }
 
 #letters {
-	overflow: visible;
+	overflow: hidden;
 	position: relative;
-	height: 108px;
-	background: brown;
-	border: 4px solid black;
-	width: 984px;
-	_width: 960px;
+	height: 101px;
+	background: url(../images/wood-tile3.jpg);
+	width: 944px;
+	padding: 0 8px 0px 8px;
+	border-top-left-radius: 6px;
+	border-top-right-radius: 6px;
+	z-index: 1;
+}
+
+#letters-extra {
+	height: 30px;
+	width: 960px;
+	background: url(../images/wood-tile3.jpg) 300px 80px;
+	box-shadow: 0 0 4px rgba(0, 0, 0, 0.8) inset;
 	margin-bottom: 8px;
+	position: relative;
+	top: -14px;
+	border-radius: 6px;
+	z-index: 2;
+}
+
+#letters-extra-before {
+	position: relative;
+	top: -4px;
+	height: 10px;
+	width: 960px;
+	-moz-border-radius:100px / 10px;
+	border-radius:100px / 10px;
+  -webkit-box-shadow:0 0 25px rgba(0,0,0,1);
+  -moz-box-shadow:0 0 25px rgba(0,0,0,1);
+  box-shadow:0 0 25px rgba(0,0,0,1);
+	z-index: 2;
 }
 
 input#word {
