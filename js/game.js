@@ -23,45 +23,26 @@ $(function(){
 
 			// Make sure we aren't trying to swap with itself
 			if ( activeTile !== this ) {
-				// Remember the original positions of the tiles
-				var origPos = $(activeTile).position(),
-					swapPos = $(this).position(),
+				var thisLeft = $(this).css( "left" ),
+					activeLeft = $(activeTile).css( "left" ),
+					thisPos = posFromLeft( thisLeft ),
+					activePos = posFromLeft( activeLeft );
 
-					// Figure out which element's margins we should be padding
-					adjacent = activeTile.nextSibling === this && this.nextSibling ||
-						this.nextSibling === activeTile && activeTile.nextSibling ||
-						[ activeTile.nextSibling, this.nextSibling ],
-
-					// Reset everything after the animation is done
-					swapDone = function() {
-						$(adjacent).css( "marginLeft", "" );
-						$(this).removeClass( "swapping" ).css( "left", "" );
-					};
-
-				// Dynamically calculate what the margin should be
-				$(adjacent).css( "marginLeft",
-					Math.abs( $(adjacent).position().left - (adjacent.nodeType ?
-						Math.min( origPos.left, swapPos.left ) :
-						Math.max( origPos.left, swapPos.left )) ) +
-						parseFloat( $(adjacent).css("marginLeft") ) );
-
-				// Move the current tile (via cloning)
-				$(this)
-					.clone()
-					.insertAfter( activeTile )
-					.addClass( "swapping" )
-					.css( "left", swapPos.left )
-					.animate( { left: origPos.left }, 350, swapDone );
+				// Move the current tile 
+				$(this).animate( { left: activeLeft }, 300 );
 
 				// Finally move the originally selected tile
-				$(activeTile)
-					.replaceAll( this )
-					.addClass( "swapping" )
-					.css( "left", origPos.left )
-					.animate( { left: swapPos.left }, 350, swapDone );
+				$(activeTile).animate( { left: thisLeft }, 300 );
 
-				// Regenerate the list of letters
-				letters = $("#letters span").map(function(){ return this.firstChild.nodeValue; }).get();
+				// Swap the letters
+				var old = letters[ thisPos ];
+				letters[ thisPos ] = letters[ activePos ];
+				letters[ activePos ] = old;
+
+				var oldNode = spanLetters[ thisPos ];
+				spanLetters[ thisPos ] = spanLetters[ activePos ];
+				spanLetters[ activePos ] = oldNode;
+
 				findWord();
 			}
 
@@ -126,14 +107,7 @@ $(function(){
 			var count = 0, rate = 30, startTime = (new Date).getTime();
 
 			if ( letters.length >= max || numLetters > maxLetters ) {
-				// Disabled for now.
-				//if ( !vowelCheck.test(letters) )
-					//totalTime = 100;
-
 				doRemove = true;
-				// Temporarily disable the red background fade
-				//$("#letters span:first").animate({ backgroundColor: "red" }, endPause);
-				// ?? delay = endPause;
 			}
 
 			timer = setInterval(function(){
@@ -156,8 +130,6 @@ $(function(){
 			multiplier = 1;
 			doRemove = false;
 			
-			// Temporarily diabling the animation
-			//$("#letters span:first").animate({ marginLeft: -100 }, 250, update);
 			removeLetters( 1 );
 
 			findWord();
@@ -168,26 +140,18 @@ $(function(){
 
 
 	function removeLetters( num ) {
-		var spans = $("#letters span"),
-			next = spans.eq( num ),
-			pos = next.position();
-
-		next
-			.css( "marginLeft", pos.left )
-			.animate( { marginLeft: 5 }, 500 );
-		
 		letters.splice( 0, num );
 
-		$( spans.slice( 0, num ).get().reverse() ).css({
-			position: "absolute",
-			left: function() {
-				return $(this).position().left;
-			}
-		})
-		.addClass( "leaving" )
-		.fadeOut( 500, function() {
-			$(this).remove();
-		});
+		spanLetters = $( spanLetters )
+			.slice( 0, num )
+				.addClass( "leaving" )
+				.fadeOut( 300, function() {
+					$(this).remove();
+				})
+			.end()
+			.slice( num )
+				.animate( { left: "-=" + (tileWidths( num + 1 ) - tileMargin) }, 500 )
+				.get();
 	}
 	
 
@@ -239,11 +203,9 @@ $(function(){
 	});
 
 	function findWord() {
-		var spanLetters = $("#letters span").removeClass("found").not(".leaving")
+		var $spanLetters = $( spanLetters ).removeClass("found"),
 			curLetters = letters.slice( 0 ),
 			word = "";
-
-		console.log( curLetters, spanLetters );
 
 		foundWord = "";
 
@@ -259,7 +221,7 @@ $(function(){
 		}
 
 		if ( foundWord ) {
-			spanLetters.slice( 0, word.length ).addClass( "found" );
+			$spanLetters.slice( 0, word.length ).addClass( "found" );
 		}
 	}
 	
@@ -309,6 +271,12 @@ $(function(){
 	var vowelCheck = /[aeiou]/, notVowelCheck = /[^aeiou]/;
 	var purityControl = [];
 	var possible = [];
+
+	// Positioning of letters
+	var tileWidth = 90;
+	var tileMargin = 15;
+	var tileTopMargin = 5;
+	var spanLetters = [];
 	
 	// Build a full array of all possible letters from which to pull
 	for ( var i in data.letters ) {
@@ -365,11 +333,14 @@ $(function(){
 				letters.push( letter );
 
 				// Inject new letter into the UI
-				$( "<span>" + letter +
-					"<b>" + getPoint(letter) +
-					" point" + (getPoint(letter) > 1 ? "s" : "") + "</b></span>" )
-					.css( "backgroundPosition", Math.round( Math.random() * 1400 ) + "px" )
-					.appendTo("#letters");
+				spanLetters.push( $( "<span>" + letter + "</span>" )
+					.css({
+						backgroundPosition: Math.round( Math.random() * 1400 ) + "px",
+						left: 1000,
+						opacity: 0
+					})
+					.appendTo("#letters")
+					.animate( { left: tileWidths( letters.length ), opacity: 1 }, 300 )[0] );
 			
 			// The letter didn't match the criteria so try again
 			} else {
@@ -380,6 +351,15 @@ $(function(){
 
 		// Let the user know how many 
 		$("#tilesleft").text( maxLetters - numLetters > 0 ? maxLetters - numLetters : "No" );
+	}
+
+	function tileWidths( num ) {
+		return (num * tileMargin) + ((num - 1) * tileWidth);
+	}
+
+	function posFromLeft( left ) {
+		left = parseFloat( left );
+		return (left - tileMargin) / (tileMargin + tileWidth);
 	}
 	
 	
