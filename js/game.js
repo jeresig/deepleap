@@ -333,14 +333,16 @@ $(function(){
 				letters.push( letter );
 
 				// Inject new letter into the UI
+				var tileLeft = tileWidths( letters.length ),
+					baseLeft = parseFloat( $( spanLetters ).last().css( "left" ) || 0 ) + tileMargin + tileWidth;
+
 				spanLetters.push( $( "<span>" + letter + "</span>" )
 					.css({
 						backgroundPosition: Math.round( Math.random() * 1400 ) + "px",
-						left: 1000,
-						opacity: 0
+						left: baseLeft
 					})
 					.appendTo("#letters")
-					.animate( { left: tileWidths( letters.length ), opacity: 1 }, 300 )[0] );
+					.animate( { left: tileLeft }, 500 )[0] );
 			
 			// The letter didn't match the criteria so try again
 			} else {
