@@ -81,6 +81,7 @@ li.fail, li.drop {
 	top: 5px;
 	left: 0px;
 	overflow: hidden;
+	-moz-border-radius: 6px;
 	border-radius: 6px;
 	text-shadow: 1px 1px #F4D1A3, -1px -1px #444;
 	z-index: 11;
@@ -101,6 +102,10 @@ li.fail, li.drop {
 	height: 101px;
 	background: url(../images/wood-tile3.jpg);
 	width: 960px;
+	-moz-border-radius-topleft: 6px;
+	-moz-border-radius-topright: 6px;
+	-webkit-border-top-left-radius: 6px;
+	-webkit-border-top-right-radius: 6px;
 	border-top-left-radius: 6px;
 	border-top-right-radius: 6px;
 	z-index: 1;
@@ -110,10 +115,13 @@ li.fail, li.drop {
 	height: 30px;
 	width: 960px;
 	background: url(../images/wood-tile3.jpg) 300px 80px;
+	-moz-box-shadow: 0 0 4px rgba(0, 0, 0, 0.8) inset;
+	-webkit-box-shadow: 0 0 4px rgba(0, 0, 0, 0.8) inset;
 	box-shadow: 0 0 4px rgba(0, 0, 0, 0.8) inset;
 	margin-bottom: 8px;
 	position: relative;
 	top: -14px;
+	-moz-border-radius: 6px;
 	border-radius: 6px;
 	z-index: 2;
 }
@@ -123,11 +131,11 @@ li.fail, li.drop {
 	top: -4px;
 	height: 10px;
 	width: 960px;
-	-moz-border-radius:100px / 10px;
-	border-radius:100px / 10px;
-  -webkit-box-shadow:0 0 25px rgba(0,0,0,1);
-  -moz-box-shadow:0 0 25px rgba(0,0,0,1);
-  box-shadow:0 0 25px rgba(0,0,0,1);
+	-moz-border-radius: 100px / 10px;
+	border-radius: 100px / 10px;
+  -webkit-box-shadow: 0 0 25px rgba(0,0,0,1);
+  -moz-box-shadow: 0 0 25px rgba(0,0,0,1);
+  box-shadow: 0 0 25px rgba(0,0,0,1);
 	z-index: 2;
 }
 
