@@ -21,66 +21,108 @@ Game.prototype = {
 		this.letters = [];
 		this.possible = [];
 		this.purityControl = [];
+		this.log = [];
+		this.callbacks = {};
 	},
 	
-	// Callbacks
-	onLettersReady: function(){},
-	onAddLetter: function(){},
-	onRemoveLetters: function(){},
-	onFindWord: function(){},
-	onAddPoints: function(){},
-	onGameOver: function(){},
+	start: function() {
+		// Log the start time for future logging
+		this.startTime = (new Date).getTime();
+		
+		// Start the updating process for the first time
+		this.update();
+	},
 	
-	// Timer control
+	// Callbacks and Triggering
+	// LettersReady, AddLetter( letter ), RemoveLetters( pos )
+	// FindWord( word ), AddPoints( result ), Swap( posA, posB ), GameOver
+	on: function( name, fn ) {
+		if ( !this.callbacks[ name ] ) {
+			this.callbacks[ name ] = [];
+		}
+		
+		this.callbacks[ name ].push( fn );
+	},
+	
+	trigger: function( name ) {
+		var callbacks = this.callbacks[ name ],
+			args = Array.prototype.slice.call( arguments, 1 );
+		
+		if ( this.logging ) {
+			this.log.push( [ (new Date).getTime() - this.startTime, name, args ] );
+		}
+		
+		for ( var i = 0, l = callbacks.length; i < l; i++ ) {
+			callbacks[ i ].apply( this, args );
+		}
+	},
+	
+	logging: true,
+	
 	doRemove: false,
+	
+	// The rate at which tiles will be dropping
+	// This is kept in the game logic to help verify scores
+	updateRate: 2000,
 
-	update: function(){
+	update: function() {
+		// If no letters are left and there are no more letters to
+		// pull from then the game is over.
 		if ( this.letters.length === 0 && this.numLetters > this.maxLetters ) {
-			this.onGameOver();
+			this.trigger( "GameOver" );
 			return;
 		}
 
-		if ( this.doRemove && this.foundWord ) {
-			this.extractWord();
-			this.doRemove = false;
+		// If we've reached the end of time
+		if ( this.doRemove ) {
+			// If the user has found a word
+			if ( this.foundWord ) {
+				// Extract the word
+				this.extractWord();
 			
-			this.findWord();
-			this.update();
-
-		} else if ( !this.doRemove ) {
-			var curLetters = this.max - this.letters.length;
-			
-			for ( var i = 0; i < curLetters; i++ ) {
-				this.addLetter();
-			}
-
-			this.findWord();
-
-			if ( this.letters.length >= this.max || this.numLetters > this.maxLetters ) {
-				this.doRemove = true;
+			// Otherwise we need to drop a tile
+			} else {
+				this.addPoints( this.letters[0] );
+				this.removeLetters( 1 );
 			}
 			
-			this.onLettersReady();
-
-		} else {
-			this.addPoints( this.letters[0] );
-			
 			this.doRemove = false;
-			
-			this.removeLetters( 1 );
-
-			this.findWord();
-			this.update();
 		}
+			
+		// Figure out how many letters need to drop
+		var curLetters = this.max - this.letters.length;
+		
+		// ... and drop them in
+		for ( var i = 0; i < curLetters; i++ ) {
+			this.addLetter();
+		}
+
+		// Check to see if we've found a new word
+		this.findWord();
+
+		// And see if we're going to be dropping a letter/word soon
+		if ( this.letters.length >= this.max || this.numLetters > this.maxLetters ) {
+			this.doRemove = true;
+		}
+		
+		// Notify the UI that the updated letters are ready to be displayed
+		this.trigger( "LettersReady" );
 	},
 	
 	swap: function( a, b ) {
-		// Swap the letters
-		var old = this.letters[ b ];
-		this.letters[ b ] = this.letters[ a ];
-		this.letters[ a ] = old;
+		// Make sure that we aren't swapping the same tile with itself
+		if ( a !== b ) {
+			// Swap the letters
+			var old = this.letters[ b ];
+			this.letters[ b ] = this.letters[ a ];
+			this.letters[ a ] = old;
+		
+			// Notify the UI that a tile swap has occurred
+			this.trigger( "Swap", a, b );
 
-		this.findWord();
+			// See if a new word exists after the swap
+			this.findWord();
+		}
 	},
 	
 	submit: function() {
@@ -98,9 +140,7 @@ Game.prototype = {
 	addLetter: function( count ) {
 		var vowelCheck = /[aeiou]/, notVowelCheck = /[^aeiou]/;
 		
-		this.numLetters++;
-		
-		if ( this.numLetters <= this.maxLetters ) {
+		if ( this.numLetters + 1 <= this.maxLetters ) {
 			var letter, isVowel,
 				hasVowel = vowelCheck.test( this.purityControl ),
 				hasConsonant = notVowelCheck.test( this.purityControl );
@@ -117,6 +157,7 @@ Game.prototype = {
 			// Are we currently dealing with a vowel?
 			isVowel = vowelCheck.test(letter);
 
+			// Check to see if we should be dropping this letter
 			if ( letter && (count > 20 ||
 					// Make sure we don't drop duplicate letters
 					this.purityControl[0] !== letter && (
@@ -141,12 +182,15 @@ Game.prototype = {
 				// Add the letter to the board
 				this.letters.push( letter );
 				
+				// Update the total letter used count
+				this.numLetters++;
+				
 				// Notify anyone listening that a letter was dropped
-				this.onAddLetter( letter );
+				this.trigger( "AddLetter", letter );
 			
 			// The letter didn't match the criteria so try again
+			// We limit the number of recursions that can occur here
 			} else {
-				this.numLetters--;
 				return this.addLetter( (count || 0) + 1 );
 			}
 		}
@@ -155,7 +199,7 @@ Game.prototype = {
 	removeLetters: function( num ) {
 		this.letters.splice( 0, num );
 		
-		this.onRemoveLetters( num );
+		this.trigger( "RemoveLetters", num );
 	},
 	
 	// Finding and extracting words
@@ -178,7 +222,7 @@ Game.prototype = {
 			curLetters.pop();
 		}
 		
-		this.onFindWord( this.foundWord );
+		this.trigger( "FindWord", this.foundWord );
 	},
 
 	extractWord: function() {
@@ -238,7 +282,7 @@ Game.prototype = {
 		}
 		
 		// Return the results so that they can be used in the UI
-		this.onAddPoints({
+		this.trigger( "AddPoints", {
 			word: word,
 			state: state,
 			total: total,

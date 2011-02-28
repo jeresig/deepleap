@@ -4,11 +4,12 @@ var UI = function() {
 	this.setSeed();
 	
 	// Attach to the callback hooks in the game
-	this.attachGameEvent( "onLettersReady" );
-	this.attachGameEvent( "onAddLetter" );
-	this.attachGameEvent( "onRemoveLetters" );
-	this.attachGameEvent( "onFindWord" );
-	this.attachGameEvent( "onAddPoints" );
+	this.attachGameEvent( "LettersReady" );
+	this.attachGameEvent( "AddLetter" );
+	this.attachGameEvent( "RemoveLetters" );
+	this.attachGameEvent( "FindWord" );
+	this.attachGameEvent( "AddPoints" );
+	this.attachGameEvent( "Swap" );
 	
 	// Get the initial context of the circle indicator canvas
 	try {
@@ -33,7 +34,9 @@ var UI = function() {
 		Game.prototype.dict = dict;
 
 		// Need to start the game
-		game.update();
+		setTimeout(function(){
+			game.start();
+		}, 1);
 	});
 };
 
@@ -57,7 +60,16 @@ UI.prototype = {
 
 			// If a previous tile was already activated
 			if ( activeTile ) {
-				self.swap( activeTile, this );
+				// Deactivate the originally-selected tile
+				jQuery(activeTile).removeClass( "active" );
+				
+				// Make sure we aren't trying to swap with itself
+				if ( activeTile !== this ) {
+					self.game.swap(
+						self.posFromLeft( activeTile ),
+						self.posFromLeft( this )
+					);
+				}
 
 				activeTile = null;
 
@@ -83,37 +95,26 @@ UI.prototype = {
 		});
 	},
 	
-	swap: function( a, b ) {
-		var $a = jQuery( a ), $b = jQuery( b );
+	Swap: function( activePos, thisPos ) {
+		var $a = jQuery( this.spanLetters[ activePos ] ),
+			$b = jQuery( this.spanLetters[ thisPos ] ),
+			activeLeft = $a.css( "left" ),
+			thisLeft = $b.css( "left" );
+
+		// Move the current tile 
+		$b.animate( { left: activeLeft }, 300 );
+
+		// Finally move the originally selected tile
+		$a.animate( { left: thisLeft }, 300 );
 		
-		// Deactivate the originally-selected tile
-		$a.removeClass( "active" );
-
-		// Make sure we aren't trying to swap with itself
-		if ( a !== b ) {
-			var thisLeft = $b.css( "left" ),
-				activeLeft = $a.css( "left" ),
-				thisPos = this.posFromLeft( thisLeft ),
-				activePos = this.posFromLeft( activeLeft );
-
-			// Move the current tile 
-			$b.animate( { left: activeLeft }, 300 );
-
-			// Finally move the originally selected tile
-			$a.animate( { left: thisLeft }, 300 );
-			
-			var oldNode = this.spanLetters[ thisPos ];
-			this.spanLetters[ thisPos ] = this.spanLetters[ activePos ];
-			this.spanLetters[ activePos ] = oldNode;
-			
-			this.game.swap( thisPos, activePos );
-		}	
+		// Swap the position of the nodes in the store
+		var oldNode = this.spanLetters[ thisPos ];
+		this.spanLetters[ thisPos ] = this.spanLetters[ activePos ];
+		this.spanLetters[ activePos ] = oldNode;
 	},
 	
-	updateRate: 2000,
-	
-	onLettersReady: function() {
-		var totalTime = this.updateRate * this.game.letters.length,
+	LettersReady: function() {
+		var totalTime = this.game.updateRate * this.game.letters.length,
 			endWarning = totalTime / 4,
 			count = 0,
 			rate = 30,
@@ -135,7 +136,6 @@ UI.prototype = {
 	},
 	
 	// Updating circle canvas
-
 	resetCircle: function() {
 		if ( this.circle ) {
 			this.circle.strokeWidth = "0px";
@@ -163,7 +163,7 @@ UI.prototype = {
 		}
 	},
 	
-	onAddPoints: function( result ) {
+	AddPoints: function( result ) {
 		jQuery("<li>")
 			.addClass( result.state ? "pass" : "fail" )
 			.html( "<b>" + (result.total >= 0 ? "+" : "" ) + result.total + ": " + result.word + ".</b> " + 
@@ -180,7 +180,7 @@ UI.prototype = {
 	tileWidth: 90,
 	tileMargin: 15,
 	
-	onAddLetter: function( letter ) {
+	AddLetter: function( letter ) {
 		// Inject new letter into the UI
 		var tileLeft = this.tileWidths( this.game.letters.length ),
 			baseLeft = parseFloat( jQuery( this.spanLetters ).last().css( "left" ) || 0 ) + this.tileMargin + this.tileWidth;
@@ -199,7 +199,7 @@ UI.prototype = {
 			"No" );
 	},
 	
-	onRemoveLetters: function( num ) {
+	RemoveLetters: function( num ) {
 		this.spanLetters = jQuery( this.spanLetters )
 			.slice( 0, num )
 				.addClass( "leaving" )
@@ -212,7 +212,7 @@ UI.prototype = {
 				.get();
 	},
 	
-	onFindWord: function( word ) {
+	FindWord: function( word ) {
 		jQuery( this.spanLetters )
 			.removeClass( "found" )
 			.slice( 0, word.length )
@@ -223,9 +223,9 @@ UI.prototype = {
 		return (num * this.tileMargin) + ((num - 1) * this.tileWidth);
 	},
 
-	posFromLeft: function( left ) {
-		left = parseFloat( left );
-		return (left - this.tileMargin) / (this.tileMargin + this.tileWidth);
+	posFromLeft: function( node ) {
+		return (parseFloat( jQuery( node ).css( "left" ) ) - this.tileMargin) /
+			(this.tileMargin + this.tileWidth);
 	},
 	
 	setSeed: function() {
@@ -239,9 +239,9 @@ UI.prototype = {
 	attachGameEvent: function( method ) {
 		var self = this;
 		
-		this.game[ method ] = function() {
+		this.game.on(method, function() {
 			return self[ method ].apply( self, arguments );
-		};
+		});
 	}
 };
 
