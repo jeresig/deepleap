@@ -1,13 +1,18 @@
 var Game = function() {
-	this.reset();
+	this.callbacks = {};
+	this._log = [];
 	
 	// Build a full array of all possible letters from which to pull
+	this.possible = [];
+
 	for ( var i in this.data.letters ) {
 		var num = this.data.letters[i];
 		for ( var j = 0; j < num; j++ ) {
 			this.possible.push( i );
 		}
 	}
+
+	this.reset();
 };
 
 Game.prototype = {
@@ -19,18 +24,67 @@ Game.prototype = {
 	
 	reset: function() {
 		this.letters = [];
-		this.possible = [];
 		this.purityControl = [];
-		this.log = [];
-		this.callbacks = {};
+		this.seed = this.firstSeed;
+
+		this.trigger( "Reset" );
 	},
 	
 	start: function() {
 		// Log the start time for future logging
-		this.startTime = (new Date).getTime();
+		this.lastTime = this.startTime = (new Date).getTime();
 		
 		// Start the updating process for the first time
 		this.update();
+	},
+
+	playback: function() {
+		var lastTime = (new Date).getTime(),
+			self = this;
+
+		this.logging = false;
+		this.reset();
+
+		if ( typeof setInterval !== "undefined" ) {
+			setInterval(function() {
+				var curTime = (new Date).getTime();
+
+				while ( self._log.length ) {
+					var diffTime = curTime - lastTime,
+						first = self._log[0],
+						next = self._log[1];
+
+					if ( first <= diffTime ) {
+						self._log.shift();
+						
+						if ( next && typeof next === "object" ) {
+							self.swap( next[0], next[1] );
+							self._log.shift();
+
+						} else {
+							self.update();
+						}
+						
+						lastTime = curTime;
+					} else {
+						break;
+					}
+				}
+			}, 20);
+		}
+	},
+
+	log: function( val ) {
+		if ( this.logging ) {
+			var curTime = (new Date).getTime();
+			this._log.push( curTime - this.lastTime );
+
+			if ( val ) {
+				this._log.push( val );
+			}
+
+			this.lastTime = curTime;
+		}
 	},
 	
 	// Callbacks and Triggering
@@ -48,10 +102,6 @@ Game.prototype = {
 		var callbacks = this.callbacks[ name ],
 			args = Array.prototype.slice.call( arguments, 1 );
 		
-		if ( this.logging ) {
-			this.log.push( [ (new Date).getTime() - this.startTime, name, args ] );
-		}
-		
 		if ( callbacks ) {
 			for ( var i = 0, l = callbacks.length; i < l; i++ ) {
 				callbacks[ i ].apply( this, args );
@@ -68,6 +118,8 @@ Game.prototype = {
 	update: function() {
 		var allDropped = this.numLetters >= this.maxLetters,
 			lettersLength = this.letters.length;
+		
+		this.log();
 		
 		// If no letters are left and there are no more letters to
 		// pull from then the game is over.
@@ -105,6 +157,8 @@ Game.prototype = {
 	swap: function( a, b ) {
 		// Make sure that we aren't swapping the same tile with itself
 		if ( a !== b ) {
+			this.log( [ a, b ] );
+			
 			// Swap the letters
 			var old = this.letters[ b ];
 			this.letters[ b ] = this.letters[ a ];
@@ -116,13 +170,6 @@ Game.prototype = {
 			// See if a new word exists after the swap
 			this.findWord();
 		}
-	},
-	
-	submit: function() {
-		if ( this.foundWord ) {
-			this.extractWord( this.foundWord );
-			this.update();
-		}	
 	},
 	
 	max: 9,
@@ -292,7 +339,7 @@ Game.prototype = {
 	seedOffset: 1000000,
 	
 	setSeed: function( seed ) {
-		this.seed = seed || Math.round(Math.random() * 1000);
+		this.firstSeed = this.seed = seed || Math.round(Math.random() * 1000);
 	},
 	
 	random: function() {

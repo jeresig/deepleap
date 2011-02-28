@@ -10,6 +10,9 @@ var UI = function() {
 	this.attachGameEvent( "FindWord" );
 	this.attachGameEvent( "AddPoints" );
 	this.attachGameEvent( "Swap" );
+	this.attachGameEvent( "Reset" );
+
+	this.game.reset();
 	
 	// Get the initial context of the circle indicator canvas
 	try {
@@ -18,9 +21,6 @@ var UI = function() {
 	
 	// Attach event handlers to the document
 	this.attachEvents();
-	
-	// Perform the rest of the initialization
-	this.reset();
 	
 	// Load in the dictionary
 	jQuery.get( "dict/dict.txt", function( txt ) {
@@ -42,10 +42,13 @@ var UI = function() {
 
 UI.prototype = {
 	
-	reset: function() {
+	Reset: function() {
 		// Empty out the tiles
 		this.spanLetters = [];
-		jQuery( "#letters" ).html( "" );
+		jQuery( "#letters, #words" ).html( "" );
+		jQuery( "#tilesleft, #points" ).text( "0" );
+		
+		clearInterval( this.timer );
 	},
 	
 	attachEvents: function() {
@@ -53,6 +56,11 @@ UI.prototype = {
 
 		// Handle tile swapping
 		jQuery("#letters").delegate("span", "click", function() {
+			// Don't allow swapping if we're replaying the game
+			if ( !self.game.logging ) {
+				return;
+			}
+			
 			// Make sure an old tile is no longer selected
 			if ( activeTile && !activeTile.parentNode ) {
 				activeTile = null;
@@ -83,9 +91,14 @@ UI.prototype = {
 		
 		// TODO: Should change this to a submit form or some such
 		$("#letters").dblclick(function(){
+			// Don't allow submission if we're replaying the game
+			if ( !self.game.logging ) {
+				return;
+			}
+			
 			if ( self.game.foundWord ) {
 				clearInterval( self.timer );
-				self.game.submit();
+				self.game.update();
 			}
 		});
 
@@ -121,6 +134,11 @@ UI.prototype = {
 			startTime = (new Date).getTime(),
 			self = this;
 		
+		// Make sure any previous timers are stopped
+		if ( this.timer ) {
+			clearInterval( this.timer );
+		}
+		
 		var timer = this.timer = setInterval(function() {
 			var curTime = (new Date).getTime();
 
@@ -128,7 +146,11 @@ UI.prototype = {
 
 			if ( count >= rate ) {
 				clearInterval( self.timer );
-				self.game.update();
+				
+				// Don't force an update if we're replaying the game
+				if ( self.game.logging ) {
+					self.game.update();
+				}
 			}
 			
 			count++;
@@ -229,7 +251,7 @@ UI.prototype = {
 	},
 	
 	setSeed: function() {
-		this.game.setSeed( parseInt( /\d+$/.exec( location.search )[0] || 0 ) );
+		this.game.setSeed( parseInt( (/\d+$/.exec( location.search ) || [0])[0] ) );
 		
 		jQuery("#game")
 			.attr( "href", "?game=" + this.game.seed )
