@@ -168,7 +168,7 @@ UI.prototype = {
 			.addClass( result.state ? "pass" : "fail" )
 			.html( "<b>" + (result.total >= 0 ? "+" : "" ) + result.total + ": " + result.word + ".</b> " + 
 				( result.state ?
-					result.total + " Points " +
+					result.num + " Points " +
 						(result.lengthBonus > 1 ? "+" + result.lengthBonus.toFixed(1) + "x Word Length. " : "") +
 						(result.multiplier > 1 ? "+" + result.multiplier.toFixed(1) + "x Multiplier. " : "") :
 					"Letter not used." )

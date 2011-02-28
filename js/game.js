@@ -52,58 +52,51 @@ Game.prototype = {
 			this.log.push( [ (new Date).getTime() - this.startTime, name, args ] );
 		}
 		
-		for ( var i = 0, l = callbacks.length; i < l; i++ ) {
-			callbacks[ i ].apply( this, args );
+		if ( callbacks ) {
+			for ( var i = 0, l = callbacks.length; i < l; i++ ) {
+				callbacks[ i ].apply( this, args );
+			}
 		}
 	},
 	
 	logging: true,
-	
-	doRemove: false,
 	
 	// The rate at which tiles will be dropping
 	// This is kept in the game logic to help verify scores
 	updateRate: 2000,
 
 	update: function() {
+		var allDropped = this.numLetters >= this.maxLetters,
+			lettersLength = this.letters.length;
+		
 		// If no letters are left and there are no more letters to
 		// pull from then the game is over.
-		if ( this.letters.length === 0 && this.numLetters > this.maxLetters ) {
+		if ( lettersLength === 0 && allDropped ) {
 			this.trigger( "GameOver" );
 			return;
 		}
-
-		// If we've reached the end of time
-		if ( this.doRemove ) {
+		
+		// Check to see if we should be removing something
+		// (Only happens if the board is full or if no more tiles will drop)
+		if ( lettersLength === this.max || allDropped ) {
 			// If the user has found a word
 			if ( this.foundWord ) {
 				// Extract the word
-				this.extractWord();
-			
+				this.extractWord( this.foundWord );
+		
 			// Otherwise we need to drop a tile
-			} else {
-				this.addPoints( this.letters[0] );
-				this.removeLetters( 1 );
+			} else if ( lettersLength ) {
+				this.extractWord( this.letters[0] );
 			}
-			
-			this.doRemove = false;
 		}
 			
-		// Figure out how many letters need to drop
-		var curLetters = this.max - this.letters.length;
-		
-		// ... and drop them in
-		for ( var i = 0; i < curLetters; i++ ) {
+		// Figure out how many letters need to drop and drop them in
+		for ( var i = 0, l = this.max - this.letters.length; i < l; i++ ) {
 			this.addLetter();
 		}
 
 		// Check to see if we've found a new word
 		this.findWord();
-
-		// And see if we're going to be dropping a letter/word soon
-		if ( this.letters.length >= this.max || this.numLetters > this.maxLetters ) {
-			this.doRemove = true;
-		}
 		
 		// Notify the UI that the updated letters are ready to be displayed
 		this.trigger( "LettersReady" );
@@ -127,8 +120,7 @@ Game.prototype = {
 	
 	submit: function() {
 		if ( this.foundWord ) {
-			this.extractWord();
-			this.doRemove = false;
+			this.extractWord( this.foundWord );
 			this.update();
 		}	
 	},
@@ -225,13 +217,13 @@ Game.prototype = {
 		this.trigger( "FindWord", this.foundWord );
 	},
 
-	extractWord: function() {
-		if ( this.foundWord ) {
+	extractWord: function( word ) {
+		if ( word ) {
 			// Extract the word
-			this.removeLetters( this.foundWord.length );
+			this.removeLetters( word.length );
 			
 			// Add the points into the display
-			this.addPoints( this.foundWord );
+			this.addPoints( word );
 
 			// Reset the word
 			this.foundWord = "";
