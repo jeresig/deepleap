@@ -1,4 +1,6 @@
-var UI = function() {
+var UI = function( rootNode ) {
+	this.root = jQuery( rootNode );
+	
 	// Initialize a copy of the game
 	var game = this.game = new Game();
 	this.setSeed();
@@ -16,7 +18,7 @@ var UI = function() {
 	
 	// Get the initial context of the circle indicator canvas
 	try {
-		this.circle = jQuery("#drop")[0].getContext("2d");
+		this.circle = this.root.find(".drop")[0].getContext("2d");
 	} catch( e ) {}
 	
 	// Attach event handlers to the document
@@ -45,8 +47,11 @@ UI.prototype = {
 	Reset: function() {
 		// Empty out the tiles
 		this.spanLetters = [];
-		jQuery( "#letters, #words" ).html( "" );
-		jQuery( "#tilesleft, #points" ).text( "0" );
+		this.root
+			.find( ".letters, .words" ).html( "" ).end()
+			.find( ".tilesleft, .points" ).text( "0" );
+			
+		this.resetCircle();
 		
 		clearInterval( this.timer );
 	},
@@ -55,7 +60,7 @@ UI.prototype = {
 		var activeTile, self = this;
 
 		// Handle tile swapping
-		jQuery("#letters").delegate("span", "click", function() {
+		this.root.find(".letters").delegate("span", "click", function() {
 			// Don't allow swapping if we're replaying the game
 			if ( !self.game.logging ) {
 				return;
@@ -90,7 +95,7 @@ UI.prototype = {
 		});
 		
 		// TODO: Should change this to a submit form or some such
-		$("#letters").dblclick(function(){
+		this.root.find(".letters").dblclick(function(){
 			// Don't allow submission if we're replaying the game
 			if ( !self.game.logging ) {
 				return;
@@ -103,7 +108,7 @@ UI.prototype = {
 		});
 
 		// Stop text selection
-		$("#letters").mousedown(function(){
+		this.root.find(".letters").mousedown(function(){
 			return false;
 		});
 	},
@@ -160,9 +165,7 @@ UI.prototype = {
 	// Updating circle canvas
 	resetCircle: function() {
 		if ( this.circle ) {
-			this.circle.strokeWidth = "0px";
-			this.circle.fillStyle = "rgb(255,255,255)";
-			this.circle.fillRect( 0, 0, 20, 20 );
+			this.circle.clearRect( 0, 0, 20, 20 );
 
 			this.circle.fillStyle = "rgb(210,210,210)";
 			this.circle.beginPath();
@@ -194,9 +197,9 @@ UI.prototype = {
 						(result.lengthBonus > 1 ? "+" + result.lengthBonus.toFixed(1) + "x Word Length. " : "") +
 						(result.multiplier > 1 ? "+" + result.multiplier.toFixed(1) + "x Multiplier. " : "") :
 					"Letter not used." )
-			).prependTo("#words");
+			).prependTo( this.root.find(".words") );
 
-		jQuery("#points").text( this.game.points );	
+		this.root.find(".points").text( this.game.points );	
 	},
 	
 	tileWidth: 90,
@@ -212,11 +215,11 @@ UI.prototype = {
 				backgroundPosition: Math.round( Math.random() * 1400 ) + "px",
 				left: baseLeft
 			})
-			.appendTo("#letters")
+			.appendTo( this.root.find(".letters") )
 			.animate( { left: tileLeft }, 500 )[0] );
 	
 		// Let the user know how many 
-		jQuery("#tilesleft").text( this.game.maxLetters - this.game.numLetters > 0 ?
+		this.root.find(".tilesleft").text( this.game.maxLetters - this.game.numLetters > 0 ?
 			this.game.maxLetters - this.game.numLetters :
 			"No" );
 	},
@@ -253,6 +256,7 @@ UI.prototype = {
 	setSeed: function() {
 		this.game.setSeed( parseInt( (/\d+$/.exec( location.search ) || [0])[0] ) );
 		
+		// TODO: This is global at the moment, should probably be changed
 		jQuery("#game")
 			.attr( "href", "?game=" + this.game.seed )
 			.text( this.game.seed );
@@ -269,5 +273,5 @@ UI.prototype = {
 
 
 jQuery(function() {
-	window.ui = new UI();
+	window.ui = new UI( "#main" );
 });

@@ -26,6 +26,11 @@ Game.prototype = {
 		this.letters = [];
 		this.purityControl = [];
 		this.seed = this.firstSeed;
+		
+		this.points = 0;
+		this.multiplier = 1;
+		this.numLetters = 0;
+		this.foundWord = "";
 
 		this.trigger( "Reset" );
 	},
@@ -40,7 +45,8 @@ Game.prototype = {
 
 	playback: function() {
 		var lastTime = (new Date).getTime(),
-			self = this;
+			self = this,
+			log = this._log.slice(0);
 
 		this.logging = false;
 		this.reset();
@@ -49,17 +55,17 @@ Game.prototype = {
 			setInterval(function() {
 				var curTime = (new Date).getTime();
 
-				while ( self._log.length ) {
+				while ( log.length ) {
 					var diffTime = curTime - lastTime,
-						first = self._log[0],
-						next = self._log[1];
+						first = log[0],
+						next = log[1];
 
 					if ( first <= diffTime ) {
-						self._log.shift();
+						log.shift();
 						
 						if ( next && typeof next === "object" ) {
 							self.swap( next[0], next[1] );
-							self._log.shift();
+							log.shift();
 
 						} else {
 							self.update();

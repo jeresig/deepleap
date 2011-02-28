@@ -9,12 +9,6 @@
 	<script src="js/game.js"></script>
 	<script src="js/ui.js"></script>
 	<script>
-		// Inline Twitter Status Updates
-		jQuery.getScript("http://twitter.com/javascripts/blogger.js")
-			.then(function(){
-				jQuery.getScript("http://twitter.com/statuses/user_timeline/deepleap.json?callback=twitterCallback2&count=2");
-			});
-
 		// Google Analytics
 		var _gaq = _gaq || [];
 		_gaq.push(['_setAccount', 'UA-8245545-1']);
@@ -29,22 +23,22 @@
 </head>
 <body>
 <h1>DeepLeap <span>The Fast-Paced Time-Wasting Word Game!</span></h1>
-<h2 id="gameinfo">Game #<a href="?game=1" id="game">1</a><span><a href="/">Play Random Game</a></span></h2>
+<h2 id="gameinfo">
+	Game #<a href="?game=1" id="game">1</a>
+	<span><a href="/">Play Random Game</a></span>
+</h2>
 <div id="main">
-<div id="letters"></div><div id="letters-extra-before"></div><div id="letters-extra"></div>
-<span class="points">Points: <span id="points">0</span> &nbsp;&nbsp; <!--Multiplier: <span id="multiplier">1</span>x--> <canvas id="drop" width="20" height="20"></canvas> <span id="tilesleft">75</span> Tiles Left</span><br/><br/>
-<div id="help"><strong>Help:</strong>
-<p>Spell words from the tiles to gain points. 75 tiles drop every game, reload or <a href="/">click here</a> to play a new game.</p>
-<p>Your point multiplier increases by spelling consecutive words correctly. Your multiplier resets if you drop a piece or spell an incorrect word.</p>
-<p>You get more points for spelling longers words. You get a bonus for having no tiles left at the end.</p>
-<strong><a href="http://twitter.com/deepleap">Deepleap Updates</a>:</strong>
-<div id="twitter_div">
-<ul id="twitter_update_list"></ul>
-<a href="http://twitter.com/deepleap" id="twitter-link" style="display:block;text-align:right;">More updates on Twitter</a>
-</div>
-</div>
-<strong>Results:</strong>
-<ul id="words"></ul>
+	<div class="letters"></div>
+	<div class="letters-extra-before"></div>
+	<div class="letters-extra"></div>
+	<span class="points-wrap">
+		Points: <span class="points">0</span> &nbsp;&nbsp;
+		<canvas class="drop" width="20" height="20"></canvas>
+		<span class="tilesleft">0</span> Tiles Left
+	</span>
+	<br/><br/>
+	<strong>Results:</strong>
+	<ul class="words"></ul>
 </div>
 </body>
 </html>
