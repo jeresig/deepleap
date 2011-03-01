@@ -120,10 +120,10 @@ UI.prototype = {
 			thisLeft = $b.css( "left" );
 
 		// Move the current tile 
-		$b.animate( { left: activeLeft }, 300 );
+		$b.stop().animate( { left: activeLeft }, 300 );
 
 		// Finally move the originally selected tile
-		$a.animate( { left: thisLeft }, 300 );
+		$a.stop().animate( { left: thisLeft }, 300 );
 		
 		// Swap the position of the nodes in the store
 		var oldNode = this.spanLetters[ thisPos ];
@@ -228,11 +228,13 @@ UI.prototype = {
 		this.spanLetters = jQuery( this.spanLetters )
 			.slice( 0, num )
 				.addClass( "leaving" )
+				.stop()
 				.fadeOut( 300, function() {
 					jQuery(this).remove();
 				})
 			.end()
 			.slice( num )
+				.stop()
 				.animate( { left: "-=" + (this.tileWidths( num + 1 ) - this.tileMargin) }, 500 )
 				.get();
 	},
@@ -265,7 +267,7 @@ UI.prototype = {
 	attachGameEvent: function( method ) {
 		var self = this;
 		
-		this.game.on(method, function() {
+		this.game.bind(method, function() {
 			return self[ method ].apply( self, arguments );
 		});
 	}
