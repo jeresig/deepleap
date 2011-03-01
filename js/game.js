@@ -313,8 +313,31 @@ Game.prototype = {
 		// ... and immediately reset the game
 		this.reset();
 
+		// Provide a mechanism for playing back a game on the server-side
+		if ( typeof exports !== "undefined" ) {
+			// We're going to execute all the moves in order (disregard time!)
+			while ( log.length ) {
+				// Grab the first two tokens on the stack
+				var first = log[0],
+					next = log[1];
+
+				// The first token is always a time diff from the previous action
+				// Remove that time diff
+				log.shift();
+					
+				// If the next token is an array then we're doing a swap
+				if ( next && typeof next === "object" ) {
+					self.swap( next[0], next[1] );
+					log.shift();
+
+				// Otherwise it's just a regular update
+				} else {
+					self.update();
+				}
+			}
+
 		// If we're in a browser then we play it back in real-time
-		if ( typeof setInterval !== "undefined" ) {
+		} else if ( typeof setInterval !== "undefined" ) {
 			// The timer will keep looping and executing moves that need to occur
 			setInterval(function() {
 				var curTime = (new Date).getTime();
@@ -350,29 +373,6 @@ Game.prototype = {
 					}
 				}
 			}, 20);
-		
-		// Provide a mechanism for playing back a game on the server-side
-		} else {
-			// We're going to execute all the moves in order (disregard time!)
-			while ( log.length ) {
-				// Grab the first two tokens on the stack
-				var first = log[0],
-					next = log[1];
-
-				// The first token is always a time diff from the previous action
-				// Remove that time diff
-				log.shift();
-					
-				// If the next token is an array then we're doing a swap
-				if ( next && typeof next === "object" ) {
-					self.swap( next[0], next[1] );
-					log.shift();
-
-				// Otherwise it's just a regular update
-				} else {
-					self.update();
-				}
-			}
 		}
 	},
 
@@ -439,3 +439,8 @@ Game.prototype = {
 		return (seed & 0xfffffff) / 0x10000000;
 	}
 };
+
+// If we're using Node.js, export the Game
+if ( typeof exports !== "undefined" ) {
+	exports.Game = Game;
+}
