@@ -133,9 +133,9 @@ li.fail, li.drop {
 	width: 960px;
 	-moz-border-radius: 100px / 10px;
 	border-radius: 100px / 10px;
-  -webkit-box-shadow: 0 0 25px rgba(0,0,0,1);
-  -moz-box-shadow: 0 0 25px rgba(0,0,0,1);
-  box-shadow: 0 0 25px rgba(0,0,0,1);
+	-webkit-box-shadow: 0 0 25px rgba(0,0,0,1);
+	-moz-box-shadow: 0 0 25px rgba(0,0,0,1);
+	box-shadow: 0 0 25px rgba(0,0,0,1);
 	z-index: 2;
 }
 
@@ -174,4 +174,44 @@ canvas {
 
 #twitter_update_list li {
 	margin: 4px 0;
+}
+
+
+#mini-main {
+	display: none;
+	position: absolute;
+	top: 267px;
+	left: 672px;
+}
+
+#mini-main .letters {
+	width: 288px;
+	height: 30px;
+}
+
+#mini-main .letters-extra {
+	width: 288px;
+	height: 9px;
+	top: -2px;
+	margin-bottom: 0px;
+}
+
+#mini-main .letters span {
+	height: 26px;
+	width: 26px;
+	font-size: 26px;
+	line-height: 26px;
+	-moz-border-radius: 3px;
+	border-radius: 3px;
+	top: 1px;
+	text-indent: 999px;
+}
+
+#mini-main .letters span.found {
+	background: white;
+}
+
+#mini-main span.points-wrap {
+	font-size: 20px;
+	padding-left: 0px;
 }

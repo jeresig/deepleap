@@ -23,23 +23,6 @@ var UI = function( rootNode ) {
 	
 	// Attach event handlers to the document
 	this.attachEvents();
-	
-	// Load in the dictionary
-	jQuery.get( "dict/dict.txt", function( txt ) {
-		var words = txt.split( "\n" ), dict = {};
-
-		for ( var i = 0, l = words.length; i < l; i++ ) {
-			dict[ words[i] ] = true;
-		}
-		
-		// Put the dictionary on all copies of the game
-		Game.prototype.dict = dict;
-
-		// Need to start the game
-		setTimeout(function(){
-			game.start();
-		}, 1);
-	});
 };
 
 UI.prototype = {
@@ -256,7 +239,7 @@ UI.prototype = {
 	},
 	
 	setSeed: function() {
-		this.game.setSeed( parseInt( (/\d+$/.exec( location.search ) || [0])[0] ) );
+		this.game.setSeed( parseInt( (/game=(\d+)/.exec( location.search ) || [0,0])[1] ) );
 		
 		// TODO: This is global at the moment, should probably be changed
 		jQuery("#game")
@@ -276,4 +259,35 @@ UI.prototype = {
 
 jQuery(function() {
 	window.ui = new UI( "#main" );
+	
+	if ( location.search && /&vs=([^&]+)/.test( location.search ) ) {
+		window.miniUI = new UI( "#mini-main" );
+		miniUI.tileMargin = 5;
+		miniUI.tileWidth = 26;
+		miniUI.game._log = jQuery.parseJSON( /&vs=([^&]+)/.exec( location.search )[1] );
+		miniUI.game.playback();
+		
+		jQuery( "#mini-main" ).show();
+	}
+	
+	// Load in the dictionary
+	jQuery.get( "dict/dict.txt", function( txt ) {
+		var words = txt.split( "\n" ), dict = {};
+
+		for ( var i = 0, l = words.length; i < l; i++ ) {
+			dict[ words[i] ] = true;
+		}
+		
+		// Put the dictionary on all copies of the game
+		Game.prototype.dict = dict;
+
+		// Need to start the game
+		setTimeout(function(){
+			ui.game.start();
+			
+			if ( typeof miniUI !== "undefined" ) {
+				miniUI.game.start();
+			}
+		}, 1);
+	});
 });
