@@ -37,8 +37,7 @@ jQuery.widget( "ui.game", {
 	},
 	
 	playback: function( data ) {
-		this.game._log = typeof data === "string" ? jQuery.parseJSON( data ) : data;
-		this.game.playback();
+		this.game.playback( false, typeof data === "string" ? jQuery.parseJSON( data ) : data );
 	},
 	
 	uiEvents: {

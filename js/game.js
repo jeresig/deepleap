@@ -1,3 +1,17 @@
+/*
+ * Tile/Word Game Engine
+ *   by John Resig (ejohn.org)
+ *
+ * Copyright 2011 John Resig
+ *
+ * How to use:
+ *   Game.loadDict( someDictionaryFile );
+ *   Game.setSeed(); // Can leave empty to make a random game
+ *   var game = new Game();
+ *   game.start();
+ */
+
+// Instantiate a new Game object
 var Game = function() {
 	// Initialize the data structures used by the game
 	this.callbacks = {};
@@ -14,18 +28,19 @@ var Game = function() {
 	}
 };
 
-// The dictionary look-up (to be populated by loadDict)
+// The dictionary look-up (to be populated by Game.loadDict)
 Game.dict = {};
 
+// A method for loading a string-based dictionary file
+// into the game engine. Should include words separated by endlines.
 Game.loadDict = function( txt ) {
-	var words = txt.split( "\n" ), dict = {};
+	// Break apart the endline-delimited list of words
+	var words = txt.split( "\n" );
 
+	// Feed them all into an object for quick lookups
 	for ( var i = 0, l = words.length; i < l; i++ ) {
-		dict[ words[i] ] = true;
-	}
-	
-	// Make the dictionary globally accessible
-	Game.dict = dict;	
+		Game.dict[ words[i] ] = true;
+	}	
 };
 
 // The random seed for the game (allows for re-playable games with identical drops)
@@ -327,10 +342,14 @@ Game.prototype = {
 	},
 	
 	// Play back a previously-played game (based upon the logged actions)
-	playback: function() {
+	// Set instant to true to play the entire game back instantly (no delay)
+	// Pass in some log data to use that instead of the current log
+	playback: function( instant, data ) {
 		var lastTime = (new Date).getTime(),
 			self = this,
-			log = this._log.slice(0);
+			
+			// Clone the log data as we'll be manipulating it
+			log = (data || this._log).slice(0);
 
 		// Disable logging before the game is played
 		this.logging = false;
@@ -339,7 +358,7 @@ Game.prototype = {
 		this.reset();
 
 		// Provide a mechanism for playing back a game on the server-side
-		if ( typeof exports !== "undefined" ) {
+		if ( instant ) {
 			// We're going to execute all the moves in order (disregard time!)
 			while ( log.length ) {
 				// Grab the first two tokens on the stack
