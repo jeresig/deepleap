@@ -28,12 +28,18 @@ Game.loadDict = function( txt ) {
 	Game.dict = dict;	
 };
 
+// The random seed for the game (allows for re-playable games with identical drops)
+// Be sure to intialize this before starting the game
+Game.setSeed = function( seed ) {
+	Game.seed = seed || Math.round(Math.random() * 1000);
+},
+
 Game.prototype = {
 	// Letter data
 	// Distribution of OSPD4 + OpenOffice en_US + Wiktionary English
 	data: {letters:{a:77,d:38,h:23,e:111,i:75,n:58,g:27,s:85,k:13,l:53,m:27,b:21,o:61,r:68,v:9,w:10,f:14,t:57,z:4,c:36,u:34,p:28,y:17,j:2,x:3,q:2},total:953},
 	
-	// The random seed for the game, set using .setSeed()
+	// The random seed for the game, set using Game.setSeed()
 	seed: 0,
 	seedOffset: 1000000,
 	
@@ -56,12 +62,6 @@ Game.prototype = {
 	// This is kept in the game logic to help verify scores
 	updateRate: 2000,
 	
-	// The random seed for the game (allows for re-playable games with identical drops)
-	// Be sure to intialize this before starting the game
-	setSeed: function( seed ) {
-		this.firstSeed = this.seed = seed || Math.round(Math.random() * 1000);
-	},
-	
 	// Start a new game running
 	start: function() {
 		// Reset the game to the start
@@ -74,18 +74,18 @@ Game.prototype = {
 		this.update();
 		
 		// Notify the UI that the game has started
-		this.trigger( "Start" );
+		this.trigger( "start" );
 	},
 	
 	// Stop and reset the game
 	reset: function() {
 		// Reset all the possible variables in the game
-		this.seed = this.firstSeed;
+		this.seed = Game.seed;
 		
 		this.rack = [];
 		this.purityControl = [];
 		
-		this.points = 0;
+		this.score = 0;
 		this.multiplier = 1;
 		this.droppedTiles = 0;
 		this.foundWord = "";
@@ -96,7 +96,7 @@ Game.prototype = {
 		}
 
 		// Notify the UI that the game has been reset
-		this.trigger( "Reset" );
+		this.trigger( "reset" );
 	},
 
 	// One of the two actions that are taken by the UI
@@ -128,11 +128,11 @@ Game.prototype = {
 		this.findWord();
 		
 		// Notify the UI that the updated tiles are ready to be displayed
-		this.trigger( "LettersReady" );
+		this.trigger( "updateDone" );
 		
 		// If no tiles are left then the game is over.
 		if ( this.rack.length === 0 ) {
-			this.trigger( "GameOver" );
+			this.trigger( "gameover" );
 		}
 	},
 	
@@ -150,7 +150,7 @@ Game.prototype = {
 			this.rack[ a ] = old;
 		
 			// Notify the UI that a tile swap has occurred
-			this.trigger( "Swap", a, b );
+			this.trigger( "swap", a, b );
 
 			// See if a new word exists after the swap
 			this.findWord();
@@ -213,7 +213,7 @@ Game.prototype = {
 				this.droppedTiles++;
 				
 				// Notify anyone listening that a letter was dropped
-				this.trigger( "AddLetter", letter );
+				this.trigger( "dropTile", letter );
 			
 			// The letter didn't match the criteria so try again
 			// We limit the number of recursions that can occur here
@@ -250,7 +250,7 @@ Game.prototype = {
 		}
 		
 		// Notify the UI that a word was found (or "" if no word was found)
-		this.trigger( "FindWord", this.foundWord );
+		this.trigger( "foundWord", this.foundWord );
 	},
 
 	// Remove a set of tiles (holding a word, or a dropped tile, from the board)
@@ -275,7 +275,7 @@ Game.prototype = {
 			this.rack.splice( 0, word.length );
 
 			// Notify the UI that the tiles were removed
-			this.trigger( "RemoveLetters", word.length );
+			this.trigger( "removeTiles", word.length );
 			
 			// Total up the points for the individual tiles
 			for ( var i = 0; i < letters.length; i++ ) {
@@ -288,7 +288,7 @@ Game.prototype = {
 				-1 * num );
 
 			// Add the total to the running score
-			this.points += total;
+			this.score += total;
 
 			// Update the multiplier
 			this.multiplier = state ?
@@ -299,7 +299,7 @@ Game.prototype = {
 				1;
 
 			// Return the results so that they can be used in the UI
-			this.trigger( "AddPoints", {
+			this.trigger( "updateScore", {
 				word: word,
 				state: state,
 				total: total,

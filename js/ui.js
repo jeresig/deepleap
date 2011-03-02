@@ -7,7 +7,6 @@ jQuery.widget( "ui.game", {
 	_create: function() {
 		// Initialize a copy of the game
 		this.game = new Game();
-		this.setSeed();
 
 		// Get the initial context of the circle indicator canvas
 		try {
@@ -27,6 +26,19 @@ jQuery.widget( "ui.game", {
 		}
 		
 		this.game.reset();
+	},
+	
+	start: function() {
+		this.game.start();
+	},
+	
+	reset: function() {
+		this.game.reset();
+	},
+	
+	playback: function( data ) {
+		this.game._log = typeof data === "string" ? jQuery.parseJSON( data ) : data;
+		this.game.playback();
 	},
 	
 	uiEvents: {
@@ -81,7 +93,7 @@ jQuery.widget( "ui.game", {
 	},
 	
 	gameEvents: {
-		Swap: function( activePos, thisPos ) {
+		swap: function( activePos, thisPos ) {
 			var $a = jQuery( this.spanLetters[ activePos ] ),
 				$b = jQuery( this.spanLetters[ thisPos ] ),
 				activeLeft = $a.css( "left" ),
@@ -99,7 +111,7 @@ jQuery.widget( "ui.game", {
 			this.spanLetters[ activePos ] = oldNode;
 		},
 
-		LettersReady: function() {
+		updateDone: function() {
 			var totalTime = this.game.updateRate * this.game.rack.length,
 				endWarning = totalTime / 4,
 				count = 0,
@@ -130,7 +142,7 @@ jQuery.widget( "ui.game", {
 			}, totalTime / rate);
 		},
 	
-		AddLetter: function( letter ) {
+		dropTile: function( letter ) {
 			// Inject new letter into the UI
 			var tileLeft = this.tileWidths( this.game.rack.length ),
 				baseLeft = parseFloat( jQuery( this.spanLetters ).last().css( "left" ) || 0 ) + this.options.tileMargin + this.options.tileWidth;
@@ -149,7 +161,7 @@ jQuery.widget( "ui.game", {
 				"No" );
 		},
 
-		RemoveLetters: function( num ) {
+		removeTiles: function( num ) {
 			this.spanLetters = jQuery( this.spanLetters )
 				.slice( 0, num )
 					.addClass( "leaving" )
@@ -164,14 +176,14 @@ jQuery.widget( "ui.game", {
 					.get();
 		},
 
-		FindWord: function( word ) {
+		foundWord: function( word ) {
 			jQuery( this.spanLetters )
 				.removeClass( "found" )
 				.slice( 0, word.length )
 					.addClass( "found" );
 		},
 	
-		AddPoints: function( result ) {
+		updateScore: function( result ) {
 			jQuery("<li>")
 				.addClass( result.state ? "pass" : "fail" )
 				.html( "<b>" + (result.total >= 0 ? "+" : "" ) + result.total + ": " + result.word + ".</b> " + 
@@ -182,10 +194,10 @@ jQuery.widget( "ui.game", {
 						"Letter not used." )
 				).prependTo( this.element.find(".words") );
 
-			this.element.find(".points").text( this.game.points );	
+			this.element.find(".points").text( this.game.score );	
 		},
 		
-		Reset: function() {
+		reset: function() {
 			// Empty out the tiles
 			this.spanLetters = [];
 			this.element
@@ -196,10 +208,6 @@ jQuery.widget( "ui.game", {
 
 			clearInterval( this.timer );
 		}
-	},
-	
-	start: function() {
-		this.game.start();
 	},
 	
 	// Updating circle canvas
@@ -235,29 +243,19 @@ jQuery.widget( "ui.game", {
 	posFromLeft: function( node ) {
 		return (parseFloat( jQuery( node ).css( "left" ) ) - this.options.tileMargin) /
 			(this.options.tileMargin + this.options.tileWidth);
-	},
-	
-	setSeed: function() {
-		this.game.setSeed( parseInt( (/game=(\d+)/.exec( location.search ) || [0,0])[1] ) );
-		
-		// TODO: This is global at the moment, should probably be changed
-		jQuery("#game")
-			.attr( "href", "?game=" + this.game.seed )
-			.text( this.game.seed );
 	}
 });
 
 
 jQuery(function() {
-	/*
-	var seed = parseInt( (/game=(\d+)/.exec( location.search ) || [0,0])[1] );
-	this.game.setSeed( parseInt( (/game=(\d+)/.exec( location.search ) || [0,0])[1] ) );
+	// Get the seed from the query string (if it exists)
+	// and set the seed on the game
+	Game.setSeed( parseInt( (/game=(\d+)/.exec( location.search ) || [0,0])[1] ) );
 	
-	// TODO: This is global at the moment, should probably be changed
+	// Show which game we're playing to the user
 	jQuery("#game")
-		.attr( "href", "?game=" + this.game.seed )
-		.text( this.game.seed );
-	*/
+		.attr( "href", "?game=" + Game.seed )
+		.text( Game.seed );
 	
 	// Load in the dictionary
 	jQuery.get( "dict/dict.txt", function( txt ) {
@@ -268,12 +266,12 @@ jQuery(function() {
 		jQuery( "#main" ).game().game("start");
 		
 		// See if we're doing a VS match, or not
-		if ( location.search && /&vs=([^&]+)/.test( location.search ) ) {
-			var mini = jQuery( "#mini-main" ).game({ tileMargin: 5, tileWidth: 26 }).show(),
-				game = mini.data("game").game;
-
-			game._log = jQuery.parseJSON( /&vs=([^&]+)/.exec( location.search )[1] );
-			game.playback();
+		if ( /&vs=([^&]+)/.test( location.search ) ) {
+			// Create a smaller game that will be played back simultaneously
+			jQuery( "#mini-main" )
+				.game({ tileMargin: 5, tileWidth: 26 })
+				.game("playback", /&vs=([^&]+)/.exec( location.search )[1])
+				.show();
 		}
 	});
 });
