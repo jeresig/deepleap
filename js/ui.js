@@ -86,7 +86,6 @@ jQuery.widget( "ui.game", {
 			}
 	
 			if ( this.game.foundWord ) {
-				clearInterval( this.timer );
 				this.game.update();
 			}
 		}
@@ -113,33 +112,22 @@ jQuery.widget( "ui.game", {
 
 		updateDone: function() {
 			var totalTime = this.game.updateRate * this.game.rack.length,
-				endWarning = totalTime / 4,
-				count = 0,
-				rate = 30,
 				startTime = (new Date).getTime(),
 				self = this;
 
-			// Make sure any previous timers are stopped
-			if ( this.timer ) {
-				clearInterval( this.timer );
-			}
+			// Make sure any previous circle animations are stopped
+			clearInterval( this.circleTimer );
 
-			var timer = this.timer = setInterval(function() {
-				var curTime = (new Date).getTime();
+			this.circleTimer = setInterval(function() {
+				var timeDiff = (new Date).getTime() - startTime;
+				
+				self.updateCircle( Math.min( timeDiff / totalTime, 1 ),
+					totalTime - timeDiff > totalTime / 4 );
 
-				self.updateCircle( count / rate, (totalTime - (curTime - startTime)) > endWarning );
-
-				if ( count >= rate ) {
-					clearInterval( self.timer );
-
-					// Don't force an update if we're replaying the game
-					if ( self.game.logging ) {
-						self.game.update();
-					}
+				if ( timeDiff >= totalTime ) {
+					clearInterval( self.circleTimer );
 				}
-
-				count++;
-			}, totalTime / rate);
+			}, totalTime / 100);
 		},
 	
 		dropTile: function( letter ) {
@@ -204,9 +192,11 @@ jQuery.widget( "ui.game", {
 				.find( ".letters, .words" ).html( "" ).end()
 				.find( ".tilesleft, .points" ).text( "0" );
 
+			// Return the circle to its start position
 			this.resetCircle();
-
-			clearInterval( this.timer );
+			
+			// Stop the circle from updating
+			clearInterval( this.circleTimer );
 		}
 	},
 	

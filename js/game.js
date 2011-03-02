@@ -90,6 +90,8 @@ Game.prototype = {
 		this.droppedTiles = 0;
 		this.foundWord = "";
 		
+		clearInterval( this.timer );
+		
 		// Make sure the log is reset
 		if ( this.logging ) {
 			this._log = [];
@@ -103,6 +105,8 @@ Game.prototype = {
 	// An update occurs after a specific amount of time (managed by a timer)
 	// or when a user manually triggers an update (double-click or submit, for example)
 	update: function() {
+		var self = this;
+		
 		// If no tiles are left then the game is over.
 		if ( this.rack.length === 0 && this.droppedTiles > 0 ) {
 			return;
@@ -133,6 +137,15 @@ Game.prototype = {
 		// If no tiles are left then the game is over.
 		if ( this.rack.length === 0 ) {
 			this.trigger( "gameover" );
+		
+		// Otherwise start a timer to call update a bit in the future
+		// Make sure a timer exists and that we aren't in playback mode
+		} else if ( typeof setTimeout !== "undefined" && this.logging ) {
+			clearTimeout( this.timer );
+		
+			this.timer = setTimeout(function() {
+				self.update();
+			}, this.updateRate * this.rack.length);	
 		}
 	},
 	
