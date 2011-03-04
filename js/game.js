@@ -32,15 +32,10 @@ var Game = function() {
 Game.dict = {};
 
 // A method for loading a string-based dictionary file
-// into the game engine. Should include words separated by endlines.
+// into the game engine. Should include words separated by spaces.
 Game.loadDict = function( txt ) {
-	// Break apart the endline-delimited list of words
-	var words = txt.split( "\n" );
-
-	// Feed them all into an object for quick lookups
-	for ( var i = 0, l = words.length; i < l; i++ ) {
-		Game.dict[ words[i] ] = true;
-	}	
+	// Cache the dictionary string for later lookups
+	Game.dict = " " + txt + " ";
 };
 
 // The random seed for the game (allows for re-playable games with identical drops)
@@ -267,7 +262,7 @@ Game.prototype = {
 			word = curRack.join("");
 			
 			// ... and see if it's in the dictionary
-			if ( Game.dict[ word ] ) {
+			if ( Game.dict.indexOf( " " + word + " " ) >= 0 ) {
 				// If it is, then we've found the word and we can stop
 				this.foundWord = word;
 				break;

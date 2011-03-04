@@ -1,10 +1,10 @@
 Deepleap!
 
 Scrabble Dictionary Files:
- - http://ejohn.org/files/ospd3.txt
- - http://ejohn.org/files/ospd4.txt
- - http://ejohn.org/files/owl.txt
- - http://ejohn.org/files/owl2.txt
+ - http://ejohn.org/files/dict/ospd3.txt
+ - http://ejohn.org/files/dict/ospd4.txt
+ - http://ejohn.org/files/dict/owl.txt
+ - http://ejohn.org/files/dict/owl2.txt
  - See also: http://mike.pietdepsi.com/scrabble/lexicons/
 
 OpenOffice Dictionaries:

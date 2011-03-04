@@ -8,7 +8,7 @@ var fs = require("fs"),
 	cdn = "//localhost:8888/deepleap/";
 	
 fs.readFile( "index.html", "utf8", function( err, data ) {
-	data = data.replace( /(src|href)="\/?(?!http)/g, '$1="' + cdn );
+	data = data.replace( /(src|href)="\/?(?!http)/ig, '$1="' + cdn );
 	
 	http.createServer(function( request, response ) {
 		response.writeHead( 200, { "Content-type": "text/html" } );

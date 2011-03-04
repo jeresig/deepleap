@@ -14,13 +14,20 @@ jQuery(function() {
 	
 	// Load in the dictionary from the server
 	} else {
-		jQuery.get( "dict/dict.txt", function( txt ) {
-			// Cache the dictionary, if possible
-			if ( window.localStorage !== null ) {
-				window.localStorage.gameDict = txt;
+		jQuery.ajax({
+			url: cdnHREF + "dict/dict.js",
+			dataType: "jsonp",
+			jsonp: false,
+			jsonpCallback: "dictLoaded",
+			success: function( txt ) {
+				// Cache the dictionary, if possible
+				if ( window.localStorage !== null ) {
+					window.localStorage.gameDict = txt;
+				}
+
+				dictReady( txt )
 			}
-			
-			dictReady( txt )
+			// TODO: Add error/timeout handling
 		});
 	}
 });
