@@ -8,30 +8,45 @@ jQuery(function() {
 		.attr( "href", "?game=" + Game.seed )
 		.text( Game.seed );
 	
-	// Load in the dictionary
-	jQuery.get( "dict/dict.txt", function( txt ) {
-		// Pass the dictionary into the game
-		Game.loadDict( txt );
-
-		// Need to start the game
-		jQuery( "#main" ).game().game("start");
-		
-		// See if we're doing a VS match, or not
-		if ( /&vs=([^&]+)/.test( location.search ) ) {
-			// Create a smaller game that will be played back simultaneously
-			jQuery( "#mini-main" )
-				// The mini game is much smaller
-				.game({ tileMargin: 5, tileWidth: 26 })
-				
-				// Extract the game data from the URL
-				// TODO: Grab this from the server instead
-				.game("playback", /&vs=([^&]+)/.exec( location.search )[1])
-				
-				// Reveal the mini game
-				.show();
-		}
-	});
+	// See if the property that we want is pre-cached in the localStorage
+	if ( window.localStorage !== null && window.localStorage.gameDict ) {
+		dictReady( window.localStorage.gameDict );
+	
+	// Load in the dictionary from the server
+	} else {
+		jQuery.get( "dict/dict.txt", function( txt ) {
+			// Cache the dictionary, if possible
+			if ( window.localStorage !== null ) {
+				window.localStorage.gameDict = txt;
+			}
+			
+			dictReady( txt )
+		});
+	}
 });
+
+function dictReady( txt ) {
+	// Pass the dictionary into the game
+	Game.loadDict( txt );
+
+	// Need to start the game
+	jQuery( "#main" ).game().game("start");
+	
+	// See if we're doing a VS match, or not
+	if ( /&vs=([^&]+)/.test( location.search ) ) {
+		// Create a smaller game that will be played back simultaneously
+		jQuery( "#mini-main" )
+			// The mini game is much smaller
+			.game({ tileMargin: 5, tileWidth: 26 })
+			
+			// Extract the game data from the URL
+			// TODO: Grab this from the server instead
+			.game("playback", /&vs=([^&]+)/.exec( location.search )[1])
+			
+			// Reveal the mini game
+			.show();
+	}
+}
 
 // Google Analytics
 var _gaq = _gaq || [];
