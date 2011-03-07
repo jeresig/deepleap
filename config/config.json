@@ -3,5 +3,9 @@
 	
 	"cdnURL": "//localhost:8888/deepleap/",
 	
-	"indexFile": "index.html"
+	"indexFile": "index.html",
+	
+	"sqlUser": "tile",
+	"sqlPass": "D33PL34P!",
+	"sqlDB": "tile"
 }
