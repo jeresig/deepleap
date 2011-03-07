@@ -18,12 +18,18 @@ Wiktionary:
 
 
 TODO:
- - Update dictionary to be jsut scrabble + openoffice
-   Include stuff like "don't" -> "dont"
  - Write an automated, server-side, test suite for game.js
  - Write a QUnit-based test suite for ui.js
- - Serve index.html from node.js server
  - Automate dumping static stuff to CloudFront
  - Use SendGrid or Amazon Email for sending notifications
  - Store played games in a MySQL DB
  - Add a way for users to create an account (name / username - send them password)
+
+Misc:
+ - Find name: http://startupgods.com/
+ - Testing: http://feedbackarmy.com/
+ - Better Font: http://www.google.com/webfonts
+ - Drop shadows: http://nicolasgallagher.com/css-drop-shadows-without-images/
+ - Wood textures: http://tileabl.es/packs/pack-5-wood
+ - Up and Running with Node.js: http://ofps.oreilly.com/titles/9781449398583/index.html
+ - Mozilla Web Apps: https://apps.mozillalabs.com/
