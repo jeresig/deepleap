@@ -1,7 +1,12 @@
 jQuery.widget( "ui.game", {
 	options: {
+		// How tall and wide a tile should be
 		tileWidth: 90,
+
+		// How much space there should be between tiles
 		tileMargin: 15
+
+		// TODO: Set width/height of tiles and tile rack based upon these values
 	},
 	
 	_create: function() {
