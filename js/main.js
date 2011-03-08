@@ -44,7 +44,7 @@ function dictReady( txt ) {
 		// Create a smaller game that will be played back simultaneously
 		jQuery( "#mini-main" )
 			// The mini game is much smaller
-			.game({ tileMargin: 5, tileWidth: 26 })
+			.game({ tileMargin: 5, tileWidth: 26, tileTopMargin: 3, showTiles: false })
 			
 			// Extract the game data from the URL
 			// TODO: Grab this from the server instead

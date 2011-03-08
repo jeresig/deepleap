@@ -1,5 +1,5 @@
 html, body {
-	background: #BBB url(../images/linen-background.jpg);
+	background: #BBB;
 	color: #000;
 	font-family: Helvetica, Arial, Sans-Serif;
 	font-size: 14px;
@@ -7,42 +7,22 @@ html, body {
 	padding: 0;
 }
 
-h1 {
-	background: darkgreen;
-	color: lightgreen;
-	font-size: 36px;
-	padding: 8px;
-	margin: 0;
+#all {
+	width: 960px;
+	height: 480px;
+	overflow: hidden;
+	background: #EEE url(../images/texture.png);
 }
 
-h1 span {
-	display: block;
-	font-size: 12px;
-	color: white;
+#all .ui-title {
+	text-align: left;
+	margin: 10px;
+	font-size: 20px;
 }
 
 #main {
-	padding: 8px;
 	width: 960px;
-}
-
-#gameinfo {
-	color: #FFF;
-	margin: 0;
 	padding: 0;
-	top: 18px;
-	left: 640px;
-	font-size: 20px;
-	position: absolute;
-}
-
-#gameinfo a {
-	color: lightgreen;
-}
-
-#gameinfo span {
-	display: block;
-	font-size: 14px;
 }
 
 p.note {
@@ -69,16 +49,56 @@ li.fail, li.drop {
 	color: red;
 }
 
+.letters-group {
+	text-align: center;
+}
+
+.letters {
+	text-align: left;
+	overflow: hidden;
+	position: relative;
+	background: url(../images/wood-tile3.jpg);
+	-moz-border-radius-topleft: 6px;
+	-moz-border-radius-topright: 6px;
+	-webkit-border-top-left-radius: 6px;
+	-webkit-border-top-right-radius: 6px;
+	border-top-left-radius: 6px;
+	border-top-right-radius: 6px;
+	z-index: 1;
+	margin: 8px auto 0 auto;
+}
+
+.letters-extra-before {
+	position: relative;
+	top: -4px;
+	height: 10px;
+	margin: 0 auto -10px auto;
+	-moz-border-radius: 100px / 10px;
+	border-radius: 100px / 10px;
+	-webkit-box-shadow: 0 0 25px rgba(0,0,0,1);
+	-moz-box-shadow: 0 0 25px rgba(0,0,0,1);
+	box-shadow: 0 0 25px rgba(0,0,0,1);
+	z-index: 2;
+}
+
+.letters-extra {
+	background: url(../images/wood-tile3.jpg) 300px 80px;
+	-moz-box-shadow: 0 0 4px rgba(0, 0, 0, 0.8) inset;
+	-webkit-box-shadow: 0 0 4px rgba(0, 0, 0, 0.8) inset;
+	box-shadow: 0 0 4px rgba(0, 0, 0, 0.8) inset;
+	margin: 0 auto 8px auto;
+	position: relative;
+	-moz-border-radius: 6px;
+	border-radius: 6px;
+	z-index: 2;
+}
+
 .letters span {
 	display: block;
-	width: 90px;
-	height: 90px;
-	font-size: 90px;
-	line-height: 90px;
 	text-align: center;
 	background: #F4D1A3 url(../images/wood-tile.jpg);
 	position: absolute;
-	top: 5px;
+	top: 6px;
 	left: 0px;
 	overflow: hidden;
 	-moz-border-radius: 6px;
@@ -94,49 +114,6 @@ li.fail, li.drop {
 .letters span.active {
 	top: -15px;
 	/* TODO: Change to another indicator. */
-}
-
-.letters {
-	overflow: hidden;
-	position: relative;
-	height: 101px;
-	background: url(../images/wood-tile3.jpg);
-	width: 960px;
-	-moz-border-radius-topleft: 6px;
-	-moz-border-radius-topright: 6px;
-	-webkit-border-top-left-radius: 6px;
-	-webkit-border-top-right-radius: 6px;
-	border-top-left-radius: 6px;
-	border-top-right-radius: 6px;
-	z-index: 1;
-}
-
-.letters-extra {
-	height: 30px;
-	width: 960px;
-	background: url(../images/wood-tile3.jpg) 300px 80px;
-	-moz-box-shadow: 0 0 4px rgba(0, 0, 0, 0.8) inset;
-	-webkit-box-shadow: 0 0 4px rgba(0, 0, 0, 0.8) inset;
-	box-shadow: 0 0 4px rgba(0, 0, 0, 0.8) inset;
-	margin-bottom: 8px;
-	position: relative;
-	top: -14px;
-	-moz-border-radius: 6px;
-	border-radius: 6px;
-	z-index: 2;
-}
-
-.letters-extra-before {
-	position: relative;
-	top: -4px;
-	height: 10px;
-	width: 960px;
-	-moz-border-radius: 100px / 10px;
-	border-radius: 100px / 10px;
-	-webkit-box-shadow: 0 0 25px rgba(0,0,0,1);
-	-moz-box-shadow: 0 0 25px rgba(0,0,0,1);
-	box-shadow: 0 0 25px rgba(0,0,0,1);
-	z-index: 2;
 }
 
 .words {
@@ -184,27 +161,13 @@ canvas {
 	left: 672px;
 }
 
-#mini-main .letters {
-	width: 288px;
-	height: 30px;
-}
-
 #mini-main .letters-extra {
-	width: 288px;
-	height: 9px;
-	top: -2px;
 	margin-bottom: 0px;
 }
 
 #mini-main .letters span {
-	height: 26px;
-	width: 26px;
-	font-size: 26px;
-	line-height: 26px;
 	-moz-border-radius: 3px;
 	border-radius: 3px;
-	top: 1px;
-	text-indent: 999px;
 }
 
 #mini-main .letters span.found {

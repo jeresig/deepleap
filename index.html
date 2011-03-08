@@ -1,9 +1,10 @@
 <!DOCTYPE html>
-<html>
+<html class="ui-mobile">
 <head>
 	<title>DeepLeap: The Fast-Paced Time-Wasting Word Game!</title>
 	<meta name="viewport" content="device-width=960, user-scalable=no" />
 	<meta name="apple-mobile-web-app-capable" content="yes" />
+	<link rel="stylesheet" href="css/jquery.mobile-1.0a3.css"/>
 	<link rel="stylesheet" href="css/game.css"/>
 	<script src="http://code.jquery.com/jquery.js"></script>
 	<script src="js/jquery.ui.widget.js"></script>
@@ -12,33 +13,58 @@
 	<script src="js/game-ui.js"></script>
 	<script src="js/main.js"></script>
 </head>
-<body>
-<h1>DeepLeap <span>The Fast-Paced Time-Wasting Word Game!</span></h1>
-<h2 id="gameinfo">
-	Game #<a href="?game=1" id="game">1</a>
-	<span><a href="/">Play Random Game</a></span>
-</h2>
-<div id="main">
-	<div class="letters"></div>
-	<div class="letters-extra-before"></div>
-	<div class="letters-extra"></div>
-	<span class="points-wrap">
-		Points: <span class="points">0</span> &nbsp;&nbsp;
-		<canvas class="drop" width="20" height="20"></canvas>
-		<span class="tilesleft">0</span> Tiles Left
-	</span>
-	<br/><br/>
-	<strong>Results:</strong>
-	<ul class="words"></ul>
-</div>
-<div id="mini-main">
-	<strong>Your Challenger:</strong>
-	<div class="letters"></div>
-	<div class="letters-extra"></div>
-	<span class="points-wrap">
-		Points: <span class="points">0</span> &nbsp;&nbsp;
-		<span class="tilesleft">0</span> Tiles Left
-	</span>
+<body class="ui-mobile-viewport">
+<div id="all" class="ui-page ui-body-c ui-page-active">
+	<div class="ui-bar-a ui-header">
+		<h1 class="ui-title">DeepLeap</h1>
+		<div class="ui-btn-right">
+			<a href="" class="ui-btn ui-btn-icon-right ui-btn-corner-all ui-shadow ui-btn-down-a ui-btn-up-a">
+				<span class="ui-btn-inner ui-btn-corner-all">
+					<span class="ui-btn-text">Share</span>
+					<span class="ui-icon ui-icon-forward ui-icon-shadow"></span>
+				</span>
+			</a>
+			<a href="" class="ui-btn ui-btn-icon-right ui-btn-corner-all ui-shadow ui-btn-down-a ui-btn-up-a">
+				<span class="ui-btn-inner ui-btn-corner-all">
+					<span class="ui-btn-text">New Game</span>
+					<span class="ui-icon ui-icon-arrow-r ui-icon-shadow"></span>
+				</span>
+			</a>
+		</div>
+	</div>
+	<div id="main" class="ui-content">
+		<div class="letters-group">
+			<div class="letters"></div>
+			<div class="letters-extra-before"></div>
+			<div class="letters-extra"></div>
+		</div>
+		<span class="points-wrap">
+			Points: <span class="points">0</span> &nbsp;&nbsp;
+			<canvas class="drop" width="20" height="20"></canvas>
+			<span class="tilesleft">0</span> Tiles Left
+		</span>
+		<br/><br/>
+		<strong>Results:</strong>
+		<ul class="words"></ul>
+	</div>
+	<div id="mini-main">
+		<strong>Your Challenger:</strong>
+		<div class="letters"></div>
+		<div class="letters-extra"></div>
+		<span class="points-wrap">
+			Points: <span class="points">0</span> &nbsp;&nbsp;
+			<span class="tilesleft">0</span> Tiles Left
+		</span>
+	</div>
+	<div id="overview-all">
+		<div id="overview-desc">
+			<h2>DeepLeap</h2>
+			<strong>The Fast-Paced Tile-Swapping Word Game!</strong>
+		
+			<strong>How to Play:</strong>
+		
+		</div>
+	</div>
 </div>
 </body>
 </html>

@@ -4,12 +4,35 @@ jQuery.widget( "ui.game", {
 		tileWidth: 90,
 
 		// How much space there should be between tiles
-		tileMargin: 15
+		tileMargin: 13,
+		tileTopMargin: 6,
 
-		// TODO: Set width/height of tiles and tile rack based upon these values
+		longLetters: "gjpqy",
+		
+		showTiles: true
 	},
 	
 	_create: function() {
+		var rackWidth = ((this.options.tileMargin + this.options.tileWidth) * 9) + this.options.tileMargin,
+			rackHeight = this.options.tileWidth + (this.options.tileTopMargin * 2);
+		
+		jQuery( this.element )
+			.find(".letters").css({
+				width: rackWidth,
+				height: rackHeight,
+				fontSize: this.options.tileWidth,
+				borderRadius: this.options.tileTopMargin
+			}).end()
+			.find(".letters-extra").css({
+				width: rackWidth,
+				height: rackHeight / 4,
+				borderRadius: this.options.tileTopMargin,
+				top: -1 * (this.options.tileTopMargin + 1)
+			}).end()
+			.find(".letters-extra-before").css({
+				width: rackWidth
+			}).end();
+		
 		// Initialize a copy of the game
 		this.game = new Game();
 
@@ -139,9 +162,15 @@ jQuery.widget( "ui.game", {
 			var tileLeft = this.tileWidths( this.game.rack.length ),
 				baseLeft = parseFloat( jQuery( this.spanLetters ).last().css( "left" ) || 0 ) + this.options.tileMargin + this.options.tileWidth;
 
-			this.spanLetters.push( jQuery( "<span>" + letter + "</span>" )
+			this.spanLetters.push( jQuery( "<span>" + (this.options.showTiles ? letter : "") + "</span>" )
 				.css({
 					backgroundPosition: Math.round( Math.random() * 1400 ) + "px",
+					width: this.options.tileWidth,
+					height: this.options.tileWidth,
+					lineHeight: (this.options.tileWidth -
+						(this.options.longLetters.indexOf( letter ) > -1 ?
+							this.options.tileWidth / 4 : 0)) + "px",
+					top: this.options.tileTopMargin - 1,
 					left: baseLeft
 				})
 				.appendTo( this.element.find(".letters") )
