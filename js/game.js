@@ -93,6 +93,7 @@ Game.prototype = {
 		this.seed = Game.seed;
 		
 		this.rack = [];
+		this.tileQueue = [];
 		this.purityControl = [];
 		
 		this.score = 0;
@@ -105,6 +106,11 @@ Game.prototype = {
 		// Make sure the log is reset
 		if ( this.logging ) {
 			this._log = [];
+		}
+		
+		// Reset the tile queue
+		for ( var i = 0; i < this.maxTiles; i++ ) {
+			this.addTile();
 		}
 
 		// Notify the UI that the game has been reset
@@ -180,69 +186,74 @@ Game.prototype = {
 		}
 	},
 	
-	// Internal function for dropping a tile
-	// (count argument is only used internally)
-	dropTile: function( count ) {
+	// Internal function for dropping a tile into the player's rack
+	dropTile: function() {
+		if ( this.tileQueue.length ) {
+			var tile = this.tileQueue.shift();
+			
+			// Take the tile off the queue and add it to the rack
+			this.rack.push( tile );
+			
+			// Update the total letter used count
+			this.droppedTiles++;
+			
+			// Notify anyone listening that a letter was dropped
+			this.trigger( "dropTile", tile );
+		}
+	},
+	
+	// Internal function for adding tiles to the tile queue
+	addTile: function( count ) {
 		// We need to make sure that there aren't too many vowels
 		// (or consonants) being passed in to the game
-		var vowelCheck = /[aeiou]/,
-			notVowelCheck = /[^aeiou]/;
+		var letter, isVowel,
+			vowelCheck = /[aeiou]/,
+			notVowelCheck = /[^aeiou]/,
+			hasVowel = vowelCheck.test( this.purityControl ),
+			hasConsonant = notVowelCheck.test( this.purityControl );
+
+		// If the last letter dropped was a Q, make sure we drop a U next
+		if ( this.purityControl[ 0 ] === "q" ) {
+			letter = "u";
 		
-		// Don't add any more tiles if we've already hit the max
-		if ( this.droppedTiles + 1 <= this.maxTiles ) {
-			var letter, isVowel,
-				hasVowel = vowelCheck.test( this.purityControl ),
-				hasConsonant = notVowelCheck.test( this.purityControl );
+		// Otherwise attempt to drop a random letter
+		} else {
+			letter = this.possibleLetters[
+				Math.round( this.random() * this.possibleLetters.length ) ];
+		}
+		
+		// Are we currently dealing with a vowel?
+		isVowel = vowelCheck.test(letter);
 
-			// If the last letter dropped was a Q, make sure we drop a U next
-			if ( this.purityControl[ 0 ] === "q" ) {
-				letter = "u";
-			
-			// Otherwise attempt to drop a random letter
-			} else {
-				letter = this.possibleLetters[
-					Math.round( this.random() * this.possibleLetters.length ) ];
-			}
-			
-			// Are we currently dealing with a vowel?
-			isVowel = vowelCheck.test(letter);
-
-			// Check to see if we should be dropping this letter
-			if ( letter && (count > 20 ||
-					// Make sure we don't drop duplicate letter tiles
-					this.purityControl[0] !== letter && (
-						
-						// Not enough tiles in the rack yet, don't care about letter
-						this.purityControl.length < 4 ||
+		// Check to see if we should be dropping this letter
+		if ( letter && (count > 20 ||
+				// Make sure we don't drop duplicate letter tiles
+				this.purityControl[0] !== letter && (
 					
-						// No vowel has dropped recently and a vowel is dropping
-						!hasVowel && isVowel ||
-					
-						// No consonant has dropped and one is dropping now
-						!hasConsonant && !isVowel
-					)
-				)) {
+					// Not enough tiles in the rack yet, don't care about letter
+					this.purityControl.length < 4 ||
 				
-				// Add the new letter onto the queue
-				this.purityControl.unshift( letter );
+					// No vowel has dropped recently and a vowel is dropping
+					!hasVowel && isVowel ||
 				
-				// Make sure the queue doesn't grow too long
-				this.purityControl.splice( 4 );
-				
-				// Add the letter to the board
-				this.rack.push( letter );
-				
-				// Update the total letter used count
-				this.droppedTiles++;
-				
-				// Notify anyone listening that a letter was dropped
-				this.trigger( "dropTile", letter );
+					// No consonant has dropped and one is dropping now
+					!hasConsonant && !isVowel
+				)
+			)) {
 			
-			// The letter didn't match the criteria so try again
-			// We limit the number of recursions that can occur here
-			} else {
-				return this.dropTile( (count || 0) + 1 );
-			}
+			// Add the new letter onto the queue
+			this.purityControl.unshift( letter );
+			
+			// Make sure the queue doesn't grow too long
+			this.purityControl.splice( 4 );
+			
+			// Add the tile to the queue
+			this.tileQueue.push( letter );
+		
+		// The letter didn't match the criteria so try again
+		// We limit the number of recursions that can occur here
+		} else {
+			return this.addTile( (count || 0) + 1 );
 		}
 	},
 	

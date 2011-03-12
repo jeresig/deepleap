@@ -10,6 +10,7 @@ html, body {
 #all {
 	width: 960px;
 	height: 480px;
+	min-height: 480px;
 	overflow: hidden;
 	background: #EEE url(../images/texture.png);
 }

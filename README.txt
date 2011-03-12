@@ -33,3 +33,4 @@ Misc:
  - Wood textures: http://tileabl.es/packs/pack-5-wood
  - Up and Running with Node.js: http://ofps.oreilly.com/titles/9781449398583/index.html
  - Mozilla Web Apps: https://apps.mozillalabs.com/
+ - Background texture: http://rappdaniel.com/other/noisy-sample/
