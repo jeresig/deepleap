@@ -34,12 +34,21 @@ p.note {
 }
 
 span.points-wrap {
-	font-size: 20px;
 	padding-left: 10px;
+	font-size: 20px;
 }
 
-span.points-wrap span {
-	font-weight: bold;
+span.points-wrap .right {
+	float: right;
+	padding-right: 10px;
+}
+
+span.points-wrap .right .ui-btn {
+	cursor: default;
+}
+
+span.points-wrap canvas {
+	background-image: none;
 }
 
 li.pass {
@@ -56,7 +65,8 @@ li.fail, li.drop {
 
 .letters {
 	text-align: left;
-	overflow: hidden;
+	overflow-x: visible;
+	overflow-y: visible;
 	position: relative;
 	background: url(../images/wood-tile3.jpg);
 	-moz-border-radius-topleft: 6px;
@@ -106,15 +116,30 @@ li.fail, li.drop {
 	border-radius: 6px;
 	text-shadow: 1px 1px #F4D1A3, -1px -1px #444;
 	z-index: 11;
+	cursor: pointer;
+}
+
+.letters span.active {
+	-webkit-box-shadow: 0 0 10px rgba(255,255,255,1);
+	-moz-box-shadow: 0 0 10px rgba(0,255,0,1);
+	box-shadow: 0 0 20px rgba(0,0,0,1);
+	z-index: 20;
+}
+
+.letters span.dropsoonA {
+	-webkit-transform: rotate(2deg);
+	-moz-transform: rotate(2deg);
+	transform: rotate(2deg);
+}
+
+.letters span.dropsoonB {
+	-webkit-transform: rotate(358deg);
+	-moz-transform: rotate(358deg);
+	transform: rotate(358deg);
 }
 
 .letters span.found {
 	color: white;
-}
-
-.letters span.active {
-	top: -15px;
-	/* TODO: Change to another indicator. */
 }
 
 .words {
@@ -138,10 +163,6 @@ li.fail, li.drop {
 
 .help a {
 	color: darkgreen;
-}
-
-canvas {
-	vertical-align: -10%;
 }
 
 #twitter_update_list {

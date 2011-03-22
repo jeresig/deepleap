@@ -6,8 +6,12 @@ jQuery.widget( "ui.game", {
 		// How much space there should be between tiles
 		tileMargin: 13,
 		tileTopMargin: 6,
+		
+		// The size of the tile when it's actively selected
+		activeTileWidth: 100,
 
-		longLetters: "gjpqy",
+		// TODO: Disabled for now, need to figure out a good result for this
+		longLetters: "", // "gjpqy",
 		
 		showTiles: true
 	},
@@ -44,9 +48,11 @@ jQuery.widget( "ui.game", {
 		// Attach the various UI events
 		this.element.find(".letters").bind({
 			click: jQuery.proxy( this.uiEvents.swap, this ),
-			dblclick: jQuery.proxy( this.uiEvents.submit, this ),
 			mousedown: false
 		});
+		
+		this.element.find(".saveword")
+			.bind( "click", jQuery.proxy( this.uiEvents.submit, this ) );
 
 		// Attach all the game events
 		for ( var method in this.gameEvents ) {
@@ -73,7 +79,9 @@ jQuery.widget( "ui.game", {
 			var tile = e.target;
 			
 			// Don't allow swapping if we're replaying the game
-			if ( !this.game.logging || tile.nodeName.toLowerCase() !== "span" ) {
+			// or if the tile that we want is no longer available
+			if ( !this.game.logging || tile.nodeName.toLowerCase() !== "span" ||
+			 	jQuery(tile).hasClass("leaving") ) {
 				return;
 			}
 	
@@ -85,7 +93,14 @@ jQuery.widget( "ui.game", {
 			// If a previous tile was already activated
 			if ( this.activeTile ) {
 				// Deactivate the originally-selected tile
-				jQuery(this.activeTile).removeClass( "active" );
+				jQuery(this.activeTile).removeClass("active").css({
+					width: this.options.tileWidth,
+					height: this.options.tileWidth,
+					fontSize: "",
+					lineHeight: "",
+					marginTop: "",
+					marginLeft: ""
+				});
 		
 				// Make sure we aren't trying to swap with itself
 				if ( this.activeTile !== tile ) {
@@ -99,13 +114,22 @@ jQuery.widget( "ui.game", {
 
 			} else {
 				this.activeTile = tile;
-				jQuery(tile).addClass( "active" );
+				
+				var offset = -1 * ((this.options.activeTileWidth - this.options.tileWidth));
+				
+				jQuery(tile).addClass("active").css({
+					width: this.options.activeTileWidth,
+					height: this.options.activeTileWidth,
+					fontSize: this.options.activeTileWidth,
+					lineHeight: this.options.activeTileWidth + "px",
+					marginTop: offset,
+					marginLeft: offset / 2
+				});
 			}
 
 			return false;
 		},
 		
-		// TODO: Should change this to a submit form or some such
 		submit: function(){
 			// Don't allow submission if we're replaying the game
 			if ( !this.game.logging ) {
@@ -120,16 +144,18 @@ jQuery.widget( "ui.game", {
 	
 	gameEvents: {
 		swap: function( activePos, thisPos ) {
+			jQuery( this.spanLetters[0] ).removeClass( "dropsoonA dropsoonB" );
+			
 			var $a = jQuery( this.spanLetters[ activePos ] ),
 				$b = jQuery( this.spanLetters[ thisPos ] ),
 				activeLeft = $a.css( "left" ),
 				thisLeft = $b.css( "left" );
 
 			// Move the current tile 
-			$b.stop().animate( { left: activeLeft }, 300 );
+			$b.animate( { left: activeLeft }, 300 );
 
 			// Finally move the originally selected tile
-			$a.stop().animate( { left: thisLeft }, 300 );
+			$a.animate( { left: thisLeft }, 300 );
 
 			// Swap the position of the nodes in the store
 			var oldNode = this.spanLetters[ thisPos ];
@@ -146,15 +172,26 @@ jQuery.widget( "ui.game", {
 			clearInterval( this.circleTimer );
 
 			this.circleTimer = setInterval(function() {
-				var timeDiff = (new Date).getTime() - startTime;
+				var timeDiff = (new Date).getTime() - startTime,
+					nearEnd = totalTime - timeDiff > totalTime / 4;
 				
-				self.updateCircle( Math.min( timeDiff / totalTime, 1 ),
-					totalTime - timeDiff > totalTime / 4 );
+				self.updateCircle( Math.min( timeDiff / totalTime, 1 ), nearEnd );
+				
+				if ( !self.game.foundWord && !nearEnd ) {
+					var firstTile = jQuery( self.spanLetters[ 0 ] );
+					
+					if ( firstTile.hasClass( "dropsoonA" ) ) {
+						firstTile.removeClass( "dropsoonA" ).addClass( "dropsoonB" );
+					
+					} else {
+						firstTile.removeClass( "dropsoonB" ).addClass( "dropsoonA" );
+					}
+				}
 
 				if ( timeDiff >= totalTime ) {
 					clearInterval( self.circleTimer );
 				}
-			}, totalTime / 100);
+			}, totalTime / 200);
 		},
 	
 		dropTile: function( letter ) {
@@ -186,13 +223,11 @@ jQuery.widget( "ui.game", {
 			this.spanLetters = jQuery( this.spanLetters )
 				.slice( 0, num )
 					.addClass( "leaving" )
-					.stop()
 					.fadeOut( 300, function() {
 						jQuery(this).remove();
 					})
 				.end()
 				.slice( num )
-					.stop()
 					.animate( { left: "-=" + (this.tileWidths( num + 1 ) - this.options.tileMargin) }, 500 )
 					.get();
 		},
@@ -202,6 +237,8 @@ jQuery.widget( "ui.game", {
 				.removeClass( "found" )
 				.slice( 0, word.length )
 					.addClass( "found" );
+			
+			this.element.find(".saveword").toggleClass( "ui-disabled", !word.length );
 		},
 	
 		updateScore: function( result ) {
@@ -215,7 +252,8 @@ jQuery.widget( "ui.game", {
 						"Letter not used." )
 				).prependTo( this.element.find(".words") );
 
-			this.element.find(".points").text( this.game.score );	
+			this.element.find(".points").text( this.game.score );
+			this.element.find(".multiplier").text( this.game.multiplier.toFixed(1) );
 		},
 		
 		reset: function() {
@@ -236,11 +274,11 @@ jQuery.widget( "ui.game", {
 	// Updating circle canvas
 	resetCircle: function() {
 		if ( this.circle ) {
-			this.circle.clearRect( 0, 0, 20, 20 );
+			this.circle.clearRect( 0, 0, 18, 18 );
 
-			this.circle.fillStyle = "rgb(210,210,210)";
+			this.circle.fillStyle = "rgba(0,0,0,0.4)";
 			this.circle.beginPath();
-			this.circle.arc(10, 10, 9, 0, Math.PI * 2, true);
+			this.circle.arc(9, 9, 9, 0, Math.PI * 2, true);
 			this.circle.closePath();
 			this.circle.fill();
 		}
@@ -249,11 +287,11 @@ jQuery.widget( "ui.game", {
 	updateCircle: function( amount, rate ) {
 		if ( this.circle ) {
 			this.resetCircle();
-			this.circle.fillStyle = rate ? "rgb(0,0,0)" : "rgb(255,0,0)";
+			this.circle.fillStyle = rate ? "rgb(255,255,255)" : "rgb(255,0,0)";
 			this.circle.beginPath();
-			this.circle.moveTo(10, 10);
-			this.circle.arc(10, 10, 9, -0.5 * Math.PI, (amount * (Math.PI * 2)) - (0.5 * Math.PI), false);
-			this.circle.moveTo(10, 10);
+			this.circle.moveTo(9, 9);
+			this.circle.arc(9, 9, 8, -0.5 * Math.PI, (amount * (Math.PI * 2)) - (0.5 * Math.PI), false);
+			this.circle.moveTo(9, 9);
 			this.circle.closePath();
 			this.circle.fill();
 		}

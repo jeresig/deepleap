@@ -3,11 +3,6 @@ jQuery(function() {
 	// and set the seed on the game
 	Game.setSeed( parseInt( (/game=(\d+)/.exec( location.search ) || [0,0])[1] ) );
 	
-	// Show which game we're playing to the user
-	jQuery("#game")
-		.attr( "href", "?game=" + Game.seed )
-		.text( Game.seed );
-	
 	// See if the property that we want is pre-cached in the localStorage
 	if ( window.localStorage !== null && window.localStorage.gameDict ) {
 		dictReady( window.localStorage.gameDict );

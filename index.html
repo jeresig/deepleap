@@ -20,11 +20,11 @@
 		<div class="ui-btn-right">
 			<a href="" class="ui-btn ui-btn-icon-right ui-btn-corner-all ui-shadow ui-btn-down-a ui-btn-up-a">
 				<span class="ui-btn-inner ui-btn-corner-all">
-					<span class="ui-btn-text">Share</span>
+					<span class="ui-btn-text">Restart</span>
 					<span class="ui-icon ui-icon-forward ui-icon-shadow"></span>
 				</span>
 			</a>
-			<a href="" class="ui-btn ui-btn-icon-right ui-btn-corner-all ui-shadow ui-btn-down-a ui-btn-up-a">
+			<a href="./" class="ui-btn ui-btn-icon-right ui-btn-corner-all ui-shadow ui-btn-down-a ui-btn-up-a">
 				<span class="ui-btn-inner ui-btn-corner-all">
 					<span class="ui-btn-text">New Game</span>
 					<span class="ui-icon ui-icon-arrow-r ui-icon-shadow"></span>
@@ -39,9 +39,35 @@
 			<div class="letters-extra"></div>
 		</div>
 		<span class="points-wrap">
-			Points: <span class="points">0</span> &nbsp;&nbsp;
-			<canvas class="drop" width="20" height="20"></canvas>
-			<span class="tilesleft">0</span> Tiles Left
+			<div class="saveword ui-btn ui-btn-icon-left ui-btn-corner-all ui-shadow ui-btn-down-b ui-btn-up-b ui-btn-inline ui-disabled">
+				<span class="ui-btn-inner ui-btn-corner-all">
+					<span class="ui-btn-text">Save Word</span>
+					<span class="ui-icon ui-icon-check ui-icon-shadow"></span>
+				</span>
+			</div>
+			
+			<div class="right">
+				<div class="ui-btn ui-btn-corner-all ui-shadow ui-btn-down-e ui-btn-up-e ui-btn-inline">
+					<span class="ui-btn-inner ui-btn-corner-all">
+						<span class="ui-btn-text">Points: <span class="points">0</span></span>
+					</span>
+				</div>
+				
+				<div class="ui-btn ui-btn-icon-left ui-btn-corner-all ui-shadow ui-btn-down-a ui-btn-up-a ui-btn-inline">
+					<span class="ui-btn-inner ui-btn-corner-all">
+						<canvas class="drop ui-icon" width="18" height="18"></canvas>
+						<span class="ui-btn-text">
+							<span class="tilesleft">0</span> Tiles Left
+						</span>
+					</span>
+				</div>
+			
+				<div class="ui-btn ui-btn-corner-all ui-shadow ui-btn-down-a ui-btn-up-a ui-btn-inline">
+					<span class="ui-btn-inner ui-btn-corner-all">
+						<span class="ui-btn-text"><span class="multiplier">1.0</span>x Multiplier</span>
+					</span>
+				</div>
+			</div>
 		</span>
 		<br/><br/>
 		<strong>Results:</strong>
