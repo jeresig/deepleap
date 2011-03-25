@@ -200,3 +200,37 @@ li.fail, li.drop {
 	font-size: 20px;
 	padding-left: 0px;
 }
+
+#overview-all {
+	width: 480px;
+}
+
+#overview-all h2 {
+	text-align: center;
+	font-weight: normal;
+	font-style: italic;
+	font-size: 20px;
+}
+
+#overview-all .ui-listview {
+	width: 50%;
+}
+
+#overview-all .ui-li .ui-btn-text {
+	overflow: visible;
+}
+
+#overview-all .ui-li .ui-icon {
+	background-image: url(../images/icons-18-white.png);
+}
+
+#overview-desc {
+	float: right;
+	width: 50%;
+	overflow: hidden;
+	text-align: center;
+}
+
+.ui-dialog .ui-dialog-content {
+	padding: .5em .2em;
+}
