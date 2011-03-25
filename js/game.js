@@ -5,7 +5,7 @@
  * Copyright 2011 John Resig
  *
  * How to use:
- *   Game.loadDict( someDictionaryFile );
+ *   Game.loadDict( packedTrieString );
  *   Game.setSeed(); // Can leave empty to make a random game
  *   var game = new Game();
  *   game.start();
@@ -28,14 +28,11 @@ var Game = function() {
 	}
 };
 
-// The dictionary look-up (to be populated by Game.loadDict)
-Game.dict = {};
-
 // A method for loading a string-based dictionary file
-// into the game engine. Should include words separated by spaces.
+// into the game engine. Should be a properly-formatted PackedTrie string.
 Game.loadDict = function( txt ) {
 	// Cache the dictionary string for later lookups
-	Game.dict = " " + txt + " ";
+	Game.dict = new PackedTrie( txt );
 };
 
 // The random seed for the game (allows for re-playable games with identical drops)
@@ -273,7 +270,7 @@ Game.prototype = {
 			word = curRack.join("");
 			
 			// ... and see if it's in the dictionary
-			if ( Game.dict.indexOf( " " + word + " " ) >= 0 ) {
+			if ( Game.dict.isWord( word ) ) {
 				// If it is, then we've found the word and we can stop
 				this.foundWord = word;
 				break;
