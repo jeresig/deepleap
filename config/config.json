@@ -1,7 +1,7 @@
 {
 	"serverPort": 80,
 	
-	"cdnURL": "//localhost:8888/deepleap/",
+	"cdnURL": "//cdn.deepleap.org/",
 	
 	"indexFile": "index.html",
 	
