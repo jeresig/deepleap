@@ -96,8 +96,8 @@ jQuery.widget( "ui.game", {
 				jQuery(this.activeTile).removeClass("active").css({
 					width: this.options.tileWidth,
 					height: this.options.tileWidth,
-					fontSize: "",
-					lineHeight: "",
+					fontSize: this.options.tileWidth,
+					lineHeight: this.options.tileWidth + "px",
 					marginTop: "",
 					marginLeft: ""
 				});
