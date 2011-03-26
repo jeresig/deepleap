@@ -1,11 +1,30 @@
+var versus = "";
+
 jQuery(function() {
+	versus = (/&vs=([^&]+)/.exec( location.search ) || ["",""])[1];
+	
 	jQuery( "#overview-all" ).dialog({
 		title: "DeepLeap",
 		modal: true,
 		draggable: false,
 		resizable: false,
-		width: 480
+		width: 480,
+		autoOpen: !versus
 	}).parent().find(".ui-dialog-titlebar-close").remove();
+	
+	jQuery( "#play-hard-bot").click(function() {
+		versus = "hard";
+		jQuery( "#play-random" ).click();
+		
+		return false;
+	});
+	
+	jQuery( "#play-easy-bot").click(function() {
+		versus = "easy";
+		jQuery( "#play-random" ).click();
+		
+		return false;
+	});
 	
 	jQuery( "#play-random" ).click(function() {
 		jQuery( "#overview-all" ).dialog( "close" );
@@ -57,6 +76,10 @@ function dictReady( txt ) {
 		
 		// Reveal the mini game
 		.show();
+	
+	if ( versus ) {
+		startGame();
+	}
 }
 
 function startGame() {
@@ -68,18 +91,25 @@ function startGame() {
 	jQuery( "#main" ).game().game("start");
 	
 	// See if we're doing a VS match, or not
-	if ( /&vs=([^&]+)/.test( location.search ) ) {
+	if ( versus ) {
 		// Create a smaller game that will be played back simultaneously
-		jQuery( "#mini-main" )
+		var mini = jQuery( "#mini-main" )
 			// The mini game is much smaller
 			.game({ tileMargin: 5, tileWidth: 26, tileTopMargin: 3, showTiles: false })
 			
-			// Extract the game data from the URL
-			// TODO: Grab this from the server instead
-			.game("playback", /&vs=([^&]+)/.exec( location.search )[1])
-			
 			// Reveal the mini game
 			.show();
+		
+		if ( versus === "hard" || versus === "easy" ) {
+			new Bot( mini.game("start").data("game").game, versus );
+			
+			
+		
+		} else {
+			// Extract the game data from the URL
+			// TODO: Grab this from the server instead
+			mini.game( "playback", versus );
+		}
 	}
 }
 
