@@ -8,9 +8,9 @@ html, body {
 }
 
 #all {
-	width: 980px;
-	height: 620px;
-	min-height: 620px;
+	width: 960px;
+	height: 600px;
+	min-height: 600px;
 	overflow: hidden;
 	background: #EEE url(../images/texture.png);
 }
@@ -22,7 +22,7 @@ html, body {
 }
 
 #main {
-	width: 980px;
+	width: 960px;
 	padding: 0;
 }
 

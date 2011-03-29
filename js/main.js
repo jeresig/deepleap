@@ -1,7 +1,19 @@
 var versus = "";
 
+// Hide the address bar on iOS
+jQuery(window).load(function() {
+	setTimeout(function(){
+		window.scrollTo( 0, 0 );
+	}, 20);
+});
+
 jQuery(function() {
 	versus = (/&vs=([^&]+)/.exec( location.search ) || ["",""])[1];
+	
+	// Stop the device from scrolling on iOS
+	jQuery("body").bind("touchmove", function(e) {
+		e.preventDefault();
+	});
 	
 	jQuery( "#overview-all" ).dialog({
 		title: "DeepLeap",
