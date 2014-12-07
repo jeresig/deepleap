@@ -44,14 +44,44 @@ Game.setSeed = function(seed) {
 Game.prototype = {
     // Letter data
     // Distribution of OSPD4 + OpenOffice en_US + Wiktionary English
-    data: {letters:{a:77,d:38,h:23,e:111,i:75,n:58,g:27,s:85,k:13,l:53,m:27,b:21,o:61,r:68,v:9,w:10,f:14,t:57,z:4,c:36,u:34,p:28,y:17,j:2,x:3,q:2},total:953},
+    data: {
+        letters: {
+            a:77,
+            d:38,
+            h:23,
+            e:111,
+            i:75,
+            n:58,
+            g:27,
+            s:85,
+            k:13,
+            l:53,
+            m:27,
+            b:21,
+            o:61,
+            r:68,
+            v:9,
+            w:10,
+            f:14,
+            t:57,
+            z:4,
+            c:36,
+            u:34,
+            p:28,
+            y:17,
+            j:2,
+            x:3,
+            q:2
+        },
+        total:953
+    },
 
     // The random seed for the game, set using Game.setSeed()
     seed: 0,
     seedOffset: 1000000,
 
     // The bonus multiplier for word length
-    lengthBonuses: [ 0, 0, 1, 1, 1.5, 2, 2.5, 3, 3.5, 4, 4.5 ],
+    lengthBonuses: [0, 0, 1, 1, 1.5, 2, 2.5, 3, 3.5, 4, 4.5],
 
     // The minimum word length required
     minWordLength: 3,
@@ -116,7 +146,8 @@ Game.prototype = {
 
     // One of the two actions that are taken by the UI
     // An update occurs after a specific amount of time (managed by a timer)
-    // or when a user manually triggers an update (double-click or submit, for example)
+    // or when a user manually triggers an update
+    // (double-click or submit, for example)
     update: function() {
         var self = this;
 
@@ -131,7 +162,8 @@ Game.prototype = {
         // Check to see if we should be removing something
         // (Only happens if the board is full or if no more tiles will drop)
         if (this.rack.length &&
-                (this.rack.length === this.rackSize || this.droppedTiles >= this.maxTiles)) {
+                (this.rack.length === this.rackSize ||
+                    this.droppedTiles >= this.maxTiles)) {
             // Remove a word, if found, otherwise drop a tile
             this.removeWord(this.foundWord || this.rack[0]);
         }
@@ -168,12 +200,12 @@ Game.prototype = {
         // Make sure that we aren't swapping the same tile with itself
         if (a !== b) {
             // Log that a swap has occurred for a later playback
-            this.log([ a, b ]);
+            this.log([a, b]);
 
             // Swap the tiles
-            var old = this.rack[ b ];
-            this.rack[ b ] = this.rack[ a ];
-            this.rack[ a ] = old;
+            var old = this.rack[b];
+            this.rack[b] = this.rack[a];
+            this.rack[a] = old;
 
             // Notify the UI that a tile swap has occurred
             this.trigger("swap", a, b);
@@ -210,13 +242,13 @@ Game.prototype = {
             hasConsonant = notVowelCheck.test(this.purityControl);
 
         // If the last letter dropped was a Q, make sure we drop a U next
-        if (this.purityControl[ 0 ] === "q") {
+        if (this.purityControl[0] === "q") {
             letter = "u";
 
         // Otherwise attempt to drop a random letter
         } else {
             letter = this.possibleLetters[
-                Math.round(this.random() * this.possibleLetters.length) ];
+                Math.round(this.random() * this.possibleLetters.length)];
         }
 
         // Are we currently dealing with a vowel?
@@ -295,7 +327,7 @@ Game.prototype = {
             state = letters.length >= this.minWordLength,
 
             // Give a bonus for longer words
-            lengthBonus = this.lengthBonuses[ word.length ],
+            lengthBonus = this.lengthBonuses[word.length],
 
             // Get the current multiplier
             multiplier = this.multiplier;
@@ -310,7 +342,8 @@ Game.prototype = {
 
             // Total up the points for the individual tiles
             for (var i = 0; i < letters.length; i++) {
-                num += Math.round((this.data.total / this.data.letters[ letters[i] ]) / 8.5);
+                num += Math.round(
+                    (this.data.total / this.data.letters[letters[i]]) / 8.5);
             }
 
             // Factor in all the score modifiers
@@ -368,8 +401,8 @@ Game.prototype = {
                 var first = log[0],
                     next = log[1];
 
-                // The first token is always a time diff from the previous action
-                // Remove that time diff
+                // The first token is always a time diff from the previous
+                // action. Remove that time diff
                 log.shift();
 
                 // If the next token is an array then we're doing a swap
@@ -385,18 +418,21 @@ Game.prototype = {
 
         // If we're in a browser then we play it back in real-time
         } else if (typeof setInterval !== "undefined") {
-            // The timer will keep looping and executing moves that need to occur
+            // The timer will keep looping and executing moves that need to
+            // occur
             setInterval(function() {
                 var curTime = (new Date).getTime();
 
                 // We're going to execute all moves whose time diff has come up
                 while (log.length) {
-                    // All logged items use a time diff relative to the last action
+                    // All logged items use a time diff relative to the last
+                    // action
                     var diffTime = curTime - lastTime,
                         first = log[0],
                         next = log[1];
 
-                    // The first token is always a time diff from the previous action
+                    // The first token is always a time diff from the previous
+                    // action
                     if (first <= diffTime) {
                         // Remove that time diff
                         log.shift();
@@ -411,10 +447,12 @@ Game.prototype = {
                             self.update();
                         }
 
-                        // Make sure to remember the current time for later diffs
+                        // Make sure to remember the current time for later
+                        // diffs
                         lastTime = curTime;
 
-                    // No valid move was found so we can wait until the next timer
+                    // No valid move was found so we can wait until the next
+                    // timer
                     } else {
                         break;
                     }
@@ -449,21 +487,21 @@ Game.prototype = {
     // Watch for a particular event published by the game
     // Good for updating a UI corresponding to the actions in the game
     bind: function(name, fn) {
-        if (!this.callbacks[ name ]) {
-            this.callbacks[ name ] = [];
+        if (!this.callbacks[name]) {
+            this.callbacks[name] = [];
         }
 
-        this.callbacks[ name ].push(fn);
+        this.callbacks[name].push(fn);
     },
 
     // Publish an event (used internally in the game)
     trigger: function(name) {
-        var callbacks = this.callbacks[ name ],
+        var callbacks = this.callbacks[name],
             args = Array.prototype.slice.call(arguments, 1);
 
         if (callbacks) {
             for (var i = 0, l = callbacks.length; i < l; i++) {
-                callbacks[ i ].apply(this, args);
+                callbacks[i].apply(this, args);
             }
         }
     },
@@ -524,18 +562,19 @@ Bot.prototype = {
                 if (i !== j) {
                     var pair = letters[i] + letters[j];
 
-                    if (!done[ pair ]) {
+                    if (!done[pair]) {
                         var possible = Game.dict.words(pair);
 
                         for (var p = 0, pl = possible.length; p < pl; p++) {
                             var word = possible[p];
 
-                            if (check.test(word) && check2.test(word.split("").sort().join(""))) {
+                            if (check.test(word) &&
+                                check2.test(word.split("").sort().join(""))) {
                                 words.push(word);
                             }
                         }
 
-                        done[ pair ] = true;
+                        done[pair] = true;
                     }
                 }
             }
@@ -547,9 +586,9 @@ Bot.prototype = {
     },
 
     solve: function() {
-        var level = this.levels[ this.level ],
+        var level = this.levels[this.level],
             words = level.words(this.findWords(), this.game),
-            word = words[ Math.floor(words.length * Math.random()) ],
+            word = words[Math.floor(words.length * Math.random())],
             game = this.game,
             rack = game.rack,
             pos = 0,
@@ -561,7 +600,8 @@ Bot.prototype = {
 
         // Do an initial pause to "think" of a solution
         // Start swapping tiles to solve
-        this.timer = setTimeout(swapTile, level.startTime + (level.startTime * Math.random()) +
+        this.timer = setTimeout(swapTile,
+            level.startTime + (level.startTime * Math.random()) +
             level.swapTime + (level.swapTime * Math.random()));
 
         function swapTile() {
@@ -572,15 +612,15 @@ Bot.prototype = {
                 return;
             }
 
-            while (rack[ pos ] === word[ pos ] && pos < word.length) {
+            while (rack[pos] === word[pos] && pos < word.length) {
                 pos++;
             }
 
-            var letter = word[ pos ];
+            var letter = word[pos];
 
-            if (rack[ pos ] !== letter) {
+            if (rack[pos] !== letter) {
                 for (var i = pos + 1; i < rack.length; i++) {
-                    if (rack[ i ] === letter) {
+                    if (rack[i] === letter) {
                         game.swap(pos, i);
                         break;
                     }
@@ -589,7 +629,8 @@ Bot.prototype = {
 
             pos++;
 
-            self.timer = setTimeout(swapTile, level.swapTime + (level.swapTime * Math.random()));
+            self.timer = setTimeout(swapTile,
+                level.swapTime + (level.swapTime * Math.random()));
         }
     },
 
@@ -607,10 +648,10 @@ Bot.prototype = {
 
                 // If a word was already spelled, just use that
                 return game.foundWord ?
-                    [ game.foundWord ] :
+                    [game.foundWord] :
                         // Every couple plays, really mess up
                         Math.random() * 5 < 1 && words.length ?
-                            [ words[0].split("").sort().join("") ] :
+                            [words[0].split("").sort().join("")] :
                             words;
             },
             startTime: 5000,

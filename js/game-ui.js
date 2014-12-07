@@ -17,8 +17,10 @@ $.widget("ui.game", {
     },
 
     _create: function() {
-        var rackWidth = ((this.options.tileMargin + this.options.tileWidth) * 9) + this.options.tileMargin,
-            rackHeight = this.options.tileWidth + (this.options.tileTopMargin * 2);
+        var rackWidth = this.options.tileMargin +
+            ((this.options.tileMargin + this.options.tileWidth) * 9);
+        var rackHeight = this.options.tileWidth +
+            (this.options.tileTopMargin * 2);
 
         $(this.element)
             .find(".letters").css({
@@ -56,7 +58,7 @@ $.widget("ui.game", {
 
         // Attach all the game events
         for (var method in this.gameEvents) {
-            this.game.bind(method, $.proxy(this.gameEvents[ method ], this));
+            this.game.bind(method, $.proxy(this.gameEvents[method], this));
         }
 
         this.game.reset();
@@ -71,7 +73,11 @@ $.widget("ui.game", {
     },
 
     playback: function(data) {
-        this.game.playback(false, typeof data === "string" ? $.parseJSON(data) : data);
+        if (typeof data === "string") {
+            data = $.parseJSON(data)
+        }
+
+        this.game.playback(false, data);
     },
 
     uiEvents: {
@@ -115,7 +121,8 @@ $.widget("ui.game", {
             } else {
                 this.activeTile = tile;
 
-                var offset = -1 * ((this.options.activeTileWidth - this.options.tileWidth));
+                var offset = -1 *
+                    (this.options.activeTileWidth - this.options.tileWidth);
 
                 $(tile).addClass("active").css({
                     width: this.options.activeTileWidth,
@@ -146,8 +153,8 @@ $.widget("ui.game", {
         swap: function(activePos, thisPos) {
             $(this.spanLetters[0]).removeClass("dropsoonA dropsoonB");
 
-            var $a = $(this.spanLetters[ activePos ]),
-                $b = $(this.spanLetters[ thisPos ]),
+            var $a = $(this.spanLetters[activePos]),
+                $b = $(this.spanLetters[thisPos]),
                 activeLeft = $a.css("left"),
                 thisLeft = $b.css("left");
 
@@ -158,9 +165,9 @@ $.widget("ui.game", {
             $a.animate({ left: thisLeft }, 300);
 
             // Swap the position of the nodes in the store
-            var oldNode = this.spanLetters[ thisPos ];
-            this.spanLetters[ thisPos ] = this.spanLetters[ activePos ];
-            this.spanLetters[ activePos ] = oldNode;
+            var oldNode = this.spanLetters[thisPos];
+            this.spanLetters[thisPos] = this.spanLetters[activePos];
+            this.spanLetters[activePos] = oldNode;
         },
 
         updateDone: function() {
@@ -178,13 +185,15 @@ $.widget("ui.game", {
                 self.updateCircle(Math.min(timeDiff / totalTime, 1), nearEnd);
 
                 if (!self.game.foundWord && !nearEnd) {
-                    var firstTile = $(self.spanLetters[ 0 ]);
+                    var firstTile = $(self.spanLetters[0]);
 
                     if (firstTile.hasClass("dropsoonA")) {
-                        firstTile.removeClass("dropsoonA").addClass("dropsoonB");
+                        firstTile.removeClass("dropsoonA")
+                            .addClass("dropsoonB");
 
                     } else {
-                        firstTile.removeClass("dropsoonB").addClass("dropsoonA");
+                        firstTile.removeClass("dropsoonB")
+                            .addClass("dropsoonA");
                     }
                 }
 
@@ -196,8 +205,10 @@ $.widget("ui.game", {
 
         dropTile: function(letter) {
             // Inject new letter into the UI
-            var tileLeft = this.tileWidths(this.game.rack.length),
-                baseLeft = parseFloat($(this.spanLetters).last().css("left") || 0) + this.options.tileMargin + this.options.tileWidth;
+            var tileLeft = this.tileWidths(this.game.rack.length);
+            var left = parseFloat($(this.spanLetters).last().css("left") || 0);
+            var baseLeft = left + this.options.tileMargin +
+                this.options.tileWidth;
 
             this.spanLetters.push($("<span>")
                 .text(this.options.showTiles ? letter : "")
@@ -215,9 +226,10 @@ $.widget("ui.game", {
                 .animate({ left: tileLeft }, 500)[0]);
 
             // Let the user know how many
-            this.element.find(".tilesleft").text(this.game.maxTiles - this.game.droppedTiles > 0 ?
-                this.game.maxTiles - this.game.droppedTiles :
-                "No");
+            this.element.find(".tilesleft")
+                .text(this.game.maxTiles - this.game.droppedTiles > 0 ?
+                    this.game.maxTiles - this.game.droppedTiles :
+                    "No");
         },
 
         removeTiles: function(num) {
@@ -229,7 +241,10 @@ $.widget("ui.game", {
                     })
                 .end()
                 .slice(num)
-                    .animate({ left: "-=" + (this.tileWidths(num + 1) - this.options.tileMargin) }, 500)
+                    .animate({
+                        left: "-=" + (this.tileWidths(num + 1) -
+                            this.options.tileMargin)
+                    }, 500)
                     .get();
         },
 
@@ -239,22 +254,29 @@ $.widget("ui.game", {
                 .slice(0, word.length)
                     .addClass("found");
 
-            this.element.find(".saveword").toggleClass("ui-disabled", !word.length);
+            this.element.find(".saveword")
+                .toggleClass("ui-disabled", !word.length);
         },
 
         updateScore: function(result) {
             $("<li>")
                 .addClass(result.state ? "pass" : "fail")
-                .html("<b>" + (result.total >= 0 ? "+" : "") + result.total + ": " + result.word + ".</b> " +
+                .html("<b>" + (result.total >= 0 ? "+" : "") + result.total +
+                    ": " + result.word + ".</b> " +
                     (result.state ?
                         result.num + " Points " +
-                            (result.lengthBonus > 1 ? "+" + result.lengthBonus.toFixed(1) + "x Word Length. " : "") +
-                            (result.multiplier > 1 ? "+" + result.multiplier.toFixed(1) + "x Multiplier. " : "") :
+                            (result.lengthBonus > 1 ? "+" +
+                                result.lengthBonus.toFixed(1) +
+                                "x Word Length. " : "") +
+                            (result.multiplier > 1 ? "+" +
+                                result.multiplier.toFixed(1) +
+                                "x Multiplier. " : "") :
                         "Letter not used.")
                ).prependTo(this.element.find(".words"));
 
             this.element.find(".points").text(this.game.score);
-            this.element.find(".multiplier").text(this.game.multiplier.toFixed(1));
+            this.element.find(".multiplier")
+                .text(this.game.multiplier.toFixed(1));
         },
 
         reset: function() {
@@ -291,7 +313,8 @@ $.widget("ui.game", {
             this.circle.fillStyle = rate ? "rgb(255,255,255)" : "rgb(255,0,0)";
             this.circle.beginPath();
             this.circle.moveTo(9, 9);
-            this.circle.arc(9, 9, 8, -0.5 * Math.PI, (amount * (Math.PI * 2)) - (0.5 * Math.PI), false);
+            this.circle.arc(9, 9, 8, -0.5 * Math.PI,
+                (amount * (Math.PI * 2)) - (0.5 * Math.PI), false);
             this.circle.moveTo(9, 9);
             this.circle.closePath();
             this.circle.fill();
@@ -299,7 +322,8 @@ $.widget("ui.game", {
     },
 
     tileWidths: function(num) {
-        return (num * this.options.tileMargin) + ((num - 1) * this.options.tileWidth);
+        return (num * this.options.tileMargin) +
+            ((num - 1) * this.options.tileWidth);
     },
 
     posFromLeft: function(node) {
