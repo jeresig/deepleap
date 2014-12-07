@@ -108,7 +108,7 @@ li.fail, li.drop {
 	display: block;
 	text-align: center;
 	background: #F4D1A3 url(../images/wood-tile.jpg);
-	position: absolute;
+	position: absolute !important;
 	top: 6px;
 	left: 0px;
 	overflow: hidden;
@@ -124,6 +124,10 @@ li.fail, li.drop {
 	-moz-box-shadow: 0 0 10px rgba(0,255,0,1);
 	box-shadow: 0 0 20px rgba(0,0,0,1);
 	z-index: 20;
+}
+
+.letters span.dragging {
+    opacity: 0;
 }
 
 .letters span.dropsoonA {

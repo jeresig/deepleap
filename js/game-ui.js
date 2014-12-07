@@ -47,12 +47,6 @@ $.widget("ui.game", {
             this.circle = this.element.find(".drop")[0].getContext("2d");
         } catch(e) {}
 
-        // Attach the various UI events
-        this.element.find(".letters").bind({
-            click: $.proxy(this.uiEvents.swap, this),
-            mousedown: false
-        });
-
         this.element.find(".saveword")
             .bind("click", $.proxy(this.uiEvents.submit, this));
 
@@ -81,62 +75,6 @@ $.widget("ui.game", {
     },
 
     uiEvents: {
-        swap: function(e) {
-            var tile = e.target;
-
-            // Don't allow swapping if we're replaying the game
-            // or if the tile that we want is no longer available
-            if (!this.game.logging || tile.nodeName.toLowerCase() !== "span" ||
-                 $(tile).hasClass("leaving")) {
-                return;
-            }
-
-            // Make sure an old tile is no longer selected
-            if (this.activeTile && !this.activeTile.parentNode) {
-                this.activeTile = null;
-            }
-
-            // If a previous tile was already activated
-            if (this.activeTile) {
-                // Deactivate the originally-selected tile
-                $(this.activeTile).removeClass("active").css({
-                    width: this.options.tileWidth,
-                    height: this.options.tileWidth,
-                    fontSize: this.options.tileWidth,
-                    lineHeight: this.options.tileWidth + "px",
-                    marginTop: "",
-                    marginLeft: ""
-                });
-
-                // Make sure we aren't trying to swap with itself
-                if (this.activeTile !== tile) {
-                    this.game.swap(
-                        this.posFromLeft(this.activeTile),
-                        this.posFromLeft(tile)
-                   );
-                }
-
-                this.activeTile = null;
-
-            } else {
-                this.activeTile = tile;
-
-                var offset = -1 *
-                    (this.options.activeTileWidth - this.options.tileWidth);
-
-                $(tile).addClass("active").css({
-                    width: this.options.activeTileWidth,
-                    height: this.options.activeTileWidth,
-                    fontSize: this.options.activeTileWidth,
-                    lineHeight: this.options.activeTileWidth + "px",
-                    marginTop: offset,
-                    marginLeft: offset / 2
-                });
-            }
-
-            return false;
-        },
-
         submit: function() {
             // Don't allow submission if we're replaying the game
             if (!this.game.logging) {
@@ -155,14 +93,14 @@ $.widget("ui.game", {
 
             var $a = $(this.spanLetters[activePos]),
                 $b = $(this.spanLetters[thisPos]),
-                activeLeft = $a.css("left"),
-                thisLeft = $b.css("left");
+                activeLeft = Math.max(this.tileWidths(activePos + 1), 0),
+                thisLeft = Math.max(this.tileWidths(thisPos + 1), 0);
 
             // Move the current tile
-            $b.animate({ left: activeLeft }, 300);
+            $b.stop().animate({ left: activeLeft }, 300);
 
             // Finally move the originally selected tile
-            $a.animate({ left: thisLeft }, 300);
+            $a.stop().animate({ left: thisLeft }, 300);
 
             // Swap the position of the nodes in the store
             var oldNode = this.spanLetters[thisPos];
@@ -195,6 +133,19 @@ $.widget("ui.game", {
                         firstTile.removeClass("dropsoonB")
                             .addClass("dropsoonA");
                     }
+
+                    if (self.activeTile === self.spanLetters[0]) {
+                        var dragTile = $(".ui-draggable-dragging");
+
+                        if (dragTile.hasClass("dropsoonA")) {
+                            dragTile.removeClass("dropsoonA")
+                                .addClass("dropsoonB");
+
+                        } else {
+                            dragTile.removeClass("dropsoonB")
+                                .addClass("dropsoonA");
+                        }
+                    }
                 }
 
                 if (timeDiff >= totalTime) {
@@ -204,23 +155,83 @@ $.widget("ui.game", {
         },
 
         dropTile: function(letter) {
+            var self = this;
+
             // Inject new letter into the UI
             var tileLeft = this.tileWidths(this.game.rack.length);
             var left = parseFloat($(this.spanLetters).last().css("left") || 0);
-            var baseLeft = left + this.options.tileMargin +
-                this.options.tileWidth;
+            var tileWidth = this.options.tileWidth;
+            var baseLeft = left + this.options.tileMargin + tileWidth;
+            var activeTileWidth = this.options.activeTileWidth;
+            var curPos;
 
             this.spanLetters.push($("<span>")
                 .text(this.options.showTiles ? letter : "")
                 .css({
                     backgroundPosition: Math.round(Math.random() * 1400) + "px",
-                    width: this.options.tileWidth,
-                    height: this.options.tileWidth,
-                    lineHeight: (this.options.tileWidth -
+                    width: tileWidth,
+                    height: tileWidth,
+                    lineHeight: (tileWidth -
                         (this.options.longLetters.indexOf(letter) > -1 ?
                             this.options.tileWidth / 4 : 0)) + "px",
                     top: this.options.tileTopMargin - 1,
                     left: baseLeft
+                })
+                .bind("shift", function(e, num) {
+                    curPos -= num;
+                })
+                .draggable({
+                    axis: "x",
+                    helper: "clone",
+                    revert: true,
+                    revertDuration: 200,
+                    containment: "parent",
+                    start: function(e, ui) {
+                        self.activeTile = this;
+
+                        $(this).addClass("dragging");
+
+                        curPos = self.posFromLeft(
+                            parseFloat($(this).css("left")));
+
+                        var offset = -1 * (activeTileWidth - tileWidth);
+
+                        ui.helper.addClass("active").css({
+                            width: activeTileWidth,
+                            height: activeTileWidth,
+                            fontSize: activeTileWidth,
+                            lineHeight: activeTileWidth + "px",
+                            marginTop: offset,
+                            marginLeft: offset / 2
+                        });
+                    },
+                    drag: function(e, ui) {
+                        if (!self.activeTile) {
+                            return false;
+                        }
+
+                        var targetPos = self.posFromLeft(ui.position.left);
+
+                        // Make sure we aren't trying to swap with itself
+                        if (curPos !== targetPos) {
+                            ui.helper.removeClass("found dropsoonA dropsoonB");
+                            self.game.swap(curPos, targetPos);
+                            curPos = targetPos;
+                        }
+                    },
+                    revert: function(e, ui) {
+                        var draggable = $(this).data("draggable");
+                        if (draggable) {
+                            $(this).data("draggable").originalPosition =
+                                $(this).position();
+                            return true;
+                        }
+                        return false;
+                    },
+                    stop: function() {
+                        self.activeTile = null;
+                        $(this).removeClass("dragging");
+                    }
                 })
                 .appendTo(this.element.find(".letters"))
                 .animate({ left: tileLeft }, 500)[0]);
@@ -239,6 +250,7 @@ $.widget("ui.game", {
                     .fadeOut(300, function() {
                         $(this).remove();
                     })
+                    .draggable("destroy")
                 .end()
                 .slice(num)
                     .animate({
@@ -246,6 +258,15 @@ $.widget("ui.game", {
                             this.options.tileMargin)
                     }, 500)
                     .get();
+
+            if (this.activeTile) {
+                if (this.spanLetters.indexOf(this.activeTile) < 0) {
+                    $(".ui-draggable-dragging").remove();
+                    this.activeTile = null;
+                } else {
+                    $(this.activeTile).trigger("shift", num);
+                }
+            }
         },
 
         foundWord: function(word) {
@@ -253,6 +274,14 @@ $.widget("ui.game", {
                 .removeClass("found")
                 .slice(0, word.length)
                     .addClass("found");
+
+            if (this.activeTile) {
+                if ($(this.spanLetters).index(this.activeTile) < word.length) {
+                    $(".ui-draggable-dragging").addClass("found");
+                } else {
+                    $(this.activeTile).removeClass("found");
+                }
+            }
 
             this.element.find(".saveword")
                 .toggleClass("ui-disabled", !word.length);
@@ -326,8 +355,8 @@ $.widget("ui.game", {
             ((num - 1) * this.options.tileWidth);
     },
 
-    posFromLeft: function(node) {
-        return (parseFloat($(node).css("left")) - this.options.tileMargin) /
-            (this.options.tileMargin + this.options.tileWidth);
+    posFromLeft: function(left) {
+        return Math.round((left - this.options.tileMargin) /
+            (this.options.tileMargin + this.options.tileWidth));
     }
 });
