@@ -39,6 +39,36 @@ $.widget("ui.game", {
                 width: rackWidth
             }).end();
 
+        var $letters = this.element.find(".letters");
+
+        var curDrag;
+
+        $letters.on("mousedown", ".tile", function(e) {
+            if (curDrag) {
+                return;
+            }
+
+            curDrag = {
+                x: e.offsetX,
+                y: e.offsetY,
+                elem: this
+            };
+        });
+
+        $letters.on("mousemove", function(e) {
+            if (!curDrag) {
+                return;
+            }
+
+            console.log(curDrag, e.offsetX, e.offsetY)
+
+            curDrag.elem.style.transform = "translate(" +
+                (e.offsetX) + "px," +
+                "0px)";
+
+            e.preventDefault();
+        });
+
         // Initialize a copy of the game
         this.game = new Game();
 
@@ -156,6 +186,7 @@ $.widget("ui.game", {
 
         dropTile: function(letter) {
             var self = this;
+            var $letters = this.element.find(".letters");
 
             // Inject new letter into the UI
             var tileLeft = this.tileWidths(this.game.rack.length);
@@ -166,6 +197,7 @@ $.widget("ui.game", {
             var curPos;
 
             this.spanLetters.push($("<span>")
+                .addClass("tile")
                 .text(this.options.showTiles ? letter : "")
                 .css({
                     backgroundPosition: Math.round(Math.random() * 1400) + "px",
@@ -174,12 +206,14 @@ $.widget("ui.game", {
                     lineHeight: (tileWidth -
                         (this.options.longLetters.indexOf(letter) > -1 ?
                             this.options.tileWidth / 4 : 0)) + "px",
-                    top: this.options.tileTopMargin - 1,
-                    left: baseLeft
+                    transform: "translate(" +
+                        baseLeft "px," +
+                        (this.options.tileTopMargin - 1) + "px)"
                 })
                 .bind("shift", function(e, num) {
                     curPos -= num;
                 })
+                /*
                 .draggable({
                     axis: "x",
                     helper: "clone",
@@ -233,7 +267,8 @@ $.widget("ui.game", {
                         $(this).removeClass("dragging");
                     }
                 })
-                .appendTo(this.element.find(".letters"))
+                */
+                .appendTo($letters)
                 .animate({ left: tileLeft }, 500)[0]);
 
             // Let the user know how many
