@@ -1,3 +1,13 @@
+var swap = function(a, b) {
+    var aParent = a.parentNode;
+    var aNext = a.nextSibling;
+    var bParent = b.parentNode;
+    var bNext = b.nextSibling;
+
+    aParent.insertBefore(b, aNext);
+    bParent.insertBefore(a, bNext);
+};
+
 $.widget("ui.game", {
     options: {
         // How tall and wide a tile should be
@@ -10,6 +20,8 @@ $.widget("ui.game", {
         // The size of the tile when it's actively selected
         activeTileWidth: 100,
 
+        numTiles: 9,
+
         // TODO: Disabled for now, need to figure out a good result for this
         longLetters: "", // "gjpqy",
 
@@ -17,8 +29,10 @@ $.widget("ui.game", {
     },
 
     _create: function() {
+        var self = this;
         var rackWidth = this.options.tileMargin +
-            ((this.options.tileMargin + this.options.tileWidth) * 9);
+            ((this.options.tileMargin + this.options.tileWidth) *
+            this.options.numTiles);
         var rackHeight = this.options.tileWidth +
             (this.options.tileTopMargin * 2);
 
@@ -40,6 +54,7 @@ $.widget("ui.game", {
             }).end();
 
         var $letters = this.element.find(".letters");
+        var maxLeft = this.tileWidths(this.options.numTiles);
 
         var curDrag;
 
@@ -48,25 +63,56 @@ $.widget("ui.game", {
                 return;
             }
 
+            var offset = $letters.offset();
+
             curDrag = {
                 x: e.offsetX,
                 y: e.offsetY,
-                elem: this
+                offsetX: offset.left,
+                offsetY: offset.top,
+                $elem: $(this),
+                pos: $(this).index()
             };
+
+            curDrag.$elem.addClass("active");
         });
 
-        $letters.on("mousemove", function(e) {
+        $(document).on("mousemove", function(e) {
             if (!curDrag) {
                 return;
             }
 
-            console.log(curDrag, e.offsetX, e.offsetY)
+            //console.log(e.pageX - curDrag.offsetX - curDrag.x)
 
-            curDrag.elem.style.transform = "translate(" +
-                (e.offsetX) + "px," +
-                "0px)";
+            var x = (e.pageX - curDrag.offsetX - curDrag.x);
+
+            x = Math.min(Math.max(x, 0), maxLeft);
+
+            curDrag.$elem.css("transform", "translateX(" + x + "px)");
+
+            var targetPos = self.posFromLeft(x);
+
+            // Make sure we aren't trying to swap with itself
+            if (curDrag.pos !== targetPos) {
+                curDrag.$elem.removeClass("found dropsoonA dropsoonB");
+                self.game.swap(curDrag.pos, targetPos);
+                curDrag.pos = targetPos;
+            }
 
             e.preventDefault();
+        });
+
+        $(document).on("mouseup", function() {
+            if (!curDrag) {
+                return;
+            }
+
+            curDrag.$elem
+                .removeClass("active")
+                .css("transform", "translateX(" +
+                    self.tileWidths(curDrag.pos + 1) + "px)");
+
+            curDrag = null;
         });
 
         // Initialize a copy of the game
@@ -127,10 +173,12 @@ $.widget("ui.game", {
                 thisLeft = Math.max(this.tileWidths(thisPos + 1), 0);
 
             // Move the current tile
-            $b.stop().animate({ left: activeLeft }, 300);
+            $b.css("transform", "translateX(" + activeLeft + "px)");
+            //$b.stop().animate({ left: activeLeft }, 300);
 
             // Finally move the originally selected tile
-            $a.stop().animate({ left: thisLeft }, 300);
+            $a.css("transform", "translateX(" + thisLeft + "px)");
+            //$a.stop().animate({ left: thisLeft }, 300);
 
             // Swap the position of the nodes in the store
             var oldNode = this.spanLetters[thisPos];
@@ -190,11 +238,8 @@ $.widget("ui.game", {
 
             // Inject new letter into the UI
             var tileLeft = this.tileWidths(this.game.rack.length);
-            var left = parseFloat($(this.spanLetters).last().css("left") || 0);
             var tileWidth = this.options.tileWidth;
-            var baseLeft = left + this.options.tileMargin + tileWidth;
             var activeTileWidth = this.options.activeTileWidth;
-            var curPos;
 
             this.spanLetters.push($("<span>")
                 .addClass("tile")
@@ -206,70 +251,9 @@ $.widget("ui.game", {
                     lineHeight: (tileWidth -
                         (this.options.longLetters.indexOf(letter) > -1 ?
                             this.options.tileWidth / 4 : 0)) + "px",
-                    transform: "translate(" +
-                        baseLeft "px," +
-                        (this.options.tileTopMargin - 1) + "px)"
+                    transform: "translateX(" + tileLeft + "px)"
                 })
-                .bind("shift", function(e, num) {
-                    curPos -= num;
-                })
-                /*
-                .draggable({
-                    axis: "x",
-                    helper: "clone",
-                    revert: true,
-                    revertDuration: 200,
-                    containment: "parent",
-                    start: function(e, ui) {
-                        self.activeTile = this;
-
-                        $(this).addClass("dragging");
-
-                        curPos = self.posFromLeft(
-                            parseFloat($(this).css("left")));
-
-                        var offset = -1 * (activeTileWidth - tileWidth);
-
-                        ui.helper.addClass("active").css({
-                            width: activeTileWidth,
-                            height: activeTileWidth,
-                            fontSize: activeTileWidth,
-                            lineHeight: activeTileWidth + "px",
-                            marginTop: offset,
-                            marginLeft: offset / 2
-                        });
-                    },
-                    drag: function(e, ui) {
-                        if (!self.activeTile) {
-                            return false;
-                        }
-
-                        var targetPos = self.posFromLeft(ui.position.left);
-
-                        // Make sure we aren't trying to swap with itself
-                        if (curPos !== targetPos) {
-                            ui.helper.removeClass("found dropsoonA dropsoonB");
-                            self.game.swap(curPos, targetPos);
-                            curPos = targetPos;
-                        }
-                    },
-                    revert: function(e, ui) {
-                        var draggable = $(this).data("draggable");
-                        if (draggable) {
-                            $(this).data("draggable").originalPosition =
-                                $(this).position();
-                            return true;
-                        }
-                        return false;
-                    },
-                    stop: function() {
-                        self.activeTile = null;
-                        $(this).removeClass("dragging");
-                    }
-                })
-                */
-                .appendTo($letters)
-                .animate({ left: tileLeft }, 500)[0]);
+                .appendTo($letters)[0]);
 
             // Let the user know how many
             this.element.find(".tilesleft")
@@ -279,20 +263,21 @@ $.widget("ui.game", {
         },
 
         removeTiles: function(num) {
+            var self = this;
+
             this.spanLetters = $(this.spanLetters)
                 .slice(0, num)
                     .addClass("leaving")
                     .fadeOut(300, function() {
                         $(this).remove();
                     })
-                    .draggable("destroy")
+                    //.draggable("destroy")
                 .end()
-                .slice(num)
-                    .animate({
-                        left: "-=" + (this.tileWidths(num + 1) -
-                            this.options.tileMargin)
-                    }, 500)
-                    .get();
+                .slice(num).each(function(i) {
+                    $(this).css("transform",
+                        "translateX(" + self.tileWidths(i + 1) + "px)");
+                })
+                .get();
 
             if (this.activeTile) {
                 if (this.spanLetters.indexOf(this.activeTile) < 0) {
