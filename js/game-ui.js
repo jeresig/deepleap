@@ -177,7 +177,9 @@ $.widget("ui.game", {
             //$b.stop().animate({ left: activeLeft }, 300);
 
             // Finally move the originally selected tile
-            $a.css("transform", "translateX(" + thisLeft + "px)");
+            if (!$a.hasClass("active")) {
+                $a.css("transform", "translateX(" + thisLeft + "px)");
+            }
             //$a.stop().animate({ left: thisLeft }, 300);
 
             // Swap the position of the nodes in the store
