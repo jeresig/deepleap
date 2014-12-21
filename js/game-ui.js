@@ -28,13 +28,21 @@ $.widget("ui.game", {
         showTiles: true
     },
 
-    _create: function() {
-        var self = this;
-        var rackWidth = this.options.tileMargin +
+    rackWidth: function() {
+        return this.options.tileMargin +
             ((this.options.tileMargin + this.options.tileWidth) *
             this.options.numTiles);
-        var rackHeight = this.options.tileWidth +
+    },
+
+    rackHeight: function() {
+        return this.options.tileWidth +
             (this.options.tileTopMargin * 2);
+    },
+
+    _create: function() {
+        var self = this;
+        var rackWidth = this.rackWidth();
+        var rackHeight = this.rackHeight();
 
         $(this.element)
             .find(".letters").css({
@@ -82,10 +90,7 @@ $.widget("ui.game", {
                 return;
             }
 
-            //console.log(e.pageX - curDrag.offsetX - curDrag.x)
-
             var x = (e.pageX - curDrag.offsetX - curDrag.x);
-
             x = Math.min(Math.max(x, 0), maxLeft);
 
             curDrag.$elem.css("transform", "translateX(" + x + "px)");
@@ -250,7 +255,9 @@ $.widget("ui.game", {
                     height: tileWidth,
                     lineHeight: (tileWidth -
                         (this.options.longLetters.indexOf(letter) > -1 ?
-                            this.options.tileWidth / 4 : 0)) + "px"
+                            this.options.tileWidth / 4 : 0)) + "px",
+                    transform: "translateX(" +
+                        (this.rackWidth() + tileLeft) + "px)"
                 })
                 .appendTo($letters);
 
@@ -269,20 +276,20 @@ $.widget("ui.game", {
 
         removeTiles: function(num) {
             var self = this;
+            var $spanLetters = $(this.spanLetters);
 
-            this.spanLetters = $(this.spanLetters)
-                .slice(0, num)
-                    .addClass("leaving")
-                    .fadeOut(300, function() {
-                        $(this).remove();
-                    })
-                    //.draggable("destroy")
-                .end()
-                .slice(num).each(function(i) {
-                    $(this).css("transform",
-                        "translateX(" + self.tileWidths(i + 1) + "px)");
+            var $leaving = $spanLetters.slice(0, num).addClass("leaving");
+
+            // TODO: Stop drag
+            setTimeout(function() {
+                $leaving.remove();
+            }, 300);
+
+            this.spanLetters = $spanLetters.slice(num)
+                .css("transform", function(i) {
+                    return "translateX(" + self.tileWidths(i + 1) + "px)";
                 })
-                .get();
+                .toArray();
 
             if (this.activeTile) {
                 if (this.spanLetters.indexOf(this.activeTile) < 0) {

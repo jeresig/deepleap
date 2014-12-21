@@ -111,6 +111,7 @@ li.fail, li.drop {
     position: absolute !important;
     top: 6px;
     left: 0px;
+    opacity: 1;
     overflow: hidden;
     -moz-border-radius: 6px;
     border-radius: 6px;
@@ -119,8 +120,8 @@ li.fail, li.drop {
     cursor: pointer;
     -webkit-transform: translateX(1000px);
     transform: translateX(1000px);
-    -webkit-transition: transform 0.3s ease;
-    transition: transform 0.3s ease;
+    -webkit-transition: transform 0.3s ease, opacity 0.3s ease;
+    transition: transform 0.3s ease, opacity 0.3s ease;
 }
 
 .letters span.active {
@@ -130,6 +131,10 @@ li.fail, li.drop {
     z-index: 20;
     -webkit-transition: none;
     transition: none;
+}
+
+.letters span.leaving {
+    opacity: 0;
 }
 
 .letters span.dragging {
