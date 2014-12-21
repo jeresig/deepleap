@@ -71,7 +71,7 @@ $.widget("ui.game", {
                 offsetX: offset.left,
                 offsetY: offset.top,
                 $elem: $(this),
-                pos: $(this).index()
+                pos: self.posFromLeft(e.pageX - offset.left)
             };
 
             curDrag.$elem.addClass("active");
@@ -174,13 +174,11 @@ $.widget("ui.game", {
 
             // Move the current tile
             $b.css("transform", "translateX(" + activeLeft + "px)");
-            //$b.stop().animate({ left: activeLeft }, 300);
 
             // Finally move the originally selected tile
             if (!$a.hasClass("active")) {
                 $a.css("transform", "translateX(" + thisLeft + "px)");
             }
-            //$a.stop().animate({ left: thisLeft }, 300);
 
             // Swap the position of the nodes in the store
             var oldNode = this.spanLetters[thisPos];
@@ -243,7 +241,7 @@ $.widget("ui.game", {
             var tileWidth = this.options.tileWidth;
             var activeTileWidth = this.options.activeTileWidth;
 
-            this.spanLetters.push($("<span>")
+            var $tile = $("<span>")
                 .addClass("tile")
                 .text(this.options.showTiles ? letter : "")
                 .css({
@@ -252,10 +250,15 @@ $.widget("ui.game", {
                     height: tileWidth,
                     lineHeight: (tileWidth -
                         (this.options.longLetters.indexOf(letter) > -1 ?
-                            this.options.tileWidth / 4 : 0)) + "px",
-                    transform: "translateX(" + tileLeft + "px)"
+                            this.options.tileWidth / 4 : 0)) + "px"
                 })
-                .appendTo($letters)[0]);
+                .appendTo($letters);
+
+            this.spanLetters.push($tile[0]);
+
+            setTimeout(function() {
+                $tile.css("transform", "translateX(" + tileLeft + "px)");
+            }, 0);
 
             // Let the user know how many
             this.element.find(".tilesleft")

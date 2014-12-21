@@ -1,129 +1,135 @@
 html, body {
-	background: #BBB;
-	color: #000;
-	font-family: Helvetica, Arial, Sans-Serif;
-	font-size: 14px;
-	margin: 0;
-	padding: 0;
+    background: #BBB;
+    color: #000;
+    font-family: Helvetica, Arial, Sans-Serif;
+    font-size: 14px;
+    margin: 0;
+    padding: 0;
 }
 
 #all {
-	width: 960px;
-	height: 100%;
-	min-height: 600px;
-	overflow: hidden;
-	background: #EEE url(../images/texture.png);
+    width: 960px;
+    height: 100%;
+    min-height: 600px;
+    overflow: hidden;
+    background: #EEE url(../images/texture.png);
 }
 
 #all .ui-title {
-	text-align: left;
-	margin: 10px;
-	font-size: 20px;
+    text-align: left;
+    margin: 10px;
+    font-size: 20px;
 }
 
 #main {
-	width: 960px;
-	padding: 0;
+    width: 960px;
+    padding: 0;
 }
 
 p.note {
-	background: yellow;
-	padding: 4px;
-	width: 766px;
-	border: 4px solid black;
+    background: yellow;
+    padding: 4px;
+    width: 766px;
+    border: 4px solid black;
 }
 
 span.points-wrap {
-	padding-left: 10px;
-	font-size: 20px;
+    padding-left: 10px;
+    font-size: 20px;
 }
 
 span.points-wrap .right {
-	float: right;
-	padding-right: 10px;
+    float: right;
+    padding-right: 10px;
 }
 
 span.points-wrap .right .ui-btn {
-	cursor: default;
+    cursor: default;
 }
 
 span.points-wrap canvas {
-	background-image: none;
+    background-image: none;
 }
 
 li.pass {
-	color: green;
+    color: green;
 }
 
 li.fail, li.drop {
-	color: red;
+    color: red;
 }
 
 .letters-group {
-	text-align: center;
+    text-align: center;
 }
 
 .letters {
-	text-align: left;
-	overflow-x: visible;
-	overflow-y: visible;
-	position: relative;
-	background: url(../images/wood-tile3.jpg);
-	-moz-border-radius-topleft: 6px;
-	-moz-border-radius-topright: 6px;
-	-webkit-border-top-left-radius: 6px;
-	-webkit-border-top-right-radius: 6px;
-	border-top-left-radius: 6px;
-	border-top-right-radius: 6px;
-	z-index: 1;
-	margin: 8px auto 0 auto;
+    text-align: left;
+    overflow-x: visible;
+    overflow-y: visible;
+    position: relative;
+    background: url(../images/wood-tile3.jpg);
+    -moz-border-radius-topleft: 6px;
+    -moz-border-radius-topright: 6px;
+    -webkit-border-top-left-radius: 6px;
+    -webkit-border-top-right-radius: 6px;
+    border-top-left-radius: 6px;
+    border-top-right-radius: 6px;
+    z-index: 1;
+    margin: 8px auto 0 auto;
 }
 
 .letters-extra-before {
-	position: relative;
-	top: -4px;
-	height: 10px;
-	margin: 0 auto -10px auto;
-	-moz-border-radius: 100px / 10px;
-	border-radius: 100px / 10px;
-	-webkit-box-shadow: 0 0 25px rgba(0,0,0,1);
-	-moz-box-shadow: 0 0 25px rgba(0,0,0,1);
-	box-shadow: 0 0 25px rgba(0,0,0,1);
-	z-index: 2;
+    position: relative;
+    top: -4px;
+    height: 10px;
+    margin: 0 auto -10px auto;
+    -moz-border-radius: 100px / 10px;
+    border-radius: 100px / 10px;
+    -webkit-box-shadow: 0 0 25px rgba(0,0,0,1);
+    -moz-box-shadow: 0 0 25px rgba(0,0,0,1);
+    box-shadow: 0 0 25px rgba(0,0,0,1);
+    z-index: 2;
 }
 
 .letters-extra {
-	background: url(../images/wood-tile3.jpg) 300px 80px;
-	-moz-box-shadow: 0 0 4px rgba(0, 0, 0, 0.8) inset;
-	-webkit-box-shadow: 0 0 4px rgba(0, 0, 0, 0.8) inset;
-	box-shadow: 0 0 4px rgba(0, 0, 0, 0.8) inset;
-	margin: 0 auto 8px auto;
-	position: relative;
-	-moz-border-radius: 6px;
-	border-radius: 6px;
-	z-index: 2;
+    background: url(../images/wood-tile3.jpg) 300px 80px;
+    -moz-box-shadow: 0 0 4px rgba(0, 0, 0, 0.8) inset;
+    -webkit-box-shadow: 0 0 4px rgba(0, 0, 0, 0.8) inset;
+    box-shadow: 0 0 4px rgba(0, 0, 0, 0.8) inset;
+    margin: 0 auto 8px auto;
+    position: relative;
+    -moz-border-radius: 6px;
+    border-radius: 6px;
+    z-index: 2;
 }
 
 .letters span {
-	display: block;
-	text-align: center;
-	background: #F4D1A3 url(../images/wood-tile.jpg);
-	position: absolute !important;
-	top: 6px;
-	left: 0px;
-	overflow: hidden;
-	-moz-border-radius: 6px;
-	border-radius: 6px;
-	text-shadow: 1px 1px #F4D1A3, -1px -1px #444;
-	z-index: 11;
-	cursor: pointer;
+    display: block;
+    text-align: center;
+    background: #F4D1A3 url(../images/wood-tile.jpg);
+    position: absolute !important;
+    top: 6px;
+    left: 0px;
+    overflow: hidden;
+    -moz-border-radius: 6px;
+    border-radius: 6px;
+    text-shadow: 1px 1px #F4D1A3, -1px -1px #444;
+    z-index: 11;
+    cursor: pointer;
+    -webkit-transform: translateX(1000px);
+    transform: translateX(1000px);
+    -webkit-transition: transform 0.3s ease;
+    transition: transform 0.3s ease;
 }
 
 .letters span.active {
-	-webkit-box-shadow: 0 0 10px rgba(255,255,255,1);
-	-moz-box-shadow: 0 0 10px rgba(0,255,0,1);
-	box-shadow: 0 0 20px rgba(0,0,0,1);
-	z-index: 20;
+    -webkit-box-shadow: 0 0 10px rgba(255,255,255,1);
+    -moz-box-shadow: 0 0 10px rgba(0,255,0,1);
+    box-shadow: 0 0 20px rgba(0,0,0,1);
+    z-index: 20;
+    -webkit-transition: none;
+    transition: none;
 }
 
 .letters span.dragging {
@@ -131,110 +137,110 @@ li.fail, li.drop {
 }
 
 .letters span.dropsoonA {
-	-webkit-transform: rotate(2deg);
-	-moz-transform: rotate(2deg);
-	transform: rotate(2deg);
+    -webkit-transform: rotate(2deg);
+    -moz-transform: rotate(2deg);
+    transform: rotate(2deg);
 }
 
 .letters span.dropsoonB {
-	-webkit-transform: rotate(358deg);
-	-moz-transform: rotate(358deg);
-	transform: rotate(358deg);
+    -webkit-transform: rotate(358deg);
+    -moz-transform: rotate(358deg);
+    transform: rotate(358deg);
 }
 
 .letters span.found {
-	color: white;
+    color: white;
 }
 
 .words {
-	list-style: none;
-	padding: 0;
-	margin: 0;
+    list-style: none;
+    padding: 0;
+    margin: 0;
 }
 
 .words li {
-	margin: 3px;
-	padding: 2px;
-	background: #F4D1A3;
-	border: 1px outset black;
-	width: 500px;
+    margin: 3px;
+    padding: 2px;
+    background: #F4D1A3;
+    border: 1px outset black;
+    width: 500px;
 }
 
 .help {
-	width: 250px;
-	float: right;
+    width: 250px;
+    float: right;
 }
 
 .help a {
-	color: darkgreen;
+    color: darkgreen;
 }
 
 #twitter_update_list {
-	list-style: none;
-	margin: 0;
-	padding: 0;
+    list-style: none;
+    margin: 0;
+    padding: 0;
 }
 
 #twitter_update_list li {
-	margin: 4px 0;
+    margin: 4px 0;
 }
 
 
 #mini-main {
-	display: none;
-	position: absolute;
-	top: 267px;
-	left: 672px;
+    display: none;
+    position: absolute;
+    top: 267px;
+    left: 672px;
 }
 
 #mini-main .letters-extra {
-	margin-bottom: 0px;
+    margin-bottom: 0px;
 }
 
 #mini-main .letters span {
-	-moz-border-radius: 3px;
-	border-radius: 3px;
+    -moz-border-radius: 3px;
+    border-radius: 3px;
 }
 
 #mini-main .letters span.found {
-	background: white;
+    background: white;
 }
 
 #mini-main span.points-wrap {
-	font-size: 20px;
-	padding-left: 0px;
+    font-size: 20px;
+    padding-left: 0px;
 }
 
 #overview-all {
-	width: 480px;
+    width: 480px;
 }
 
 #overview-all h2 {
-	text-align: center;
-	font-weight: normal;
-	font-style: italic;
-	font-size: 20px;
+    text-align: center;
+    font-weight: normal;
+    font-style: italic;
+    font-size: 20px;
 }
 
 #overview-all .ui-listview {
-	width: 50%;
+    width: 50%;
 }
 
 #overview-all .ui-li .ui-btn-text {
-	overflow: visible;
+    overflow: visible;
 }
 
 #overview-all .ui-li .ui-icon {
-	background-image: url(../images/icons-18-white.png);
+    background-image: url(../images/icons-18-white.png);
 }
 
 #overview-desc {
-	float: right;
-	width: 50%;
-	overflow: hidden;
-	text-align: center;
+    float: right;
+    width: 50%;
+    overflow: hidden;
+    text-align: center;
 }
 
 .ui-dialog .ui-dialog-content {
-	padding: .5em .2em;
+    padding: .5em .2em;
 }
