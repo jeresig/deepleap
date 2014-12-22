@@ -124,11 +124,12 @@ li.fail, li.drop {
     transform: translateX(1000px);
     -webkit-transition: transform 0.3s ease, opacity 0.3s ease;
     transition: transform 0.3s ease, opacity 0.3s ease;
+    box-shadow: 0 0 4px rgba(0,0,0,1);
 }
 
 .letters span.active {
-    -webkit-box-shadow: 0 0 10px rgba(255,255,255,1);
-    -moz-box-shadow: 0 0 10px rgba(0,255,0,1);
+    -webkit-box-shadow: 0 0 20px rgba(0,0,0,1);
+    -moz-box-shadow: 0 0 20px rgba(0,0,0,1);
     box-shadow: 0 0 20px rgba(0,0,0,1);
     z-index: 20;
     -webkit-transition: none;

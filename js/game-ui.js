@@ -80,9 +80,10 @@ $.widget("ui.game", {
             }
 
             var x = (e.pageX - self.curDrag.offsetX - self.curDrag.x);
-            x = Math.min(Math.max(x, 0), maxLeft);
+            x = Math.min(Math.max(x, self.options.tileMargin), maxLeft);
 
-            self.curDrag.$elem.css("transform", "translateX(" + x + "px)");
+            self.curDrag.$elem.css("transform",
+                "translateX(" + x + "px) scale(1.1)");
 
             var targetPos = self.posFromLeft(x +
                 (self.options.tileWidth / 2));
@@ -105,7 +106,7 @@ $.widget("ui.game", {
             self.curDrag.$elem
                 .removeClass("active")
                 .css("transform", "translateX(" +
-                    self.tileWidths(self.curDrag.pos + 1) + "px)");
+                    self.tileWidths(self.curDrag.pos + 1) + "px) scale(1.0)");
 
             self.curDrag = null;
         });
@@ -170,11 +171,11 @@ $.widget("ui.game", {
                 thisLeft = Math.max(this.tileWidths(thisPos + 1), 0);
 
             // Move the current tile
-            $b.css("transform", "translateX(" + activeLeft + "px)");
+            $b.css("transform", "translateX(" + activeLeft + "px) scale(1.0)");
 
             // Finally move the originally selected tile
             if (!$a.hasClass("active")) {
-                $a.css("transform", "translateX(" + thisLeft + "px)");
+                $a.css("transform", "translateX(" + thisLeft + "px) scale(1.0)");
             }
 
             // Swap the position of the nodes in the store
@@ -249,14 +250,15 @@ $.widget("ui.game", {
                         (this.options.longLetters.indexOf(letter) > -1 ?
                             this.options.tileWidth / 4 : 0)) + "px",
                     transform: "translateX(" +
-                        (this.rackWidth() + tileLeft) + "px)"
+                        (this.rackWidth() + tileLeft) + "px) scale(1.0)"
                 })
                 .appendTo($letters);
 
             this.spanLetters.push($tile[0]);
 
             setTimeout(function() {
-                $tile.css("transform", "translateX(" + tileLeft + "px)");
+                $tile.css("transform", "translateX(" + tileLeft +
+                    "px) scale(1.0)");
             }, 0);
 
             // Let the user know how many
@@ -287,7 +289,7 @@ $.widget("ui.game", {
 
             this.spanLetters = $spanLetters.slice(num)
                 .css("transform", function(i) {
-                    return "translateX(" + self.tileWidths(i + 1) + "px)";
+                    return "translateX(" + self.tileWidths(i + 1) + "px) scale(1.0)";
                 })
                 .toArray();
 
