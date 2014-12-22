@@ -12,7 +12,13 @@
  */
 
 // Instantiate a new Game object
-var Game = function() {
+var Game = function(options) {
+    for (var prop in options) {
+        if (options.hasOwnProperty(prop)) {
+            this[prop] = options[prop];
+        }
+    }
+
     // Initialize the data structures used by the game
     this.callbacks = {};
 
@@ -135,11 +141,6 @@ Game.prototype = {
             this._log = [];
         }
 
-        // Reset the tile queue
-        for (var i = 0; i < this.maxTiles; i++) {
-            this.addTile();
-        }
-
         // Notify the UI that the game has been reset
         this.trigger("reset");
     },
@@ -152,7 +153,7 @@ Game.prototype = {
         var self = this;
 
         // If no tiles are left then the game is over.
-        if (this.rack.length === 0 && this.droppedTiles > 0) {
+        if (this.maxTiles > 0 && this.rack.length === 0 && this.droppedTiles > 0) {
             return;
         }
 
@@ -163,13 +164,20 @@ Game.prototype = {
         // (Only happens if the board is full or if no more tiles will drop)
         if (this.rack.length &&
                 (this.rack.length === this.rackSize ||
-                    this.droppedTiles >= this.maxTiles)) {
-            // Remove a word, if found, otherwise drop a tile
-            this.removeWord(this.foundWord || this.rack[0]);
+                    (this.maxTiles > 0 &&
+                        this.droppedTiles >= this.maxTiles))) {
+            if (!this.foundWord && this.maxTiles < 0) {
+                this.trigger("gameover");
+                return;
+            } else {
+                // Remove a word, if found, otherwise drop a tile
+                this.removeWord(this.foundWord || this.rack[0]);
+            }
         }
 
         // Figure out how many tiles need to drop and drop them in
         for (var i = 0, l = this.rackSize - this.rack.length; i < l; i++) {
+            this.addTile();
             this.dropTile();
         }
 

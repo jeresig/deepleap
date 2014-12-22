@@ -111,7 +111,9 @@ $.widget("ui.game", {
         });
 
         // Initialize a copy of the game
-        this.game = new Game();
+        this.game = new Game({
+            maxTiles: -1
+        });
 
         // Get the initial context of the circle indicator canvas
         try {
@@ -350,6 +352,10 @@ $.widget("ui.game", {
 
             // Stop the circle from updating
             clearInterval(this.circleTimer);
+        },
+
+        gameover: function() {
+            console.log("Game Over");
         }
     },
 

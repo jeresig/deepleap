@@ -78,6 +78,7 @@ function dictReady(txt) {
     // Pass the dictionary into the game
     Game.loadDict(txt);
 
+    /*
     // Create a sample game that will be played in the main menu
     $("#sample-game")
         // The mini game is much smaller
@@ -92,6 +93,7 @@ function dictReady(txt) {
 
         // Reveal the mini game
         .show();
+    */
 
     if (versus) {
         startGame();
