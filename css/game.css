@@ -77,6 +77,8 @@ li.fail, li.drop {
     border-top-right-radius: 6px;
     z-index: 1;
     margin: 8px auto 0 auto;
+    -webkit-user-select: none;
+    user-select: none;
 }
 
 .letters-extra-before {

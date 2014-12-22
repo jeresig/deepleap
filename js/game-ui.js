@@ -54,61 +54,60 @@ $.widget("ui.game", {
         var $letters = this.element.find(".letters");
         var maxLeft = this.tileWidths(this.options.numTiles);
 
-        var curDrag;
-
         $letters.on("mousedown", ".tile", function(e) {
-            if (curDrag) {
+            if (self.curDrag) {
                 return;
             }
 
+            var $this = $(this);
             var offset = $letters.offset();
 
-            curDrag = {
+            self.curDrag = {
                 x: e.offsetX,
                 y: e.offsetY,
                 offsetX: offset.left,
                 offsetY: offset.top,
-                $elem: $(this),
+                $elem: $this,
                 pos: self.posFromLeft(e.pageX - offset.left)
             };
 
-            curDrag.$elem.addClass("active");
+            $this.addClass("active");
         });
 
         $(document).on("mousemove", function(e) {
-            if (!curDrag) {
+            if (!self.curDrag) {
                 return;
             }
 
-            var x = (e.pageX - curDrag.offsetX - curDrag.x);
+            var x = (e.pageX - self.curDrag.offsetX - self.curDrag.x);
             x = Math.min(Math.max(x, 0), maxLeft);
 
-            curDrag.$elem.css("transform", "translateX(" + x + "px)");
+            self.curDrag.$elem.css("transform", "translateX(" + x + "px)");
 
             var targetPos = self.posFromLeft(x +
                 (self.options.tileWidth / 2));
 
             // Make sure we aren't trying to swap with itself
-            if (curDrag.pos !== targetPos) {
-                curDrag.$elem.removeClass("found dropsoonA dropsoonB");
-                self.game.swap(curDrag.pos, targetPos);
-                curDrag.pos = targetPos;
+            if (self.curDrag.pos !== targetPos) {
+                self.curDrag.$elem.removeClass("found dropsoonA dropsoonB");
+                self.game.swap(self.curDrag.pos, targetPos);
+                self.curDrag.pos = targetPos;
             }
 
             e.preventDefault();
         });
 
         $(document).on("mouseup", function() {
-            if (!curDrag) {
+            if (!self.curDrag) {
                 return;
             }
 
-            curDrag.$elem
+            self.curDrag.$elem
                 .removeClass("active")
                 .css("transform", "translateX(" +
-                    self.tileWidths(curDrag.pos + 1) + "px)");
+                    self.tileWidths(self.curDrag.pos + 1) + "px)");
 
-            curDrag = null;
+            self.curDrag = null;
         });
 
         // Initialize a copy of the game
@@ -269,9 +268,17 @@ $.widget("ui.game", {
             var self = this;
             var $spanLetters = $(this.spanLetters);
 
+            // Stop the drag if the item being dragged is about to be
+            // removed from the page
+            if (this.curDrag) {
+                var pos = this.spanLetters.indexOf(this.curDrag.$elem[0]);
+                if (pos >= 0 && pos < num) {
+                    this.curDrag = null;
+                }
+            }
+
             var $leaving = $spanLetters.slice(0, num).addClass("leaving");
 
-            // TODO: Stop drag
             setTimeout(function() {
                 $leaving.remove();
             }, 300);
