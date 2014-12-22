@@ -1,13 +1,3 @@
-var swap = function(a, b) {
-    var aParent = a.parentNode;
-    var aNext = a.nextSibling;
-    var bParent = b.parentNode;
-    var bNext = b.nextSibling;
-
-    aParent.insertBefore(b, aNext);
-    bParent.insertBefore(a, bNext);
-};
-
 $.widget("ui.game", {
     options: {
         // How tall and wide a tile should be
@@ -95,7 +85,8 @@ $.widget("ui.game", {
 
             curDrag.$elem.css("transform", "translateX(" + x + "px)");
 
-            var targetPos = self.posFromLeft(x);
+            var targetPos = self.posFromLeft(x +
+                (self.options.tileWidth / 2));
 
             // Make sure we aren't trying to swap with itself
             if (curDrag.pos !== targetPos) {
@@ -388,7 +379,7 @@ $.widget("ui.game", {
     },
 
     posFromLeft: function(left) {
-        return Math.round((left - this.options.tileMargin) /
+        return Math.floor((left - this.options.tileMargin) /
             (this.options.tileMargin + this.options.tileWidth));
     }
 });
