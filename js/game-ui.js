@@ -1,4 +1,4 @@
-$.widget("ui.game", {
+var GameUI = Backbone.View.extend({
     options: {
         // How tall and wide a tile should be
         tileWidth: 90,
@@ -18,23 +18,12 @@ $.widget("ui.game", {
         showTiles: true
     },
 
-    rackWidth: function() {
-        return this.options.tileMargin +
-            ((this.options.tileMargin + this.options.tileWidth) *
-            this.options.rackSize);
-    },
-
-    rackHeight: function() {
-        return this.options.tileWidth +
-            (this.options.tileTopMargin * 2);
-    },
-
-    _create: function() {
+    initialize: function() {
         var self = this;
         var rackWidth = this.rackWidth();
         var rackHeight = this.rackHeight();
 
-        $(this.element)
+        this.$el
             .find(".letters").css({
                 width: rackWidth,
                 height: rackHeight,
@@ -51,8 +40,34 @@ $.widget("ui.game", {
                 width: rackWidth
             }).end();
 
-        var $letters = this.element.find(".letters");
+        // Initialize a copy of the game
+        this.game = new Game({
+            maxTiles: this.options.maxTiles,
+            rackSize: this.options.rackSize,
+            scaledScore: this.options.scaledScore,
+            useMultiplier: this.options.useMultiplier
+        });
+
+        this.updateTimer = new UpdateTimer();
+
+        // Attach all the game events
+        for (var method in this.gameEvents) {
+            this.game.bind(method, $.proxy(this.gameEvents[method], this));
+        }
+
+        this.game.reset();
+
+        this.bind();
+        this.render();
+    },
+
+    bind: function() {
+        var self = this;
+        var $letters = this.$el.find(".letters");
         var maxLeft = this.tileWidths(this.options.rackSize);
+
+        this.$el.find(".saveword")
+            .bind("click", $.proxy(this.uiEvents.submit, this));
 
         $letters.on("mousedown", ".tile", function(e) {
             if (self.curDrag) {
@@ -116,29 +131,10 @@ $.widget("ui.game", {
 
             self.curDrag = null;
         });
+    },
 
-        // Initialize a copy of the game
-        this.game = new Game({
-            maxTiles: this.options.maxTiles,
-            rackSize: this.options.rackSize,
-            scaledScore: this.options.scaledScore,
-            useMultiplier: this.options.useMultiplier
-        });
-
-        // Get the initial context of the circle indicator canvas
-        try {
-            this.circle = this.element.find(".drop")[0].getContext("2d");
-        } catch(e) {}
-
-        this.element.find(".saveword")
-            .bind("click", $.proxy(this.uiEvents.submit, this));
-
-        // Attach all the game events
-        for (var method in this.gameEvents) {
-            this.game.bind(method, $.proxy(this.gameEvents[method], this));
-        }
-
-        this.game.reset();
+    render: function() {
+        this.$el.find(".drop").html(this.updateTimer.render().el);
     },
 
     start: function() {
@@ -194,21 +190,23 @@ $.widget("ui.game", {
         },
 
         updateDone: function() {
-            var totalTime = this.game.updateRate * this.game.rack.length,
-                startTime = (new Date).getTime(),
-                self = this;
+            var totalTime = this.game.updateRate * this.game.rack.length;
+            var startTime = (new Date).getTime();
 
             // Make sure any previous circle animations are stopped
             clearInterval(this.circleTimer);
 
             this.circleTimer = setInterval(function() {
-                var timeDiff = (new Date).getTime() - startTime,
-                    nearEnd = totalTime - timeDiff > totalTime / 4;
+                var timeDiff = (new Date).getTime() - startTime;
+                var nearEnd = totalTime - timeDiff <= totalTime / 4;
 
-                self.updateCircle(Math.min(timeDiff / totalTime, 1), nearEnd);
+                this.updateTimer.update(
+                    Math.min(timeDiff / totalTime, 1),
+                    nearEnd
+                );
 
-                if (!self.game.foundWord && !nearEnd) {
-                    var firstTile = $(self.spanLetters[0]);
+                if (!this.game.foundWord && nearEnd) {
+                    var firstTile = $(this.spanLetters[0]);
 
                     if (firstTile.hasClass("dropsoonA")) {
                         firstTile.removeClass("dropsoonA")
@@ -218,30 +216,18 @@ $.widget("ui.game", {
                         firstTile.removeClass("dropsoonB")
                             .addClass("dropsoonA");
                     }
-
-                    if (self.activeTile === self.spanLetters[0]) {
-                        var dragTile = $(".ui-draggable-dragging");
-
-                        if (dragTile.hasClass("dropsoonA")) {
-                            dragTile.removeClass("dropsoonA")
-                                .addClass("dropsoonB");
-
-                        } else {
-                            dragTile.removeClass("dropsoonB")
-                                .addClass("dropsoonA");
-                        }
-                    }
                 }
 
                 if (timeDiff >= totalTime) {
-                    clearInterval(self.circleTimer);
+                    clearInterval(this.circleTimer);
                 }
-            }, totalTime / 200);
+            }.bind(this), totalTime / 200);
         },
 
         dropTile: function(letter) {
+            console.log("dropTile")
             var self = this;
-            var $letters = this.element.find(".letters");
+            var $letters = this.$el.find(".letters");
 
             // Inject new letter into the UI
             var tileLeft = this.tileWidths(this.game.rack.length);
@@ -270,7 +256,7 @@ $.widget("ui.game", {
             }, 0);
 
             // Let the user know how many
-            this.element.find(".tilesleft")
+            this.$el.find(".tilesleft")
                 .text(this.game.maxTiles - this.game.droppedTiles > 0 ?
                     this.game.maxTiles - this.game.droppedTiles :
                     "No");
@@ -300,15 +286,6 @@ $.widget("ui.game", {
                     return "translateX(" + self.tileWidths(i + 1) + "px) scale(1.0)";
                 })
                 .toArray();
-
-            if (this.activeTile) {
-                if (this.spanLetters.indexOf(this.activeTile) < 0) {
-                    $(".ui-draggable-dragging").remove();
-                    this.activeTile = null;
-                } else {
-                    $(this.activeTile).trigger("shift", num);
-                }
-            }
         },
 
         foundWord: function(word) {
@@ -317,15 +294,7 @@ $.widget("ui.game", {
                 .slice(0, word.length)
                     .addClass("found");
 
-            if (this.activeTile) {
-                if ($(this.spanLetters).index(this.activeTile) < word.length) {
-                    $(".ui-draggable-dragging").addClass("found");
-                } else {
-                    $(this.activeTile).removeClass("found");
-                }
-            }
-
-            this.element.find(".saveword")
+            this.$el.find(".saveword")
                 .toggleClass("ui-disabled", !word.length);
         },
 
@@ -343,22 +312,22 @@ $.widget("ui.game", {
                                 result.multiplier.toFixed(1) +
                                 "x Multiplier. " : "") :
                         "Letter not used.")
-               ).prependTo(this.element.find(".words"));
+               ).prependTo(this.$el.find(".words"));
 
-            this.element.find(".points").text(this.game.score);
-            this.element.find(".multiplier")
+            this.$el.find(".points").text(this.game.score);
+            this.$el.find(".multiplier")
                 .text(this.game.multiplier.toFixed(1));
         },
 
         reset: function() {
             // Empty out the tiles
             this.spanLetters = [];
-            this.element
+            this.$el
                 .find(".letters, .words").html("").end()
                 .find(".tilesleft, .points").text("0");
 
-            // Return the circle to its start position
-            this.resetCircle();
+            // Return the update timer to its start position
+            this.updateTimer.reset();
 
             // Stop the circle from updating
             clearInterval(this.circleTimer);
@@ -369,31 +338,15 @@ $.widget("ui.game", {
         }
     },
 
-    // Updating circle canvas
-    resetCircle: function() {
-        if (this.circle) {
-            this.circle.clearRect(0, 0, 18, 18);
-
-            this.circle.fillStyle = "rgba(0,0,0,0.4)";
-            this.circle.beginPath();
-            this.circle.arc(9, 9, 9, 0, Math.PI * 2, true);
-            this.circle.closePath();
-            this.circle.fill();
-        }
+    rackWidth: function() {
+        return this.options.tileMargin +
+            ((this.options.tileMargin + this.options.tileWidth) *
+            this.options.rackSize);
     },
 
-    updateCircle: function(amount, rate) {
-        if (this.circle) {
-            this.resetCircle();
-            this.circle.fillStyle = rate ? "rgb(255,255,255)" : "rgb(255,0,0)";
-            this.circle.beginPath();
-            this.circle.moveTo(9, 9);
-            this.circle.arc(9, 9, 8, -0.5 * Math.PI,
-                (amount * (Math.PI * 2)) - (0.5 * Math.PI), false);
-            this.circle.moveTo(9, 9);
-            this.circle.closePath();
-            this.circle.fill();
-        }
+    rackHeight: function() {
+        return this.options.tileWidth +
+            (this.options.tileTopMargin * 2);
     },
 
     tileWidths: function(num) {

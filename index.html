@@ -5,16 +5,19 @@
     <meta name="viewport" content="width=960, user-scalable=no" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black" />
-    <link rel="stylesheet" href="bower_components/jquery-ui/themes/base/all.css"/>
-    <link rel="stylesheet" href="bower_components/jquery-ui/themes/base/jquery-ui.min.css"/>
+
     <link rel="stylesheet" href="css/jquery.mobile-1.0a3.css"/>
     <link rel="stylesheet" href="css/game.css"/>
+
+    <script src="bower_components/lodash/dist/lodash.min.js"></script>
     <script src="bower_components/jquery/dist/jquery.min.js"></script>
-    <script src="bower_components/jquery-ui/jquery-ui.min.js"></script>
-    <script src="js/jquery.ui.touch-punch.min.js"></script>
+    <script src="bower_components/backbone/backbone.js"></script>
+
     <script>var cdnHREF="";</script>
     <script src="js/ptrie.js"></script>
     <script src="js/game.js"></script>
+
+    <script src="js/timer.js"></script>
     <script src="js/game-ui.js"></script>
     <script src="js/main.js"></script>
 </head>
@@ -60,7 +63,8 @@
 
                 <div class="ui-btn ui-btn-icon-left ui-btn-corner-all ui-shadow ui-btn-down-a ui-btn-up-a ui-btn-inline">
                     <span class="ui-btn-inner ui-btn-corner-all">
-                        <canvas class="drop ui-icon" width="18" height="18"></canvas>
+                        <span class="drop ui-icon"></span>
+
                         <span class="ui-btn-text">
                             <span class="tilesleft">0</span> Tiles Left
                         </span>
@@ -77,65 +81,6 @@
         <br/><br/>
         <strong>Results:</strong>
         <ul class="words"></ul>
-    </div>
-    <div id="mini-main">
-        <strong>Your Challenger:</strong>
-        <div class="letters"></div>
-        <div class="letters-extra"></div>
-        <span class="points-wrap">
-            Points: <span class="points">0</span> &nbsp;&nbsp;
-            <span class="tilesleft">0</span> Tiles Left
-        </span>
-    </div>
-    <div id="overview-all">
-        <h2>The Fast-Paced Tile-Swapping Word Game!</h2>
-
-        <div id="overview-desc">
-            <strong>How to Play:</strong>
-
-            <div id="sample-game">
-                <div class="letters"></div>
-                <div class="letters-extra"></div>
-            </div>
-        </div>
-
-        <ul class="ui-listview ui-listview-inset ui-corner-all ui-listview-c">
-            <li class="ui-li ui-li-divider ui-btn ui-bar-b ui-corner-top">Play</li>
-            <li class="ui-btn ui-btn-icon-right ui-li ui-btn-up-c">
-                <div class="ui-btn-inner">
-                    <div class="ui-btn-text">
-                        <a href="" class="ui-link-inherit" id="play-random">Play Random Game</a>
-                    </div>
-                    <span class="ui-icon ui-icon-arrow-r"></span>
-                </div>
-            </li>
-            <li class="ui-btn ui-btn-icon-right ui-li ui-btn-up-c">
-                <div class="ui-btn-inner">
-                    <div class="ui-btn-text">
-                        <a href="" class="ui-link-inherit" id="play-hard-bot">Play vs Hard Bot</a>
-                    </div>
-                    <span class="ui-icon ui-icon-arrow-r"></span>
-                </div>
-            </li>
-            <li class="ui-btn ui-btn-icon-right ui-li ui-btn-up-c">
-                <div class="ui-btn-inner">
-                    <div class="ui-btn-text">
-                        <a href="" class="ui-link-inherit" id="play-easy-bot">Play vs Easy Bot</a>
-                    </div>
-                    <span class="ui-icon ui-icon-arrow-r"></span>
-                </div>
-            </li>
-            <li class="ui-btn ui-btn-icon-right ui-li ui-btn-up-c ui-corner-bottom">
-                <div class="ui-btn-inner">
-                    <div class="ui-btn-text">
-                        <a href="" class="ui-link-inherit" id="get-help">Help</a>
-                    </div>
-                    <span class="ui-icon ui-icon-arrow-r"></span>
-                </div>
-            </li>
-        </ul>
-
-
     </div>
 </div>
 </body>

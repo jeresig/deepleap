@@ -47,7 +47,7 @@ span.points-wrap .right .ui-btn {
     cursor: default;
 }
 
-span.points-wrap canvas {
+span.points-wrap .drop {
     background-image: none;
 }
 
