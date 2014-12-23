@@ -61,6 +61,8 @@ li.fail, li.drop {
 
 .letters-group {
     text-align: center;
+    -webkit-transform-origin: 0 0;
+    transform-origin: 0 0;
 }
 
 .letters {

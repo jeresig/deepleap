@@ -7,13 +7,13 @@ $.widget("ui.game", {
         tileMargin: 13,
         tileTopMargin: 6,
 
-        // The size of the tile when it's actively selected
-        activeTileWidth: 100,
-
-        numTiles: 9,
+        rackSize: 7,
+        maxTiles: -1,
+        scaledScore: false,
+        useMultiplier: false,
 
         // TODO: Disabled for now, need to figure out a good result for this
-        longLetters: "", // "gjpqy",
+        longLetters: "gjpqy",
 
         showTiles: true
     },
@@ -21,7 +21,7 @@ $.widget("ui.game", {
     rackWidth: function() {
         return this.options.tileMargin +
             ((this.options.tileMargin + this.options.tileWidth) *
-            this.options.numTiles);
+            this.options.rackSize);
     },
 
     rackHeight: function() {
@@ -52,7 +52,7 @@ $.widget("ui.game", {
             }).end();
 
         var $letters = this.element.find(".letters");
-        var maxLeft = this.tileWidths(this.options.numTiles);
+        var maxLeft = this.tileWidths(this.options.rackSize);
 
         $letters.on("mousedown", ".tile", function(e) {
             if (self.curDrag) {
@@ -70,6 +70,12 @@ $.widget("ui.game", {
                 $elem: $this,
                 pos: self.posFromLeft(e.pageX - offset.left)
             };
+
+            var x = (e.pageX - self.curDrag.offsetX - self.curDrag.x);
+            x = Math.min(Math.max(x, self.options.tileMargin), maxLeft);
+
+            self.curDrag.$elem.css("transform",
+                "translateX(" + x + "px) scale(1.1)");
 
             $this.addClass("active");
         });
@@ -113,7 +119,10 @@ $.widget("ui.game", {
 
         // Initialize a copy of the game
         this.game = new Game({
-            maxTiles: -1
+            maxTiles: this.options.maxTiles,
+            rackSize: this.options.rackSize,
+            scaledScore: this.options.scaledScore,
+            useMultiplier: this.options.useMultiplier
         });
 
         // Get the initial context of the circle indicator canvas
@@ -237,7 +246,6 @@ $.widget("ui.game", {
             // Inject new letter into the UI
             var tileLeft = this.tileWidths(this.game.rack.length);
             var tileWidth = this.options.tileWidth;
-            var activeTileWidth = this.options.activeTileWidth;
 
             var $tile = $("<span>")
                 .addClass("tile")

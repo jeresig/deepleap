@@ -25,12 +25,21 @@ var Game = function(options) {
     // Build a full array of all possible letters from which to pull
     this.possibleLetters = [];
 
-    // We do this to make it easier to grab a random letter from a list
-    for (var i in this.data.letters) {
-        var num = this.data.letters[i];
+    // Build a cache of how many points each letter is worth
+    this.letterPoints = {};
+    
+    for (var letter in this.data.letters) {
+        var num = this.data.letters[letter];
+
+        // We do this to make it easier to grab a random letter from a list
         for (var j = 0; j < num; j++) {
-            this.possibleLetters.push(i);
+            this.possibleLetters.push(letter);
         }
+
+        // Calculate the points for all the letters
+        this.letterPoints[letter] = this.scaledScore ?
+            Math.round((this.data.total / num) / 8.5) :
+            1;
     }
 };
 
@@ -97,6 +106,10 @@ Game.prototype = {
 
     // The total number of tiles that will drop
     maxTiles: 75,
+
+    // Should the score be scaled to correlate with the frequency
+    // of how often the letter appears in the dictionary
+    scaledScore: true,
 
     // Are the moves in the game being logged?
     logging: true,
@@ -203,7 +216,8 @@ Game.prototype = {
     },
 
     // The other one of the two actions taken by the UI
-    // This occurs when a user taps two different tiles to make them switch places
+    // This occurs when a user taps two different tiles to make them
+    // switch places
     swap: function(a, b) {
         // Make sure that we aren't swapping the same tile with itself
         if (a !== b) {
@@ -225,18 +239,20 @@ Game.prototype = {
 
     // Internal function for dropping a tile into the player's rack
     dropTile: function() {
-        if (this.tileQueue.length) {
-            var tile = this.tileQueue.shift();
-
-            // Take the tile off the queue and add it to the rack
-            this.rack.push(tile);
-
-            // Update the total letter used count
-            this.droppedTiles++;
-
-            // Notify anyone listening that a letter was dropped
-            this.trigger("dropTile", tile);
+        if (!this.tileQueue.length) {
+            return;
         }
+
+        var tile = this.tileQueue.shift();
+
+        // Take the tile off the queue and add it to the rack
+        this.rack.push(tile);
+
+        // Update the total letter used count
+        this.droppedTiles++;
+
+        // Notify anyone listening that a letter was dropped
+        this.trigger("dropTile", tile);
     },
 
     // Internal function for adding tiles to the tile queue
@@ -350,8 +366,7 @@ Game.prototype = {
 
             // Total up the points for the individual tiles
             for (var i = 0; i < letters.length; i++) {
-                num += Math.round(
-                    (this.data.total / this.data.letters[letters[i]]) / 8.5);
+                num += this.letterPoints[letters[i]];
             }
 
             // Factor in all the score modifiers
@@ -363,12 +378,10 @@ Game.prototype = {
             this.score += total;
 
             // Update the multiplier
-            this.multiplier = state ?
+            if (this.useMultiplier && state) {
                 // Increase the multiplier, slowly
-                this.multiplier + (1 / (Math.floor(this.multiplier) * 10)) :
-
-                // Reset the multiplier if a letter was dropped
-                1;
+                this.multiplier += (1 / (Math.floor(this.multiplier) * 10));
+            }
 
             // Return the results so that they can be used in the UI
             this.trigger("updateScore", {
