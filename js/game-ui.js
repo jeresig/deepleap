@@ -12,6 +12,8 @@ var GameUI = Backbone.View.extend({
         scaledScore: false,
         useMultiplier: false,
 
+        scale: 1.0,
+
         // TODO: Disabled for now, need to figure out a good result for this
         longLetters: "gjpqy",
 
@@ -20,25 +22,6 @@ var GameUI = Backbone.View.extend({
 
     initialize: function() {
         var self = this;
-        var rackWidth = this.rackWidth();
-        var rackHeight = this.rackHeight();
-
-        this.$el
-            .find(".letters").css({
-                width: rackWidth,
-                height: rackHeight,
-                fontSize: this.options.tileWidth,
-                borderRadius: this.options.tileTopMargin
-            }).end()
-            .find(".letters-extra").css({
-                width: rackWidth,
-                height: rackHeight / 4,
-                borderRadius: this.options.tileTopMargin,
-                top: -1 * (this.options.tileTopMargin + 1)
-            }).end()
-            .find(".letters-extra-before").css({
-                width: rackWidth
-            }).end();
 
         // Initialize a copy of the game
         this.game = new Game({
@@ -52,7 +35,7 @@ var GameUI = Backbone.View.extend({
 
         // Attach all the game events
         for (var method in this.gameEvents) {
-            this.game.bind(method, $.proxy(this.gameEvents[method], this));
+            this.game.on(method, $.proxy(this.gameEvents[method], this));
         }
 
         this.game.reset();
@@ -67,7 +50,7 @@ var GameUI = Backbone.View.extend({
         var maxLeft = this.tileWidths(this.options.rackSize);
 
         this.$el.find(".saveword")
-            .bind("click", $.proxy(this.uiEvents.submit, this));
+            .on("click", $.proxy(this.uiEvents.submit, this));
 
         $letters.on("mousedown", ".tile", function(e) {
             if (self.curDrag) {
@@ -76,17 +59,19 @@ var GameUI = Backbone.View.extend({
 
             var $this = $(this);
             var offset = $letters.offset();
+            var scale = self.options.scale;
 
             self.curDrag = {
-                x: e.offsetX,
-                y: e.offsetY,
+                x: e.offsetX * scale,
+                y: e.offsetY * scale,
                 offsetX: offset.left,
                 offsetY: offset.top,
                 $elem: $this,
-                pos: self.posFromLeft(e.pageX - offset.left)
+                pos: self.posFromLeft((e.pageX - offset.left) / scale)
             };
 
             var x = (e.pageX - self.curDrag.offsetX - self.curDrag.x);
+            x /= scale;
             x = Math.min(Math.max(x, self.options.tileMargin), maxLeft);
 
             self.curDrag.$elem.css("transform",
@@ -101,6 +86,7 @@ var GameUI = Backbone.View.extend({
             }
 
             var x = (e.pageX - self.curDrag.offsetX - self.curDrag.x);
+            x /= self.options.scale;
             x = Math.min(Math.max(x, self.options.tileMargin), maxLeft);
 
             self.curDrag.$elem.css("transform",
@@ -134,6 +120,30 @@ var GameUI = Backbone.View.extend({
     },
 
     render: function() {
+        var rackWidth = this.rackWidth();
+        var rackHeight = this.rackHeight();
+
+        this.$el.find(".letters-group").css("transform",
+            "scale(" + this.options.scale + ")");
+
+        this.$el.find(".letters").css({
+            width: rackWidth,
+            height: rackHeight,
+            fontSize: this.options.tileWidth,
+            borderRadius: this.options.tileTopMargin
+        });
+
+        this.$el.find(".letters-extra").css({
+            width: rackWidth,
+            height: rackHeight / 4,
+            borderRadius: this.options.tileTopMargin,
+            top: -1 * (this.options.tileTopMargin + 1)
+        });
+
+        this.$el.find(".letters-extra-before").css({
+            width: rackWidth
+        });
+
         this.$el.find(".drop").html(this.updateTimer.render().el);
     },
 
@@ -225,7 +235,6 @@ var GameUI = Backbone.View.extend({
         },
 
         dropTile: function(letter) {
-            console.log("dropTile")
             var self = this;
             var $letters = this.$el.find(".letters");
 
@@ -323,7 +332,7 @@ var GameUI = Backbone.View.extend({
             // Empty out the tiles
             this.spanLetters = [];
             this.$el
-                .find(".letters, .words").html("").end()
+                .find(".letters, .words").empty().end()
                 .find(".tilesleft, .points").text("0");
 
             // Return the update timer to its start position
