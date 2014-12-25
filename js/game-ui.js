@@ -28,23 +28,19 @@ var GameUI = Backbone.View.extend({
             rackSize: this.options.rackSize
         });
 
-        this.rack.on("swap", function(a, b) {
-            self.game.swap(a, b);
-        });
-
-        // Attach all the game events
-        for (var method in this.gameEvents) {
-            this.game.on(method, _.bind(this.gameEvents[method], this));
-        }
-
-        this.game.reset();
-
         this.bind();
         this.render();
     },
 
     bind: function() {
-        
+        this.rack.on("swap", _.bind(function(a, b) {
+            this.game.swap(a, b);
+        }, this));
+
+        // Attach all the game events
+        for (var method in this.gameEvents) {
+            this.game.on(method, _.bind(this.gameEvents[method], this));
+        }
     },
 
     render: function() {
