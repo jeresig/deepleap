@@ -12,51 +12,42 @@
  */
 
 // Instantiate a new Game object
-var Game = function(options) {
-    for (var prop in options) {
-        if (options.hasOwnProperty(prop)) {
-            this[prop] = options[prop];
+var Game = Backbone.Model.extend({
+    // Callbacks and Triggering
+    // LettersReady, AddLetter(letter), RemoveLetters(pos)
+    // FindWord(word), AddPoints(result), Swap(posA, posB), GameOver
+
+    initialize: function(options) {
+        for (var prop in options) {
+            if (options.hasOwnProperty(prop)) {
+                this[prop] = options[prop];
+            }
         }
-    }
 
-    // Initialize the data structures used by the game
-    this.callbacks = {};
+        // Initialize the data structures used by the game
+        this.callbacks = {};
 
-    // Build a full array of all possible letters from which to pull
-    this.possibleLetters = [];
+        // Build a full array of all possible letters from which to pull
+        this.possibleLetters = [];
 
-    // Build a cache of how many points each letter is worth
-    this.letterPoints = {};
+        // Build a cache of how many points each letter is worth
+        this.letterPoints = {};
     
-    for (var letter in this.data.letters) {
-        var num = this.data.letters[letter];
+        for (var letter in this.data.letters) {
+            var num = this.data.letters[letter];
 
-        // We do this to make it easier to grab a random letter from a list
-        for (var j = 0; j < num; j++) {
-            this.possibleLetters.push(letter);
+            // We do this to make it easier to grab a random letter from a list
+            for (var j = 0; j < num; j++) {
+                this.possibleLetters.push(letter);
+            }
+
+            // Calculate the points for all the letters
+            this.letterPoints[letter] = this.scaledScore ?
+                Math.round((this.data.total / num) / 8.5) :
+                1;
         }
+    },
 
-        // Calculate the points for all the letters
-        this.letterPoints[letter] = this.scaledScore ?
-            Math.round((this.data.total / num) / 8.5) :
-            1;
-    }
-};
-
-// A method for loading a string-based dictionary file
-// into the game engine. Should be a properly-formatted PackedTrie string.
-Game.loadDict = function(txt) {
-    // Cache the dictionary string for later lookups
-    Game.dict = new PackedTrie(txt);
-};
-
-// The random seed for the game (allows for re-playable games with identical drops)
-// Be sure to intialize this before starting the game
-Game.setSeed = function(seed) {
-    Game.seed = seed || Math.round(Math.random() * 1000);
-},
-
-Game.prototype = {
     // Letter data
     // Distribution of OSPD4 + OpenOffice en_US + Wiktionary English
     data: {
@@ -501,32 +492,6 @@ Game.prototype = {
         }
     },
 
-    // Callbacks and Triggering
-    // LettersReady, AddLetter(letter), RemoveLetters(pos)
-    // FindWord(word), AddPoints(result), Swap(posA, posB), GameOver
-
-    // Watch for a particular event published by the game
-    // Good for updating a UI corresponding to the actions in the game
-    bind: function(name, fn) {
-        if (!this.callbacks[name]) {
-            this.callbacks[name] = [];
-        }
-
-        this.callbacks[name].push(fn);
-    },
-
-    // Publish an event (used internally in the game)
-    trigger: function(name) {
-        var callbacks = this.callbacks[name],
-            args = Array.prototype.slice.call(arguments, 1);
-
-        if (callbacks) {
-            for (var i = 0, l = callbacks.length; i < l; i++) {
-                callbacks[i].apply(this, args);
-            }
-        }
-    },
-
     // A seeded random number generator for dropping random,
     // but consistent, tiles
     random: function() {
@@ -544,7 +509,21 @@ Game.prototype = {
 
         return (seed & 0xfffffff) / 0x10000000;
     }
-};
+}, {
+    // A method for loading a string-based dictionary file
+    // into the game engine. Should be a properly-formatted PackedTrie string.
+    loadDict: function(txt) {
+        // Cache the dictionary string for later lookups
+        this.dict = new PackedTrie(txt);
+    },
+
+    // The random seed for the game (allows for re-playable games with
+    // identical drops)
+    // Be sure to intialize this before starting the game
+    setSeed: function(seed) {
+        this.seed = seed || Math.round(Math.random() * 1000);
+    }
+});
 
 var Bot = function(game, level) {
     var self = this;
@@ -552,12 +531,12 @@ var Bot = function(game, level) {
     this.game = game;
     this.level = level;
 
-    game.bind("updateDone", function() {
+    game.on("updateDone", function() {
         clearInterval(self.timer);
         self.solve();
     });
 
-    game.bind("gameover", function() {
+    game.on("gameover", function() {
         clearInterval(self.timer);
     });
 

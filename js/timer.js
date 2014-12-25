@@ -18,6 +18,8 @@ var UpdateTimer = Backbone.View.extend({
         // Get the initial context of the canvas indicator canvas
         this.canvas = this.$el[0].getContext("2d");
 
+        this.reset();
+
         return this;
     },
 
