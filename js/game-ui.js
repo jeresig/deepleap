@@ -23,6 +23,9 @@ var GameUI = Backbone.View.extend({
     initialize: function() {
         var self = this;
 
+        // Expand the rack to take up the full width
+        this.options.scale = $(window).width() / this.rackWidth();
+
         // Initialize a copy of the game
         this.game = new Game({
             maxTiles: this.options.maxTiles,
