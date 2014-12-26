@@ -47,6 +47,8 @@ var GameUI = Backbone.View.extend({
         this.rack.render();
 
         this.$el.find(".drop").html(this.updateTimer.render().el);
+
+        return this;
     },
 
     start: function() {

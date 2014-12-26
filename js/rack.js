@@ -7,9 +7,6 @@ var Rack = Backbone.View.extend({
         tileMargin: 13,
         tileTopMargin: 6,
 
-        // TODO: Disabled for now, need to figure out a good result for this
-        longLetters: "gjpqy",
-
         scale: 1.0,
 
         showTiles: true
@@ -19,6 +16,9 @@ var Rack = Backbone.View.extend({
         for (var prop in options) {
             this.options[prop] = options[prop];
         }
+
+        // The tiles held in the rack
+        this.tiles = [];
 
         // Expand the rack to take up the full width
         this.options.scale = $(window).width() / this.rackWidth();
@@ -36,7 +36,6 @@ var Rack = Backbone.View.extend({
                 return;
             }
 
-            var $this = $(this);
             var offset = $letters.offset();
             var scale = self.options.scale;
 
@@ -45,7 +44,7 @@ var Rack = Backbone.View.extend({
                 y: e.offsetY * scale,
                 offsetX: offset.left,
                 offsetY: offset.top,
-                $elem: $this,
+                item: $(this).data("tile"),
                 pos: self.posFromLeft((e.pageX - offset.left) / scale)
             };
 
@@ -53,10 +52,8 @@ var Rack = Backbone.View.extend({
             x /= scale;
             x = Math.min(Math.max(x, self.options.tileMargin), maxLeft);
 
-            self.curDrag.$elem.css("transform",
-                "translateX(" + x + "px) scale(1.1)");
-
-            $this.addClass("active");
+            self.curDrag.item.setX(x);
+            self.curDrag.item.setActive(true);
         });
 
         $(document).on("mousemove", function(e) {
@@ -68,15 +65,14 @@ var Rack = Backbone.View.extend({
             x /= self.options.scale;
             x = Math.min(Math.max(x, self.options.tileMargin), maxLeft);
 
-            self.curDrag.$elem.css("transform",
-                "translateX(" + x + "px) scale(1.1)");
+            self.curDrag.item.setX(x);
 
             var targetPos = self.posFromLeft(x +
                 (self.options.tileWidth / 2));
 
             // Make sure we aren't trying to swap with itself
             if (self.curDrag.pos !== targetPos) {
-                self.curDrag.$elem.removeClass("found dropsoonA dropsoonB");
+                self.curDrag.item.setFound(false);
                 self.trigger("swap", self.curDrag.pos, targetPos);
                 self.curDrag.pos = targetPos;
             }
@@ -89,11 +85,8 @@ var Rack = Backbone.View.extend({
                 return;
             }
 
-            self.curDrag.$elem
-                .removeClass("active")
-                .css("transform", "translateX(" +
-                    self.tileWidths(self.curDrag.pos + 1) + "px) scale(1.0)");
-
+            self.curDrag.item.setActive(false);
+            self.curDrag.item.setX(self.tileWidths(self.curDrag.pos + 1));
             self.curDrag = null;
         });
     },
@@ -126,97 +119,88 @@ var Rack = Backbone.View.extend({
     },
 
     foundWord: function(word) {
-        $(this.spanLetters)
-            .removeClass("found")
-            .slice(0, word.length)
-                .addClass("found");
+        _.forEach(this.tiles, function(tile, i) {
+            tile.setFound(i < word.length);
+        });
     },
 
     removeTiles: function(num) {
         var self = this;
-        var $spanLetters = $(this.spanLetters);
 
         // Stop the drag if the item being dragged is about to be
         // removed from the page
         if (this.curDrag) {
-            var pos = this.spanLetters.indexOf(this.curDrag.$elem[0]);
+            var pos = this.tiles.indexOf(this.curDrag.item);
             if (pos >= 0 && pos < num) {
                 this.curDrag = null;
             }
         }
 
-        var $leaving = $spanLetters.slice(0, num).addClass("leaving");
+        var leaving = this.tiles.slice(0, num);
+
+        _.forEach(leaving, function(tile, i) {
+            tile.setLeaving(true);
+        });
 
         setTimeout(function() {
-            $leaving.remove();
+            _.forEach(leaving, function(tile, i) {
+                tile.remove();
+            });
         }, 300);
 
-        this.spanLetters = $spanLetters.slice(num)
-            .css("transform", function(i) {
-                return "translateX(" + self.tileWidths(i + 1) + "px) scale(1.0)";
-            })
-            .toArray();
+        this.tiles = this.tiles.slice(num);
+
+        _.forEach(this.tiles, function(tile, i) {
+            tile.setX(self.tileWidths(i + 1));
+        });
     },
 
     swap: function(activePos, thisPos) {
-        $(this.spanLetters[0]).removeClass("dropsoonA dropsoonB");
-
-        var $a = $(this.spanLetters[activePos]),
-            $b = $(this.spanLetters[thisPos]),
+        var a = this.tiles[activePos],
+            b = this.tiles[thisPos],
             activeLeft = Math.max(this.tileWidths(activePos + 1), 0),
             thisLeft = Math.max(this.tileWidths(thisPos + 1), 0);
 
         // Move the current tile
-        $b.css("transform", "translateX(" + activeLeft + "px) scale(1.0)");
+        b.setX(activeLeft);
 
         // Finally move the originally selected tile
-        if (!$a.hasClass("active")) {
-            $a.css("transform", "translateX(" + thisLeft + "px) scale(1.0)");
+        // But only if we're not currently dragging it
+        if (!a.active) {
+            a.setX(thisLeft);
         }
 
         // Swap the position of the nodes in the store
-        var oldNode = this.spanLetters[thisPos];
-        this.spanLetters[thisPos] = this.spanLetters[activePos];
-        this.spanLetters[activePos] = oldNode;
+        var oldNode = this.tiles[thisPos];
+        this.tiles[thisPos] = this.tiles[activePos];
+        this.tiles[activePos] = oldNode;
     },
 
     dropTile: function(letter) {
-        var self = this;
         var $letters = this.$el.find(".letters");
+        var tileLeft = this.tileWidths(this.tiles.length + 1);
 
         // Inject new letter into the UI
-        var tileLeft = this.tileWidths(this.spanLetters.length + 1);
-        var tileWidth = this.options.tileWidth;
+        var tile = new Tile({
+            letter: letter,
+            x: this.rackWidth() + tileLeft,
+            size:  this.options.tileWidth,
+            showTiles: this.options.showTiles
+        });
 
-        var $tile = $("<span>")
-            .addClass("tile")
-            .text(this.options.showTiles ? letter : "")
-            .css({
-                backgroundPosition: Math.round(Math.random() * 1400) + "px",
-                width: tileWidth,
-                height: tileWidth,
-                lineHeight: (tileWidth -
-                    (this.options.longLetters.indexOf(letter) > -1 ?
-                        this.options.tileWidth / 4 : 0)) + "px",
-                transform: "translateX(" +
-                    (this.rackWidth() + tileLeft) + "px) scale(1.0)"
-            })
-            .appendTo($letters);
-
-        this.spanLetters.push($tile[0]);
+        this.tiles.push(tile);
+        $letters.append(tile.render().el);
 
         setTimeout(function() {
-            $tile.css("transform", "translateX(" + tileLeft +
-                "px) scale(1.0)");
+            tile.setX(tileLeft);
         }, 0);
     },
 
     reset: function() {
         // Empty out the tiles
-        this.spanLetters = [];
+        this.tiles = [];
 
         this.$el.find(".letters").empty();
-        
     },
 
     rackWidth: function() {
