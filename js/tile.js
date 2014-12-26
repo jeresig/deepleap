@@ -29,6 +29,7 @@ var Tile = Backbone.View.extend({
             .text(this.showTiles ? this.letter : "")
             .css({
                 backgroundPosition: this.backgroundPos + "px",
+                backgroundSize: this.size + "px " + this.size + "px",
                 width: this.size,
                 height: this.size,
                 lineHeight: (this.size -
@@ -55,9 +56,15 @@ var Tile = Backbone.View.extend({
     },
 
     setLeaving: function(leaving) {
+        clearTimeout(this.leavingTimer);
+
         this.leaving = !!leaving;
 
         this.$el.toggleClass("leaving", !!leaving);
+
+        this.leavingTimer = setTimeout(_.bind(function() {
+            this.remove();
+        }, this), 300);
     },
 
     setScale: function(scale) {

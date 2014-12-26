@@ -1,4 +1,7 @@
 var Rack = Backbone.View.extend({
+    tagName: "div",
+    className: "letters-group",
+
     options: {
         // How tall and wide a tile should be
         tileWidth: 90,
@@ -22,8 +25,6 @@ var Rack = Backbone.View.extend({
 
         // Expand the rack to take up the full width
         this.options.scale = $(window).width() / this.rackWidth();
-
-        this.bind();
     },
 
     bind: function() {
@@ -99,21 +100,36 @@ var Rack = Backbone.View.extend({
         this.$el.css("transform",
             "scale(" + this.options.scale + ")");
 
-        this.$el.find(".letters").css({
-            width: rackWidth,
-            height: rackHeight,
-            fontSize: this.options.tileWidth,
-            borderRadius: topMargin
-        });
+        $("<div>")
+            .addClass("letters")
+            .css({
+                width: rackWidth,
+                height: rackHeight,
+                fontSize: this.options.tileWidth,
+                borderRadius: topMargin,
+                backgroundSize: rackWidth + "px " +
+                    (this.options.tileWidth + topMargin) + "px"
+            })
+            .appendTo(this.$el);
 
-        this.$el.find(".letters-extra").css({
-            width: rackWidth,
-            height: rackHeight / 4,
-            borderRadius: topMargin,
-            top: -1 * (topMargin + 1)
-        });
+        $("<div>")
+            .addClass("letters-extra-before")
+            .width(rackWidth)
+            .appendTo(this.$el);
 
-        this.$el.find(".letters-extra-before").width(rackWidth);
+        $("<div>")
+            .addClass("letters-extra")
+            .css({
+                width: rackWidth,
+                height: rackHeight / 4,
+                borderRadius: topMargin,
+                top: -1 * (topMargin + 1),
+                backgroundSize: rackWidth + "px " +
+                    (rackHeight / 4) + "px"
+            })
+            .appendTo(this.$el)
+
+        this.bind();
 
         return this;
     },
@@ -141,12 +157,6 @@ var Rack = Backbone.View.extend({
         _.forEach(leaving, function(tile, i) {
             tile.setLeaving(true);
         });
-
-        setTimeout(function() {
-            _.forEach(leaving, function(tile, i) {
-                tile.remove();
-            });
-        }, 300);
 
         this.tiles = this.tiles.slice(num);
 

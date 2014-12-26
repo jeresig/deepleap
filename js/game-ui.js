@@ -21,10 +21,11 @@ var GameUI = Backbone.View.extend({
             useMultiplier: this.options.useMultiplier
         });
 
-        this.updateTimer = new UpdateTimer();
+        this.updateTimer = new UpdateTimer({
+            size: 100
+        });
 
         this.rack = new Rack({
-            el: this.$el.find(".letters-group"),
             rackSize: this.options.rackSize
         });
 
@@ -44,9 +45,21 @@ var GameUI = Backbone.View.extend({
     },
 
     render: function() {
-        this.rack.render();
+        var $saveButton = $("<button>")
+            .addClass("saveword")
+            .prop("disabled", true)
+            .text("Save Word");
 
-        this.$el.find(".drop").html(this.updateTimer.render().el);
+        this.$el.html([
+            // Render the update timer
+            this.updateTimer.render().el,
+
+            // Render the save button
+            $saveButton,
+
+            // Render the tile rack
+            this.rack.render().el
+        ]);
 
         return this;
     },
@@ -56,6 +69,7 @@ var GameUI = Backbone.View.extend({
     },
 
     reset: function() {
+        this.rack.reset();
         this.game.reset();
     },
 
@@ -138,7 +152,8 @@ var GameUI = Backbone.View.extend({
             this.rack.foundWord(word);
 
             this.$el.find(".saveword")
-                .toggleClass("ui-disabled", !word.length);
+                .prop("disabled", !word.length);
+                //.toggleClass("ui-disabled", !word.length);
         },
 
         updateScore: function(result) {

@@ -1,11 +1,9 @@
 var UpdateTimer = Backbone.View.extend({
-    width: 18,
-    height: 18,
-
     tagName: "canvas",
 
-    initialize: function() {
-        
+    initialize: function(options) {
+        this.width = options.width || options.size || 18;
+        this.height = options.height || options.size || 18;
     },
 
     render: function() {
@@ -35,7 +33,7 @@ var UpdateTimer = Backbone.View.extend({
         canvas.clearRect(0, 0, this.width, this.height);
         canvas.fillStyle = "rgba(0,0,0,0.4)";
         canvas.beginPath();
-        canvas.arc(widthCenter, heightCenter, 9, 0, Math.PI * 2, true);
+        canvas.arc(widthCenter, heightCenter, widthCenter, 0, Math.PI * 2, true);
         canvas.closePath();
         canvas.fill();
     },
@@ -54,7 +52,7 @@ var UpdateTimer = Backbone.View.extend({
         canvas.fillStyle = nearEnd ? "rgb(255,0,0)" : "rgb(255,255,255)";
         canvas.beginPath();
         canvas.moveTo(widthCenter, heightCenter);
-        canvas.arc(widthCenter, heightCenter, 8, -0.5 * Math.PI,
+        canvas.arc(widthCenter, heightCenter, widthCenter, -0.5 * Math.PI,
             (amount * (Math.PI * 2)) - (0.5 * Math.PI), false);
         canvas.moveTo(widthCenter, heightCenter);
         canvas.closePath();
