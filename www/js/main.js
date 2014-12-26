@@ -10,7 +10,7 @@ $(function() {
     // Load in the dictionary from the server
     } else {
         $.ajax({
-            url: cdnHREF + "dict/ptrie.js",
+            url: cdnHREF + "js/en-dict.js",
             dataType: "jsonp",
             jsonp: false,
             jsonpCallback: "dictLoaded",
