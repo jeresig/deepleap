@@ -22,9 +22,12 @@ html, body {
 }
 
 #main {
-    height: 100%;
+    position: relative;
+    top: 50%;
     width: 100%;
     padding: 0;
+    -webkit-transform-origin: 0 100%;
+    transform-origin: 0 100%;
 }
 
 p.note {
@@ -61,12 +64,8 @@ li.fail, li.drop {
 }
 
 .letters-group {
-    position: absolute;
-    left: 0;
-    bottom: 0;
+    margin: 0 auto;
     text-align: center;
-    -webkit-transform-origin: 0 0;
-    transform-origin: 0 100%;
 }
 
 .letters {
@@ -164,6 +163,22 @@ li.fail, li.drop {
 
 .letters span.found {
     color: white;
+}
+
+.buttons {
+    margin: 0 13px 6px 13px;
+}
+
+canvas.update-timer {
+    width: 40px;
+    height: 40px;
+    vertical-align: bottom;
+}
+
+button.saveword {
+    height: 40px;
+    font-size: 27px;
+    float: right;
 }
 
 .words {

@@ -1,5 +1,6 @@
 var UpdateTimer = Backbone.View.extend({
     tagName: "canvas",
+    className: "update-timer",
 
     initialize: function(options) {
         this.width = options.width || options.size || 18;
@@ -49,10 +50,12 @@ var UpdateTimer = Backbone.View.extend({
         var widthCenter = this.width / 2;
         var heightCenter = this.height / 2;
 
-        canvas.fillStyle = nearEnd ? "rgb(255,0,0)" : "rgb(255,255,255)";
+        canvas.fillStyle = nearEnd ?
+            "rgba(255,0,0," + (amount >= 1 ? "1" : "1") + ")" :
+            "rgba(255,255,255,1)";
         canvas.beginPath();
         canvas.moveTo(widthCenter, heightCenter);
-        canvas.arc(widthCenter, heightCenter, widthCenter, -0.5 * Math.PI,
+        canvas.arc(widthCenter, heightCenter, widthCenter - 1, -0.5 * Math.PI,
             (amount * (Math.PI * 2)) - (0.5 * Math.PI), false);
         canvas.moveTo(widthCenter, heightCenter);
         canvas.closePath();

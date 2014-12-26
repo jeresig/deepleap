@@ -3,7 +3,9 @@ var GameUI = Backbone.View.extend({
         rackSize: 7,
         maxTiles: -1,
         scaledScore: false,
-        useMultiplier: false
+        useMultiplier: false,
+
+        scale: 1.0
     },
 
     events: {
@@ -29,6 +31,10 @@ var GameUI = Backbone.View.extend({
             rackSize: this.options.rackSize
         });
 
+        // Expand the rack to take up the full width
+        this.options.scale = $(window).width() / this.rack.rackWidth();
+        this.rack.options.scale = this.options.scale;
+
         this.bind();
         this.render();
     },
@@ -45,17 +51,27 @@ var GameUI = Backbone.View.extend({
     },
 
     render: function() {
-        var $saveButton = $("<button>")
-            .addClass("saveword")
-            .prop("disabled", true)
-            .text("Save Word");
+        this.$el.css({
+            transform: "translateY(-50%) scale(" + this.options.scale + ")",
+            width: this.rack.rackWidth()
+        });
+
+        var $buttons = $("<div>")
+            .addClass("buttons")
+            .html([
+                // Render the update timer
+                this.updateTimer.render().el,
+
+                // Render the save button
+                $("<button>")
+                    .addClass("saveword")
+                    .prop("disabled", true)
+                    .text("Save Word")
+            ]);
 
         this.$el.html([
-            // Render the update timer
-            this.updateTimer.render().el,
-
-            // Render the save button
-            $saveButton,
+            // Insert the button bar
+            $buttons,
 
             // Render the tile rack
             this.rack.render().el

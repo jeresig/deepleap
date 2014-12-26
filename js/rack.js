@@ -22,9 +22,6 @@ var Rack = Backbone.View.extend({
 
         // The tiles held in the rack
         this.tiles = [];
-
-        // Expand the rack to take up the full width
-        this.options.scale = $(window).width() / this.rackWidth();
     },
 
     bind: function() {
@@ -97,8 +94,7 @@ var Rack = Backbone.View.extend({
         var rackHeight = this.rackHeight();
         var topMargin = this.options.tileTopMargin;
 
-        this.$el.css("transform",
-            "scale(" + this.options.scale + ")");
+        this.$el.width(rackWidth);
 
         $("<div>")
             .addClass("letters")
