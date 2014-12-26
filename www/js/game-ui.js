@@ -12,7 +12,7 @@ var GameUI = Backbone.View.extend({
         "click .saveword": "submitWord"
     },
 
-    initialize: function() {
+    initialize: function(options) {
         var self = this;
 
         // Initialize a copy of the game
@@ -20,7 +20,9 @@ var GameUI = Backbone.View.extend({
             maxTiles: this.options.maxTiles,
             rackSize: this.options.rackSize,
             scaledScore: this.options.scaledScore,
-            useMultiplier: this.options.useMultiplier
+            useMultiplier: this.options.useMultiplier,
+            seed: options.seed,
+            dict: options.dict
         });
 
         this.updateTimer = new UpdateTimer({

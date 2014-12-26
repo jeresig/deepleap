@@ -2,12 +2,10 @@
  * Tile/Word Game Engine
  *   by John Resig (ejohn.org)
  *
- * Copyright 2011 John Resig
+ * Copyright 2014 John Resig
  *
  * How to use:
- *   Game.loadDict(packedTrieString);
- *   Game.setSeed(); // Can leave empty to make a random game
- *   var game = new Game();
+ *   var game = new Game({dict: packedTrieString});
  *   game.start();
  */
 
@@ -23,6 +21,17 @@ var Game = Backbone.Model.extend({
                 this[prop] = options[prop];
             }
         }
+
+        // The random seed for the game (allows for re-playable games with
+        // identical drops)
+        // Be sure to intialize this before starting the game
+        this.seed = options.seed || Math.round(Math.random() * 1000);
+
+        // A method for loading a string-based dictionary file
+        // into the game engine.
+        // Should be a properly-formatted PackedTrie string.
+        // Cache the dictionary string for later lookups
+        this.dict = new PackedTrie(options.dict);
 
         // Initialize the data structures used by the game
         this.callbacks = {};
@@ -82,7 +91,7 @@ var Game = Backbone.Model.extend({
         total:953
     },
 
-    // The random seed for the game, set using Game.setSeed()
+    // The random seed for the game, set on init
     seed: 0,
     seedOffset: 1000000,
 
@@ -127,8 +136,6 @@ var Game = Backbone.Model.extend({
     // Stop and reset the game
     reset: function() {
         // Reset all the possible variables in the game
-        this.seed = Game.seed;
-
         this.rack = [];
         this.tileQueue = [];
         this.purityControl = [];
@@ -317,7 +324,7 @@ var Game = Backbone.Model.extend({
             word = curRack.join("");
 
             // ... and see if it's in the dictionary
-            if (Game.dict.isWord(word)) {
+            if (this.dict.isWord(word)) {
                 // If it is, then we've found the word and we can stop
                 this.foundWord = word;
                 break;
@@ -509,20 +516,6 @@ var Game = Backbone.Model.extend({
 
         return (seed & 0xfffffff) / 0x10000000;
     }
-}, {
-    // A method for loading a string-based dictionary file
-    // into the game engine. Should be a properly-formatted PackedTrie string.
-    loadDict: function(txt) {
-        // Cache the dictionary string for later lookups
-        this.dict = new PackedTrie(txt);
-    },
-
-    // The random seed for the game (allows for re-playable games with
-    // identical drops)
-    // Be sure to intialize this before starting the game
-    setSeed: function(seed) {
-        this.seed = seed || Math.round(Math.random() * 1000);
-    }
 });
 
 var Bot = function(game, level) {
@@ -563,7 +556,7 @@ Bot.prototype = {
                     var pair = letters[i] + letters[j];
 
                     if (!done[pair]) {
-                        var possible = Game.dict.words(pair);
+                        var possible = this.dict.words(pair);
 
                         for (var p = 0, pl = possible.length; p < pl; p++) {
                             var word = possible[p];
