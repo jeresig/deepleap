@@ -27,58 +27,31 @@ var Rack = Backbone.View.extend({
     bind: function() {
         var self = this;
         var $letters = this.$el.find(".letters");
-        var maxLeft = this.tileWidths(this.options.rackSize);
 
-        $letters.on("mousedown", ".tile", function(e) {
-            if (self.curDrag) {
-                return;
-            }
+        $letters.on("touchstart", ".tile", function(e) {
+            var touch = e.originalEvent.targetTouches[0];
 
-            var offset = $letters.offset();
-            var scale = self.options.scale;
-
-            self.curDrag = {
-                x: e.offsetX * scale,
-                y: e.offsetY * scale,
-                offsetX: offset.left,
-                offsetY: offset.top,
-                item: $(this).data("tile"),
-                pos: self.posFromLeft((e.pageX - offset.left) / scale)
-            };
-
-            var x = (e.pageX - self.curDrag.offsetX - self.curDrag.x);
-            x /= scale;
-            x = Math.min(Math.max(x, self.options.tileMargin), maxLeft);
-
-            self.curDrag.item.setX(x);
-            self.curDrag.item.setActive(true);
+            self.handleTouchStart({
+                target: touch.target,
+                pageX: touch.pageX,
+                offsetX: (touch.pageX - $(touch.target).offset().left) /
+                    self.options.scale
+            });
         });
 
-        $(document).on("mousemove", function(e) {
-            if (!self.curDrag) {
-                return;
-            }
+        $letters.on("mousedown", ".tile", this.handleTouchStart.bind(this));
 
-            var x = (e.pageX - self.curDrag.offsetX - self.curDrag.x);
-            x /= self.options.scale;
-            x = Math.min(Math.max(x, self.options.tileMargin), maxLeft);
+        $(document).on("touchmove", function(e) {
+            var touch = e.originalEvent.targetTouches[0];
 
-            self.curDrag.item.setX(x);
-
-            var targetPos = self.posFromLeft(x +
-                (self.options.tileWidth / 2));
-
-            // Make sure we aren't trying to swap with itself
-            if (self.curDrag.pos !== targetPos) {
-                self.curDrag.item.setFound(false);
-                self.trigger("swap", self.curDrag.pos, targetPos);
-                self.curDrag.pos = targetPos;
-            }
-
-            e.preventDefault();
+            self.handleTouchMove({
+                pageX: touch.pageX
+            });
         });
 
-        $(document).on("mouseup", function() {
+        $(document).on("mousemove", this.handleTouchMove.bind(this));
+
+        $(document).on("touchend mouseup", function() {
             if (!self.curDrag) {
                 return;
             }
@@ -87,6 +60,55 @@ var Rack = Backbone.View.extend({
             self.curDrag.item.setX(self.tileWidths(self.curDrag.pos + 1));
             self.curDrag = null;
         });
+    },
+
+    handleTouchStart: function(e) {
+        if (this.curDrag) {
+            return;
+        }
+
+        var $letters = this.$el.find(".letters");
+        var maxLeft = this.tileWidths(this.options.rackSize);
+        var offset = $letters.offset();
+        var scale = this.options.scale;
+
+        this.curDrag = {
+            x: e.offsetX * scale,
+            offsetX: offset.left,
+            item: $(e.target).data("tile"),
+            pos: this.posFromLeft((e.pageX - offset.left) / scale)
+        };
+
+        var x = (e.pageX - this.curDrag.offsetX - this.curDrag.x);
+        x /= scale;
+        x = Math.min(Math.max(x, this.options.tileMargin), maxLeft);
+
+        this.curDrag.item.setX(x);
+        this.curDrag.item.setActive(true);
+    },
+
+    handleTouchMove: function(e) {
+        if (!this.curDrag) {
+            return;
+        }
+
+        var maxLeft = this.tileWidths(this.options.rackSize);
+
+        var x = (e.pageX - this.curDrag.offsetX - this.curDrag.x);
+        x /= this.options.scale;
+        x = Math.min(Math.max(x, this.options.tileMargin), maxLeft);
+
+        this.curDrag.item.setX(x);
+
+        var targetPos = this.posFromLeft(x +
+            (this.options.tileWidth / 2));
+
+        // Make sure we aren't trying to swap with itself
+        if (this.curDrag.pos !== targetPos) {
+            this.curDrag.item.setFound(false);
+            this.trigger("swap", this.curDrag.pos, targetPos);
+            this.curDrag.pos = targetPos;
+        }
     },
 
     render: function() {
