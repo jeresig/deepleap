@@ -42,11 +42,15 @@ var Rack = Backbone.View.extend({
         $letters.on("mousedown", ".tile", this.handleTouchStart.bind(this));
 
         $(document).on("touchmove", function(e) {
+            e.preventDefault();
+
             var touch = e.originalEvent.targetTouches[0];
 
-            self.handleTouchMove({
-                pageX: touch.pageX
-            });
+            if (touch) {
+                self.handleTouchMove({
+                    pageX: touch.pageX
+                });
+            }
         });
 
         $(document).on("mousemove", this.handleTouchMove.bind(this));

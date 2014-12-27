@@ -126,7 +126,7 @@ li.fail, li.drop {
     cursor: pointer;
     -webkit-transform: translateX(1000px);
     transform: translateX(1000px);
-    -webkit-transition: transform 0.3s ease, opacity 0.3s ease;
+    -webkit-transition: -webkit-transform 0.3s ease, opacity 0.3s ease;
     transition: transform 0.3s ease, opacity 0.3s ease;
     box-shadow: 0 0 4px rgba(0,0,0,1);
 }
