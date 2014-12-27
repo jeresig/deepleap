@@ -54,7 +54,7 @@ var GameUI = Backbone.View.extend({
 
     render: function() {
         this.$el.css({
-            transform: "translateY(-50%) scale(" + this.options.scale + ")",
+            transform: "scale(" + this.options.scale + ")",
             width: this.rack.rackWidth()
         });
 
