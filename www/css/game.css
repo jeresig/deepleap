@@ -13,8 +13,11 @@ html, body {
     width: 100%;
     height: 100%;
     background: #EEE url(../images/texture.png);
+    display: -webkit-flex;
     display: flex;
+    -webkit-justify-content: center;
     justify-content: center;
+    -webkit-flex-direction: column;
     flex-direction: column;
 }
 
