@@ -12,7 +12,10 @@ var Rack = Backbone.View.extend({
 
         scale: 1.0,
 
-        showTiles: true
+        showTiles: true,
+
+        // Track if a tile could drop (near the end of the time limit)
+        couldDrop: false
     },
 
     initialize: function(options) {
@@ -110,6 +113,7 @@ var Rack = Backbone.View.extend({
         // Make sure we aren't trying to swap with itself
         if (this.curDrag.pos !== targetPos) {
             this.curDrag.item.setFound(false);
+            this.curDrag.item.setCouldDrop(false);
             this.trigger("swap", this.curDrag.pos, targetPos);
             this.curDrag.pos = targetPos;
         }
@@ -156,10 +160,20 @@ var Rack = Backbone.View.extend({
         return this;
     },
 
+    setCouldDrop: function(couldDrop) {
+        this.options.couldDrop = !!couldDrop;
+
+        this.tiles[0].setCouldDrop(this.options.couldDrop);
+    },
+
     foundWord: function(word) {
-        _.forEach(this.tiles, function(tile, i) {
+        _.forEach(this.tiles, _.bind(function(tile, i) {
             tile.setFound(i < word.length);
-        });
+
+            tile.setCouldDrop(i === 0 ?
+                this.options.couldDrop :
+                false);
+        }, this));
     },
 
     removeTiles: function(num) {
@@ -185,15 +199,18 @@ var Rack = Backbone.View.extend({
         _.forEach(this.tiles, function(tile, i) {
             tile.setX(self.tileWidths(i + 1));
         });
+
+        this.options.couldDrop = false;
     },
 
     swap: function(activePos, thisPos) {
-        var a = this.tiles[activePos],
-            b = this.tiles[thisPos],
-            activeLeft = Math.max(this.tileWidths(activePos + 1), 0),
-            thisLeft = Math.max(this.tileWidths(thisPos + 1), 0);
+        var a = this.tiles[activePos];
+        var b = this.tiles[thisPos];
+        var activeLeft = Math.max(this.tileWidths(activePos + 1), 0);
+        var thisLeft = Math.max(this.tileWidths(thisPos + 1), 0);
 
         // Move the current tile
+        b.setCouldDrop(false);
         b.setX(activeLeft);
 
         // Finally move the originally selected tile

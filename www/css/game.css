@@ -144,16 +144,10 @@ li.fail, li.drop {
     opacity: 0;
 }
 
-.letters span.dropsoonA {
-    -webkit-transform: rotate(2deg);
-    -moz-transform: rotate(2deg);
-    transform: rotate(2deg);
-}
-
-.letters span.dropsoonB {
-    -webkit-transform: rotate(358deg);
-    -moz-transform: rotate(358deg);
-    transform: rotate(358deg);
+.letters span.coulddrop {
+    color: rgb(205, 2, 2);
+    -webkit-transition: none;
+    transition: none;
 }
 
 .letters span.found {

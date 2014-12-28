@@ -132,18 +132,7 @@ var GameUI = Backbone.View.extend({
                 );
 
                 if (!this.game.foundWord && nearEnd) {
-                    /*
-                    var firstTile = $(this.spanLetters[0]);
-
-                    if (firstTile.hasClass("dropsoonA")) {
-                        firstTile.removeClass("dropsoonA")
-                            .addClass("dropsoonB");
-
-                    } else {
-                        firstTile.removeClass("dropsoonB")
-                            .addClass("dropsoonA");
-                    }
-                    */
+                    this.rack.setCouldDrop(true);
                 }
 
                 if (timeDiff >= totalTime) {
