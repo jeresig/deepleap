@@ -279,10 +279,10 @@ var Game = Backbone.Model.extend({
         // Check to see if we should be dropping this letter
         if (letter && (count > 20 ||
                 // Make sure we don't drop duplicate letter tiles
-                this.purityControl[0] !== letter && (
+                this.purityControl.indexOf(letter) < 0 && (
 
                     // Not enough tiles in the rack yet, don't care about letter
-                    this.purityControl.length < 4 ||
+                    this.purityControl.length < 3 ||
 
                     // No vowel has dropped recently and a vowel is dropping
                     !hasVowel && isVowel ||
@@ -296,7 +296,7 @@ var Game = Backbone.Model.extend({
             this.purityControl.unshift(letter);
 
             // Make sure the queue doesn't grow too long
-            this.purityControl.splice(4);
+            this.purityControl.splice(3);
 
             // Add the tile to the queue
             this.tileQueue.push(letter);
