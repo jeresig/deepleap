@@ -63,8 +63,10 @@ var Rack = Backbone.View.extend({
                 return;
             }
 
+            var curPos = self.tiles.indexOf(self.curDrag.item);
+
             self.curDrag.item.setActive(false);
-            self.curDrag.item.setX(self.tileWidths(self.curDrag.pos + 1));
+            self.curDrag.item.setX(self.tileWidths(curPos + 1));
             self.curDrag = null;
         });
     },
@@ -82,8 +84,7 @@ var Rack = Backbone.View.extend({
         this.curDrag = {
             x: e.offsetX * scale,
             offsetX: offset.left,
-            item: $(e.target).data("tile"),
-            pos: this.posFromLeft((e.pageX - offset.left) / scale)
+            item: $(e.target).data("tile")
         };
 
         var x = (e.pageX - this.curDrag.offsetX - this.curDrag.x);
@@ -107,15 +108,15 @@ var Rack = Backbone.View.extend({
 
         this.curDrag.item.setX(x);
 
+        var curPos = this.tiles.indexOf(this.curDrag.item);
         var targetPos = this.posFromLeft(x +
             (this.options.tileWidth / 2));
 
         // Make sure we aren't trying to swap with itself
-        if (this.curDrag.pos !== targetPos) {
+        if (curPos !== targetPos) {
             this.curDrag.item.setFound(false);
             this.curDrag.item.setCouldDrop(false);
-            this.trigger("swap", this.curDrag.pos, targetPos);
-            this.curDrag.pos = targetPos;
+            this.trigger("swap", curPos, targetPos);
         }
     },
 

@@ -128,7 +128,8 @@ var GameUI = Backbone.View.extend({
 
                 this.updateTimer.update(
                     Math.min(timeDiff / totalTime, 1),
-                    nearEnd
+                    nearEnd,
+                    !!this.game.foundWord
                 );
 
                 if (!this.game.foundWord && nearEnd) {
@@ -138,7 +139,7 @@ var GameUI = Backbone.View.extend({
                 if (timeDiff >= totalTime) {
                     clearInterval(this.circleTimer);
                 }
-            }, this), totalTime / 200);
+            }, this), 13);
         },
 
         dropTile: function(letter) {

@@ -39,7 +39,7 @@ var UpdateTimer = Backbone.View.extend({
         canvas.fill();
     },
 
-    update: function(amount, nearEnd) {
+    update: function(amount, nearEnd, good) {
         if (!this.canvas) {
             return;
         }
@@ -51,7 +51,8 @@ var UpdateTimer = Backbone.View.extend({
         var heightCenter = this.height / 2;
 
         canvas.fillStyle = nearEnd ?
-            "rgba(255,0,0," + (amount >= 1 ? "1" : "1") + ")" :
+            "rgba(" + (good ? "0,255,0," : "255,0,0,") +
+                (amount >= 1 ? "1" : "1") + ")" :
             "rgba(255,255,255,1)";
         canvas.beginPath();
         canvas.moveTo(widthCenter, heightCenter);
