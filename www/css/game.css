@@ -25,10 +25,9 @@ html, body {
     position: relative;
     padding: 0;
     top: 50%;
-    margin: 0 auto;
-    /* iOS (which uses -webkit) likes 0 0, Chrome likes 50% 50% */
+    margin: 0;
     -webkit-transform-origin: 0 0;
-    transform-origin: 50% 50%;
+    transform-origin: 0 0;
 }
 
 p.note {

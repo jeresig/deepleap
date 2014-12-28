@@ -34,8 +34,7 @@ var GameUI = Backbone.View.extend({
         });
 
         // Expand the rack to take up the full width
-        this.options.scale = $(window).width() /
-            (this.rack.rackWidth() + 26);
+        this.options.scale = $(window).width() / this.rack.rackWidth();
         this.rack.options.scale = this.options.scale;
 
         this.bind();
