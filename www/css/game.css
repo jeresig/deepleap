@@ -175,6 +175,7 @@ canvas.update-timer {
 }
 
 button.saveword {
+    border: 1px solid #000;
     height: 40px;
     font-size: 27px;
     float: right;
