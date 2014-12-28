@@ -257,11 +257,11 @@ var Game = Backbone.Model.extend({
     addTile: function(count) {
         // We need to make sure that there aren't too many vowels
         // (or consonants) being passed in to the game
-        var letter, isVowel,
-            vowelCheck = /[aeiou]/,
-            notVowelCheck = /[^aeiou]/,
-            hasVowel = vowelCheck.test(this.purityControl),
-            hasConsonant = notVowelCheck.test(this.purityControl);
+        var letter;
+        var letters = this.purityControl.join("");
+        var vowelCheck = /[aeiou]/;
+        var hasVowel = vowelCheck.test(letters);
+        var hasConsonant = /[^aeiou]/.test(letters);
 
         // If the last letter dropped was a Q, make sure we drop a U next
         if (this.purityControl[0] === "q") {
@@ -274,7 +274,7 @@ var Game = Backbone.Model.extend({
         }
 
         // Are we currently dealing with a vowel?
-        isVowel = vowelCheck.test(letter);
+        var isVowel = vowelCheck.test(letter);
 
         // Check to see if we should be dropping this letter
         if (letter && (count > 20 ||
@@ -283,6 +283,9 @@ var Game = Backbone.Model.extend({
 
                     // Not enough tiles in the rack yet, don't care about letter
                     this.purityControl.length < 3 ||
+
+                    // If there is already a good mix just drop anything
+                    hasVowel && hasConsonant ||
 
                     // No vowel has dropped recently and a vowel is dropping
                     !hasVowel && isVowel ||
