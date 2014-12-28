@@ -144,12 +144,13 @@ li.fail, li.drop {
     opacity: 0;
 }
 
-.letters span.coulddrop {
+.letters span.coulddrop:not(.active) {
     color: rgb(205, 2, 2);
-    -webkit-transition: none;
-    transition: none;
+    -webkit-transition: -webkit-transform 0.1s ease, opacity 0.1s ease;
+    transition: transform 0.1s ease, opacity 0.1s ease;
 }
 
+.letters span.coulddrop.found,
 .letters span.found {
     color: white;
 }
