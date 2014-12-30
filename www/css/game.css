@@ -169,11 +169,34 @@ canvas.update-timer {
     vertical-align: bottom;
 }
 
+.score {
+    float: right;
+    position: relative;
+    display: block;
+    border-radius: 10px;
+    background: rgba(0, 0, 0, 0.2);
+    height: 40px;
+    min-width: 78px;
+    text-align: right;
+    padding: 0 6px;
+}
+
+.score .points {
+    font-size: 28px;
+    line-height: 40px;
+}
+
+.score .text {
+    font-size: 14px;
+    position: absolute;
+    top: -13px;
+    left: 9px;
+}
+
 button.saveword {
     border: 1px solid #000;
     height: 40px;
     font-size: 27px;
-    float: right;
 }
 
 .words {

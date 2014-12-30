@@ -58,12 +58,28 @@ var GameUI = Backbone.View.extend({
             width: this.rack.rackWidth()
         });
 
-        var $buttons = $("<div>")
+        var $pointsBar = $("<div>")
             .addClass("buttons")
             .html([
                 // Render the update timer
                 this.updateTimer.render().el,
 
+                // Render the points area
+                $("<span>")
+                    .addClass("score")
+                    .html([
+                        $("<span>")
+                            .addClass("points")
+                            .text("0"),
+                        $("<span>")
+                            .addClass("text")
+                            .text("points")
+                    ])
+            ]);
+
+        var $buttons = $("<div>")
+            .addClass("buttons")
+            .html([
                 // Render the save button
                 $("<button>")
                     .addClass("saveword")
@@ -72,11 +88,14 @@ var GameUI = Backbone.View.extend({
             ]);
 
         this.$el.html([
-            // Insert the button bar
-            $buttons,
+            // Insert the points bar
+            $pointsBar,
 
             // Render the tile rack
-            this.rack.render().el
+            this.rack.render().el,
+
+            // Insert the button bar
+            $buttons
         ]);
 
         return this;
