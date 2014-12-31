@@ -160,18 +160,34 @@ li.fail, li.drop {
 }
 
 .buttons {
+    height: 40px;
     margin: 0 13px 6px 13px;
 }
 
 canvas.update-timer {
+    position: absolute;
+    top: 0;
+    left: 0;
     width: 40px;
     height: 40px;
     vertical-align: bottom;
 }
 
+.streak {
+    margin: 0 auto;
+    height: 40px;
+    width: 300px;
+}
+
+.streak .streak-bar {
+    width: 250px;
+    height: 100%;
+}
+
 .score {
-    float: right;
-    position: relative;
+    position: absolute;
+    top: 0;
+    right: 0;
     display: block;
     border-radius: 10px;
     background: rgba(0, 0, 0, 0.2);

@@ -99,7 +99,7 @@ var Game = Backbone.Model.extend({
     lengthBonuses: [0, 0, 1, 1, 1.5, 2, 2.5, 3, 3.5, 4, 4.5],
 
     // The bonus multiplier for word streaks
-    lengthMultipliers: [1, 1.5, 2, 2.5, 3, 3.5, 4, 4.5, 5],
+    lengthMultipliers: [1, 1, 1, 2, 2, 3, 3, 4, 4, 5],
 
     // The minimum word length required
     minWordLength: 3,
@@ -373,7 +373,8 @@ var Game = Backbone.Model.extend({
 
         // Increase the streak of the word is long enough
         if (letters.length >= this.useLengthMultiplier) {
-            this.streak += 1;
+            this.streak += Math.min(this.streak + 1,
+                this.lengthMultipliers.length);
 
         // Reset the streak if the user failed to write a long-enough word
         } else {
@@ -390,8 +391,7 @@ var Game = Backbone.Model.extend({
 
         // Give a bonus for long word streaks
         var lengthMultiplier = this.useLengthMultiplier ?
-            this.lengthMultipliers[
-                Math.min(this.streak, this.lengthMultipliers.length)] :
+            this.lengthMultipliers[this.streak] :
             1;
 
         // Remove the tiles from the collection

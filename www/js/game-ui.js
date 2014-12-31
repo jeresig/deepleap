@@ -64,6 +64,19 @@ var GameUI = Backbone.View.extend({
                 // Render the update timer
                 this.updateTimer.render().el,
 
+                $("<div>")
+                    .addClass("streak")
+                    .html([
+                        $("<span>")
+                            .addClass("multiplier")
+                            .text("1x"),
+                        $("<div>")
+                            .addClass("streak-bar")
+                            .html([
+                                $("<div>").addClass("bar")
+                            ])
+                    ]),
+
                 // Render the points area
                 $("<span>")
                     .addClass("score")
