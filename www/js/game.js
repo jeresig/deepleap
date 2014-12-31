@@ -371,8 +371,14 @@ var Game = Backbone.Model.extend({
             this.lengthBonuses[word.length] :
             1;
 
-        // Get the current streak
-        var streak = this.streak;
+        // Increase the streak of the word is long enough
+        if (letters.length >= this.useLengthMultiplier) {
+            this.streak += 1;
+
+        // Reset the streak if the user failed to write a long-enough word
+        } else {
+            this.streak = 0;
+        }
 
         // Get the current multiplier
         var multiplier = this.multiplier;
