@@ -98,6 +98,9 @@ var Game = Backbone.Model.extend({
     // The bonus multiplier for word length
     lengthBonuses: [0, 0, 1, 1, 1.5, 2, 2.5, 3, 3.5, 4, 4.5],
 
+    // The bonus multiplier for word streaks
+    lengthMultipliers: [1, 1.5, 2, 2.5, 3, 3.5, 4, 4.5, 5],
+
     // The minimum word length required
     minWordLength: 3,
 
@@ -117,6 +120,17 @@ var Game = Backbone.Model.extend({
     // The rate at which tiles will be dropping
     // This is kept in the game logic to help verify scores
     updateRate: 2000,
+
+    // Should a multiplier be used for streaks
+    // (back-to-back word completions with no drops)
+    useStreakMultiplier: false,
+
+    // If a multiplier should be used for streaks of a certain
+    // word length
+    useLengthMultiplier: 4,
+
+    // Should length bonus be applied
+    useLengthBonus: false,
 
     // Start a new game running
     start: function() {
@@ -142,6 +156,7 @@ var Game = Backbone.Model.extend({
 
         this.score = 0;
         this.multiplier = 1;
+        this.streak = 0;
         this.droppedTiles = 0;
         this.foundWord = "";
 
@@ -344,59 +359,73 @@ var Game = Backbone.Model.extend({
     // Remove a set of tiles (holding a word, or a dropped tile, from the board)
     removeWord: function(word) {
         // Split it up to calculate the score
-        var letters = word.split(""),
-            num = 0,
-            total = 0,
+        var letters = word.split("");
+        var num = 0;
+        var total = 0;
 
-            // Words must be a minimum length
-            state = letters.length >= this.minWordLength,
+        // Words must be a minimum length
+        var state = letters.length >= this.minWordLength;
 
-            // Give a bonus for longer words
-            lengthBonus = this.lengthBonuses[word.length],
+        // Give a bonus for longer words
+        var lengthBonus = this.useLengthBonus ?
+            this.lengthBonuses[word.length] :
+            1;
 
-            // Get the current multiplier
-            multiplier = this.multiplier;
+        // Get the current streak
+        var streak = this.streak;
+
+        // Get the current multiplier
+        var multiplier = this.multiplier;
 
         // Only extract a word if a non-empty one was passed in
-        if (word) {
-            // Remove the tiles from the collection
-            this.rack.splice(0, word.length);
-
-            // Notify the UI that the tiles were removed
-            this.trigger("removeTiles", word.length);
-
-            // Total up the points for the individual tiles
-            for (var i = 0; i < letters.length; i++) {
-                num += this.letterPoints[letters[i]];
-            }
-
-            // Factor in all the score modifiers
-            total = Math.round(state ?
-                num * multiplier * lengthBonus :
-                -1 * num);
-
-            // Add the total to the running score
-            this.score += total;
-
-            // Update the multiplier
-            if (this.useMultiplier && state) {
-                // Increase the multiplier, slowly
-                this.multiplier += (1 / (Math.floor(this.multiplier) * 10));
-            }
-
-            // Return the results so that they can be used in the UI
-            this.trigger("updateScore", {
-                word: word,
-                state: state,
-                total: total,
-                num: num,
-                lengthBonus: lengthBonus,
-                multiplier: multiplier
-            });
-
-            // Reset the word
-            this.foundWord = "";
+        if (!word) {
+            return;
         }
+
+        // Give a bonus for long word streaks
+        var lengthMultiplier = this.useLengthMultiplier ?
+            this.lengthMultipliers[
+                Math.min(this.streak, this.lengthMultipliers.length)] :
+            1;
+
+        // Remove the tiles from the collection
+        this.rack.splice(0, word.length);
+
+        // Notify the UI that the tiles were removed
+        this.trigger("removeTiles", word.length);
+
+        // Total up the points for the individual tiles
+        for (var i = 0; i < letters.length; i++) {
+            num += this.letterPoints[letters[i]];
+        }
+
+        // Factor in all the score modifiers
+        total = Math.round(state ?
+            num * multiplier * lengthBonus * lengthMultiplier :
+            -1 * num);
+
+        // Add the total to the running score
+        this.score += total;
+
+        // Update the streak multiplier
+        if (this.useStreakMultiplier && state) {
+            // Increase the multiplier, slowly
+            this.multiplier += (1 / (Math.floor(this.multiplier) * 10));
+        }
+
+        // Return the results so that they can be used in the UI
+        this.trigger("updateScore", {
+            word: word,
+            state: state,
+            total: total,
+            num: num,
+            lengthMultiplier: lengthMultiplier,
+            lengthBonus: lengthBonus,
+            multiplier: multiplier
+        });
+
+        // Reset the word
+        this.foundWord = "";
     },
 
     // Play back a previously-played game (based upon the logged actions)
