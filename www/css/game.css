@@ -174,14 +174,39 @@ canvas.update-timer {
 }
 
 .streak {
+    position: relative;
     margin: 0 auto;
     height: 40px;
     width: 300px;
+    padding-top: 5px;
+}
+
+.streak .multiplier {
+    position: absolute;
+    top: 0px;
+    left: -55px;
+    width: 50px;
+    text-align: right;
+    font-size: 28px;
+    line-height: 40px;
 }
 
 .streak .streak-bar {
-    width: 250px;
+    width: 100%;
     height: 100%;
+    border-radius: 15px;
+    height: 30px;
+    border: 1px solid #000;
+    overflow: hidden;
+}
+
+.streak .streak-bar .bar {
+    display: block;
+    background: green;
+    width: 0%;
+    height: 100%;
+    -webkit-transition: width 0.3s ease;
+    transition: width 0.3s ease;
 }
 
 .score {

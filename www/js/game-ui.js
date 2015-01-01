@@ -214,7 +214,10 @@ var GameUI = Backbone.View.extend({
 
             this.$el.find(".points").text(this.game.score);
             this.$el.find(".multiplier")
-                .text(this.game.multiplier.toFixed(1));
+                .text(Math.round(this.game.multiplier) + "x");
+            console.log(this.$el.find(".streak-bar .bar")[0], (result.streak / 10) + "%")
+            this.$el.find(".streak-bar .bar")
+                .css("width", (result.streak * 10) + "%");
         },
 
         reset: function() {
