@@ -164,7 +164,9 @@ var Rack = Backbone.View.extend({
     setCouldDrop: function(couldDrop) {
         this.options.couldDrop = !!couldDrop;
 
-        this.tiles[0].setCouldDrop(this.options.couldDrop);
+        if (this.tiles.length > 0) {
+            this.tiles[0].setCouldDrop(this.options.couldDrop);
+        }
     },
 
     foundWord: function(word) {

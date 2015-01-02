@@ -100,6 +100,11 @@ var GameUI = Backbone.View.extend({
                     .text("Save Word")
             ]);
 
+        this.$overlay = $("<div>")
+            .addClass("overlay hidden")
+            .hide()
+            .appendTo("body");
+
         this.$el.html([
             // Insert the points bar
             $pointsBar,
@@ -215,7 +220,6 @@ var GameUI = Backbone.View.extend({
             this.$el.find(".points").text(this.game.score);
             this.$el.find(".multiplier")
                 .text(Math.round(result.lengthMultiplier) + "x");
-            console.log(this.$el.find(".streak-bar .bar")[0], (result.streak / 10) + "%")
             this.$el.find(".streak-bar .bar")
                 .css("width", (result.streak * 10) + "%");
         },
@@ -237,7 +241,12 @@ var GameUI = Backbone.View.extend({
         },
 
         gameover: function() {
-            console.log("Game Over");
+            this.rack.removeTiles(this.options.rackSize);
+            this.$overlay.addClass("hidden").show();
+
+            setTimeout(_.bind(function() {
+                this.$overlay.removeClass("hidden");
+            }, this), 0);
         }
     }
 });
