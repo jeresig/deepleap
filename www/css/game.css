@@ -258,6 +258,12 @@ button.saveword {
     opacity: 0;
 }
 
+.endgame {
+    background: none;
+    opacity: 1;
+    z-index: 11;
+}
+
 .words {
     list-style: none;
     padding: 0;

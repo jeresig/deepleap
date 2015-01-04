@@ -100,6 +100,15 @@ var GameUI = Backbone.View.extend({
                     .text("Save Word")
             ]);
 
+        var $endGame = $("<div>")
+            .addClass("endgame overlay hidden")
+            .html([
+                $("<div>")
+                    .addClass("points"),
+                $("<button>")
+                    .text("Play Again")
+            ]);
+
         this.$overlay = $("<div>")
             .addClass("overlay hidden")
             .hide()
@@ -111,6 +120,9 @@ var GameUI = Backbone.View.extend({
 
             // Render the tile rack
             this.rack.render().el,
+
+            // Add the end of game overlay
+            $endGame,
 
             // Insert the button bar
             $buttons
