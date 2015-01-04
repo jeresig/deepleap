@@ -23,6 +23,12 @@ html, body {
 
 #main {
     position: relative;
+    width: 100%;
+    height: 100%;
+}
+
+.board, .endgame {
+    position: relative;
     padding: 0;
     top: 50%;
     margin: 0;
@@ -254,14 +260,38 @@ button.saveword {
     transition: opacity 0.3s ease;
 }
 
-.overlay.hidden {
+.overlay.hidden, .endgame.hidden {
     opacity: 0;
 }
 
 .endgame {
+    position: absolute;
     background: none;
     opacity: 1;
     z-index: 11;
+    text-align: center;
+}
+
+.endgame .points {
+    display: inline-block;
+    border-radius: 10px;
+    color: darkgreen;
+    border: 3px solid darkgreen;
+    background: rgba(0, 255, 0, 0.9);
+    height: 40px;
+    min-width: 78px;
+    text-align: right;
+    padding: 0 6px;
+    font-size: 28px;
+    line-height: 40px;
+    margin-right: 100px;
+}
+
+.endgame .restart {
+    border: 3px solid #000;
+    height: 40px;
+    font-size: 28px;
+    line-height: 28px;
 }
 
 .words {

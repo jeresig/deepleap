@@ -25,13 +25,15 @@ var Game = Backbone.Model.extend({
         // The random seed for the game (allows for re-playable games with
         // identical drops)
         // Be sure to intialize this before starting the game
-        this.seed = options.seed || Math.round(Math.random() * 1000);
+        this.seed = options.seed || Math.round(Math.random() * 1000000);
 
         // A method for loading a string-based dictionary file
         // into the game engine.
         // Should be a properly-formatted PackedTrie string.
         // Cache the dictionary string for later lookups
-        this.dict = new PackedTrie(options.dict);
+        if (typeof options.dict === "string") {
+            this.dict = new PackedTrie(options.dict);
+        }
 
         // Initialize the data structures used by the game
         this.callbacks = {};

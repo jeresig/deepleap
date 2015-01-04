@@ -252,6 +252,9 @@ var Rack = Backbone.View.extend({
         // Empty out the tiles
         this.tiles = [];
 
+        // Reset the could drop state
+        this.options.couldDrop = false;
+
         this.$el.find(".letters").empty();
     },
 

@@ -15,16 +15,6 @@ var GameUI = Backbone.View.extend({
     initialize: function(options) {
         var self = this;
 
-        // Initialize a copy of the game
-        this.game = new Game({
-            maxTiles: this.options.maxTiles,
-            rackSize: this.options.rackSize,
-            scaledScore: this.options.scaledScore,
-            useMultiplier: this.options.useMultiplier,
-            seed: options.seed,
-            dict: options.dict
-        });
-
         this.updateTimer = new UpdateTimer({
             size: 100
         });
@@ -37,11 +27,31 @@ var GameUI = Backbone.View.extend({
         this.options.scale = $(window).width() / this.rack.rackWidth();
         this.rack.options.scale = this.options.scale;
 
-        this.bind();
+        this.initGame(options);
+
         this.render();
+        this.bind();
     },
 
-    bind: function() {
+    initGame: function(options) {
+        options = options || {};
+
+        if (this.game) {
+            options.dict = this.game.dict;
+        }
+
+        // Initialize a copy of the game
+        this.game = new Game({
+            maxTiles: this.options.maxTiles,
+            rackSize: this.options.rackSize,
+            scaledScore: this.options.scaledScore,
+            useMultiplier: this.options.useMultiplier,
+            seed: options.seed,
+            dict: options.dict
+        });
+
+        this.rack.off("swap");
+
         this.rack.on("swap", _.bind(function(a, b) {
             this.game.swap(a, b);
         }, this));
@@ -52,12 +62,14 @@ var GameUI = Backbone.View.extend({
         }
     },
 
-    render: function() {
-        this.$el.css({
-            transform: "translateY(-50%) scale(" + this.options.scale + ")",
-            width: this.rack.rackWidth()
-        });
+    bind: function() {
+        this.$el.on("click", ".restart", _.bind(function() {
+            this.toggleOverlay("endgame", false);
+            this.restart();
+        }, this));
+    },
 
+    render: function() {
         var $pointsBar = $("<div>")
             .addClass("buttons")
             .html([
@@ -101,34 +113,70 @@ var GameUI = Backbone.View.extend({
             ]);
 
         var $endGame = $("<div>")
-            .addClass("endgame overlay hidden")
+            .addClass("endgame hidden")
             .html([
                 $("<div>")
                     .addClass("points"),
                 $("<button>")
+                    .addClass("restart")
                     .text("Play Again")
             ]);
 
-        this.$overlay = $("<div>")
-            .addClass("overlay hidden")
+        var $overlay = $("<div>")
+            .addClass("background overlay hidden")
             .hide()
             .appendTo("body");
 
+        var $board = $("<div>")
+            .addClass("board")
+            .html([
+                // Insert the points bar
+                $pointsBar,
+
+                // Render the tile rack
+                this.rack.render().el,
+
+                // Add the end of game overlay
+                $endGame,
+
+                // Insert the button bar
+                $buttons
+            ]);
+
         this.$el.html([
-            // Insert the points bar
-            $pointsBar,
-
-            // Render the tile rack
-            this.rack.render().el,
-
-            // Add the end of game overlay
+            $overlay,
             $endGame,
-
-            // Insert the button bar
-            $buttons
+            $board
         ]);
 
+        this.$el.find(".board, .endgame")
+            .css({
+                transform: "translateY(-50%) scale(" +
+                    this.options.scale + ")",
+                width: this.rack.rackWidth()
+            });
+
         return this;
+    },
+
+    toggleOverlay: function(name, toggle) {
+        var $elems = this.$el.find(".background, ." + name);
+
+        if (toggle) {
+            $elems.addClass("hidden").show();
+        } else {
+            $elems.removeClass("hidden").show();
+        }
+
+        setTimeout(function() {
+            $elems.toggleClass("hidden", !toggle);
+
+            if (!toggle) {
+                setTimeout(function() {
+                    $elems.hide();
+                }, 300);
+            }
+        }, 0);
     },
 
     start: function() {
@@ -138,6 +186,12 @@ var GameUI = Backbone.View.extend({
     reset: function() {
         this.rack.reset();
         this.game.reset();
+    },
+
+    restart: function() {
+        this.reset();
+        this.initGame();
+        this.start();
     },
 
     playback: function(data) {
@@ -254,11 +308,8 @@ var GameUI = Backbone.View.extend({
 
         gameover: function() {
             this.rack.removeTiles(this.options.rackSize);
-            this.$overlay.addClass("hidden").show();
 
-            setTimeout(_.bind(function() {
-                this.$overlay.removeClass("hidden");
-            }, this), 0);
+            this.toggleOverlay("endgame", true);
         }
     }
 });
