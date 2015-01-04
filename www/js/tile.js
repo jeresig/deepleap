@@ -90,18 +90,24 @@ var Tile = Backbone.View.extend({
     },
 
     setScale: function(scale) {
-        this.scale = scale;
-        this.updateTransform();
+        if (this.scale !== scale) {
+            this.scale = scale;
+            this.updateTransform();
+        }
     },
 
     setRotate: function(rotate) {
-        this.rotate = rotate;
-        this.updateTransform();
+        if (rotate !== this.rotate) {
+            this.rotate = rotate;
+            this.updateTransform();
+        }
     },
 
     setX: function(x) {
-        this.x = x;
-        this.updateTransform();
+        if (this.x !== x) {
+            this.x = x;
+            this.updateTransform();
+        }
     },
 
     updateTransform: function() {
@@ -112,6 +118,7 @@ var Tile = Backbone.View.extend({
     },
 
     remove: function() {
+        clearInterval(this.wiggleInterval);
         this.$el.remove();
     }
 });

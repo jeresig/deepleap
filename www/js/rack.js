@@ -236,16 +236,16 @@ var Rack = Backbone.View.extend({
         var tile = new Tile({
             letter: letter,
             x: this.rackWidth() + tileLeft,
-            size:  this.options.tileWidth,
+            size: this.options.tileWidth,
             showTiles: this.options.showTiles
         });
 
         this.tiles.push(tile);
         $letters.append(tile.render().el);
 
-        setTimeout(function() {
+        requestAnimationFrame(function() {
             tile.setX(tileLeft);
-        }, 0);
+        });
     },
 
     reset: function() {

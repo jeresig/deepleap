@@ -114,6 +114,7 @@ var GameUI = Backbone.View.extend({
 
         var $endGame = $("<div>")
             .addClass("endgame hidden")
+            .hide()
             .html([
                 $("<div>")
                     .addClass("points"),
@@ -168,7 +169,7 @@ var GameUI = Backbone.View.extend({
             $elems.removeClass("hidden").show();
         }
 
-        setTimeout(function() {
+        requestAnimationFrame(function() {
             $elems.toggleClass("hidden", !toggle);
 
             if (!toggle) {
@@ -176,7 +177,7 @@ var GameUI = Backbone.View.extend({
                     $elems.hide();
                 }, 300);
             }
-        }, 0);
+        });
     },
 
     start: function() {
@@ -264,7 +265,6 @@ var GameUI = Backbone.View.extend({
 
             this.$el.find(".saveword")
                 .prop("disabled", !word.length);
-                //.toggleClass("ui-disabled", !word.length);
         },
 
         updateScore: function(result) {
