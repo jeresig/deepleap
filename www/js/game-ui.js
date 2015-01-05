@@ -313,6 +313,11 @@ var GameUI = Backbone.View.extend({
                 .find(".words").empty().end()
                 .find(".tilesleft, .points").text("0");
 
+            this.$el.find(".multiplier")
+                .text("1x");
+            this.$el.find(".streak-bar .bar")
+                .css("width", "0%");
+
             // Return the update timer to its start position
             this.updateTimer.reset();
 

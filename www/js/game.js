@@ -101,7 +101,7 @@ var Game = Backbone.Model.extend({
     lengthBonuses: [0, 0, 1, 1, 1.5, 2, 2.5, 3, 3.5, 4, 4.5],
 
     // The bonus multiplier for word streaks
-    lengthMultipliers: [1, 1, 1, 2, 2, 3, 3, 4, 4, 5],
+    lengthMultipliers: [1, 1, 1, 2, 2, 3, 3, 4, 4, 4, 5],
 
     // The minimum word length required
     minWordLength: 3,
