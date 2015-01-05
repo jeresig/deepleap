@@ -27,7 +27,7 @@ html, body {
     height: 100%;
 }
 
-.board, .endgame {
+.board, .endgame, .startgame {
     position: relative;
     padding: 0;
     top: 50%;
@@ -260,11 +260,11 @@ button.saveword {
     transition: opacity 0.3s ease;
 }
 
-.overlay.hidden, .endgame.hidden {
+.overlay.hidden, .endgame.hidden, .startgame.hidden {
     opacity: 0;
 }
 
-.endgame {
+.endgame, .startgame {
     position: absolute;
     background: none;
     opacity: 1;
@@ -287,7 +287,8 @@ button.saveword {
     margin-right: 100px;
 }
 
-.endgame .restart {
+.endgame .restart, .startgame .start {
+    background: #FFF;
     border: 3px solid #000;
     height: 40px;
     font-size: 28px;

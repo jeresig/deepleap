@@ -67,6 +67,11 @@ var GameUI = Backbone.View.extend({
             this.toggleOverlay("endgame", false);
             this.restart();
         }, this));
+
+        this.$el.on("click", ".start", _.bind(function() {
+            this.toggleOverlay("startgame", false);
+            this.start();
+        }, this));
     },
 
     render: function() {
@@ -112,6 +117,14 @@ var GameUI = Backbone.View.extend({
                     .text("Save Word")
             ]);
 
+        var $startGame = $("<div>")
+            .addClass("startgame")
+            .html([
+                $("<button>")
+                    .addClass("start")
+                    .text("Play")
+            ]);
+
         var $endGame = $("<div>")
             .addClass("endgame hidden")
             .hide()
@@ -124,8 +137,7 @@ var GameUI = Backbone.View.extend({
             ]);
 
         var $overlay = $("<div>")
-            .addClass("background overlay hidden")
-            .hide()
+            .addClass("background overlay")
             .appendTo("body");
 
         var $board = $("<div>")
@@ -137,20 +149,25 @@ var GameUI = Backbone.View.extend({
                 // Render the tile rack
                 this.rack.render().el,
 
-                // Add the end of game overlay
-                $endGame,
-
                 // Insert the button bar
                 $buttons
             ]);
 
         this.$el.html([
+            // A background overlay
             $overlay,
+
+            // Add the start of game overlay
+            $startGame,
+
+            // Add the end of game overlay
             $endGame,
+
+            // The game board
             $board
         ]);
 
-        this.$el.find(".board, .endgame")
+        this.$el.find(".board, .endgame, .startgame")
             .css({
                 transform: "translateY(-50%) scale(" +
                     this.options.scale + ")",
