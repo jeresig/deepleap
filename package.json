@@ -19,6 +19,7 @@
   "dependencies": {
     "leaderboard": "0.0.9",
     "redis": "^0.12.1",
-    "hiredis": "^0.1.17"
+    "hiredis": "^0.1.17",
+    "restify": "^2.8.4"
   }
 }
