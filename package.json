@@ -1,0 +1,24 @@
+{
+  "name": "deepleap",
+  "version": "0.0.0",
+  "description": "Deepleap!",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/jeresig/deepleap.git"
+  },
+  "author": "John Resig <jeresig@gmail.com>",
+  "license": "None",
+  "bugs": {
+    "url": "https://github.com/jeresig/deepleap/issues"
+  },
+  "homepage": "https://github.com/jeresig/deepleap",
+  "dependencies": {
+    "leaderboard": "0.0.9",
+    "redis": "^0.12.1",
+    "hiredis": "^0.1.17"
+  }
+}
