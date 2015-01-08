@@ -11,7 +11,7 @@ var server = restify.createServer();
 server.use(restify.bodyParser());
 
 server.get("/leaderboard", function(req, res, next) {
-    board.list(1, function(err, list) {
+    board.list(0, function(err, list) {
         res.send(list);
         next();
     });
