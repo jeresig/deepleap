@@ -3,7 +3,7 @@ var Tile = Backbone.View.extend({
     className: "tile",
 
     // NOTE: Need to figure out a good result for this
-    longLetters: "gjpqy",
+    longLetters: "", //"gjpqy",
 
     initialize: function(options) {
         this.x = options.x || 0;
