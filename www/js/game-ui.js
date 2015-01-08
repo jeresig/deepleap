@@ -73,6 +73,10 @@ var GameUI = Backbone.View.extend({
             this.toggleOverlay("startgame", false);
             this.start();
         }, this));
+
+        if (typeof FastClick !== "undefined") {
+            FastClick.attach(this.el);
+        }
     },
 
     render: function() {
