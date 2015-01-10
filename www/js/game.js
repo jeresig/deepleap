@@ -29,10 +29,10 @@ var Game = Backbone.Model.extend({
 
         // Store settings for future configuration
         this.settings = {
-            maxTiles: options.maxTiles,
-            rackSize: options.rackSize,
-            scaledScore: options.scaledScore,
-            useMultiplier: options.useMultiplier,
+            maxTiles: this.maxTiles,
+            rackSize: this.rackSize,
+            scaledScore: this.scaledScore,
+            useLengthBonus: this.useLengthBonus,
             seed: this.seed
         };
 
@@ -107,7 +107,7 @@ var Game = Backbone.Model.extend({
     seedOffset: 1000000,
 
     // The bonus multiplier for word length
-    lengthBonuses: [0, 0, 1, 1, 1.5, 2, 2.5, 3, 3.5, 4, 4.5],
+    lengthBonuses: [0, 1, 1, 1, 1, 2, 2, 3],
 
     // The bonus multiplier for word streaks
     lengthMultipliers: [1, 1, 1, 2, 2, 3, 3, 4, 4, 4, 5],

@@ -3,7 +3,7 @@ var GameUI = Backbone.View.extend({
         rackSize: 7,
         maxTiles: -1,
         scaledScore: false,
-        useMultiplier: false,
+        useLengthBonus: true,
 
         scale: 1.0
     },
@@ -47,6 +47,7 @@ var GameUI = Backbone.View.extend({
             rackSize: this.options.rackSize,
             scaledScore: this.options.scaledScore,
             useMultiplier: this.options.useMultiplier,
+            useLengthBonus: this.options.useLengthBonus,
             seed: options.seed,
             dict: options.dict
         });
