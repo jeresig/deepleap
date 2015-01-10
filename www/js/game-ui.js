@@ -339,6 +339,10 @@ var GameUI = Backbone.View.extend({
             this.rack.removeTiles(this.options.rackSize);
 
             this.toggleOverlay("endgame", true);
+
+            var state = this.game.getState();
+            // TODO: Store game state
+            // TODO: Determine if a new high score was set
         }
     }
 });

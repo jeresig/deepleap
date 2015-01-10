@@ -27,6 +27,15 @@ var Game = Backbone.Model.extend({
         // Be sure to intialize this before starting the game
         this.seed = options.seed || Math.round(Math.random() * 1000000);
 
+        // Store settings for future configuration
+        this.settings = {
+            maxTiles: options.maxTiles,
+            rackSize: options.rackSize,
+            scaledScore: options.scaledScore,
+            useMultiplier: options.useMultiplier,
+            seed: this.seed
+        };
+
         // A method for loading a string-based dictionary file
         // into the game engine.
         // Should be a properly-formatted PackedTrie string.
@@ -171,6 +180,20 @@ var Game = Backbone.Model.extend({
 
         // Notify the UI that the game has been reset
         this.trigger("reset");
+    },
+
+    getState: function() {
+        // TODO:
+        // - Get longest word
+        // - Get # of dropped tiles
+        // - Get longest streak
+        return {
+            results: {
+                score: this.score
+            },
+            settings: this.state,
+            log: this._log || []
+        };
     },
 
     // One of the two actions that are taken by the UI
