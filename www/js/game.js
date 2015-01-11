@@ -165,6 +165,13 @@ var Game = Backbone.Model.extend({
         this.tileQueue = [];
         this.purityControl = [];
 
+        // Store statistics about the game
+        this.results = {
+            score: 0,
+            longestLengthStreak: 0,
+            words: []
+        };
+
         this.score = 0;
         this.multiplier = 1;
         this.streak = 0;
@@ -183,14 +190,8 @@ var Game = Backbone.Model.extend({
     },
 
     getState: function() {
-        // TODO:
-        // - Get longest word
-        // - Get # of dropped tiles
-        // - Get longest streak
         return {
-            results: {
-                score: this.score
-            },
+            results: this.results,
             settings: this.state,
             log: this._log || []
         };
@@ -401,6 +402,9 @@ var Game = Backbone.Model.extend({
             this.streak = Math.min(this.streak + 1,
                 this.lengthMultipliers.length - 1);
 
+            this.results.longestLengthStreak = Math.max(
+                this.results.longestLengthStreak, this.streak);
+
         // Reset the streak if the user failed to write a long-enough word
         } else {
             this.streak = 0;
@@ -413,6 +417,9 @@ var Game = Backbone.Model.extend({
         if (!word) {
             return;
         }
+
+        // Keep track of which words were spelled
+        this.results.words.push(word);
 
         // Give a bonus for long word streaks
         var lengthMultiplier = this.useLengthMultiplier ?
@@ -437,6 +444,8 @@ var Game = Backbone.Model.extend({
 
         // Add the total to the running score
         this.score += total;
+
+        this.results.score = score;
 
         // Update the streak multiplier
         if (this.useStreakMultiplier && state) {

@@ -341,6 +341,11 @@ var GameUI = Backbone.View.extend({
 
             this.toggleOverlay("endgame", true);
 
+            // TODO:
+            // - Get longest word
+            // - Get # of dropped tiles
+            // - Get longest streak
+
             var state = this.game.getState();
             // TODO: Store game state
             // TODO: Determine if a new high score was set
