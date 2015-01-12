@@ -190,11 +190,21 @@ var Game = Backbone.Model.extend({
     },
 
     getState: function() {
+        this.genStats();
+
         return {
             results: this.results,
             settings: this.state,
             log: this._log || []
         };
+    },
+
+    genStats: function() {
+        var sortedWords = this.results.words.sort(function(a, b) {
+            return b.length - a.length;
+        });
+
+        this.results.longestWord = sortedWords[0];
     },
 
     // One of the two actions that are taken by the UI
