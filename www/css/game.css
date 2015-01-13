@@ -25,6 +25,11 @@ html, body {
     margin: 0;
     -webkit-transform-origin: 0 50%;
     transform-origin: 0 50%;
+    -moz-user-select: none;
+    -khtml-user-select: none;
+    -webkit-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
 }
 
 p.note {
@@ -249,6 +254,11 @@ button.saveword {
     cursor: default;
     -webkit-transition: opacity 0.3s ease;
     transition: opacity 0.3s ease;
+    -moz-user-select: none;
+    -khtml-user-select: none;
+    -webkit-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
 }
 
 .overlay.hidden, .endgame.hidden, .startgame.hidden {
