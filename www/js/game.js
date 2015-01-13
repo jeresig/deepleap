@@ -455,7 +455,7 @@ var Game = Backbone.Model.extend({
         // Add the total to the running score
         this.score += total;
 
-        this.results.score = score;
+        this.results.score = this.score;
 
         // Update the streak multiplier
         if (this.useStreakMultiplier && state) {
