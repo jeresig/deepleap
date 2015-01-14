@@ -346,7 +346,20 @@ var GameUI = Backbone.View.extend({
             // - Get # of dropped tiles
             // - Get longest streak
 
+            var gameID = (new Date).getTime();
             var state = this.game.getState();
+
+            localforage.getItem("scores", function(err, scores) {
+                scores = scores || [];
+                scores.push(gameID);
+
+                localforage.setItem("scores", scores, function() {
+                    localforage.setItem("score-" + gameID, state, function() {
+                        console.log("Game Saved.");
+                    });
+                });
+            });
+
             // TODO: Store game state
             // TODO: Determine if a new high score was set
         }
