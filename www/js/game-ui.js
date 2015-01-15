@@ -43,6 +43,7 @@ var GameUI = Backbone.View.extend({
 
         // Initialize a copy of the game
         this.game = new Game({
+            type: "infinite",
             maxTiles: this.options.maxTiles,
             rackSize: this.options.rackSize,
             scaledScore: this.options.scaledScore,
@@ -348,13 +349,27 @@ var GameUI = Backbone.View.extend({
 
             var gameID = (new Date).getTime();
             var state = this.game.getState();
+            var type = state.settings.type;
+            var prefix = "dl-" + type + "-";
 
-            localforage.getItem("scores", function(err, scores) {
+            // Update the high score
+            localforage.getItem(prefix + "highscore", function(err, highScore) {
+                if (state.results.score > highScore) {
+                    localforage.setItem(prefix + "highscore", highScore);
+                }
+            });
+
+            // Save scores
+            localforage.getItem(prefix + "scores", function(err, scores) {
                 scores = scores || [];
-                scores.push(gameID);
 
-                localforage.setItem("scores", scores, function() {
-                    localforage.setItem("score-" + gameID, state, function() {
+                scores.push({
+                    id: gameID,
+                    results: state.results
+                });
+
+                localforage.setItem(prefix + "scores", scores, function() {
+                    localforage.setItem(prefix + "score-" + gameID, state, function() {
                         console.log("Game Saved.");
                     });
                 });

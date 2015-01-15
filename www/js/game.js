@@ -29,6 +29,7 @@ var Game = Backbone.Model.extend({
 
         // Store settings for future configuration
         this.settings = {
+            type: this.type,
             maxTiles: this.maxTiles,
             rackSize: this.rackSize,
             scaledScore: this.scaledScore,
@@ -167,6 +168,7 @@ var Game = Backbone.Model.extend({
 
         // Store statistics about the game
         this.results = {
+            startTime: (new Date).getTime(),
             score: 0,
             longestLengthStreak: 0,
             words: []
@@ -194,7 +196,7 @@ var Game = Backbone.Model.extend({
 
         return {
             results: this.results,
-            settings: this.state,
+            settings: this.settings,
             log: this._log || []
         };
     },
@@ -229,6 +231,7 @@ var Game = Backbone.Model.extend({
                     (this.maxTiles > 0 &&
                         this.droppedTiles >= this.maxTiles))) {
             if (!this.foundWord && this.maxTiles < 0) {
+                this.results.endTime = (new Date).getTime();
                 this.trigger("gameover");
                 return;
             } else {
