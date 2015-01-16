@@ -243,9 +243,9 @@ var Rack = Backbone.View.extend({
         this.tiles.push(tile);
         $letters.append(tile.render().el);
 
-        requestAnimationFrame(function() {
+        setTimeout(function() {
             tile.setX(tileLeft);
-        });
+        }, 13);
     },
 
     reset: function() {
