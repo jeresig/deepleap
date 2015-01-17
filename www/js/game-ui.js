@@ -63,6 +63,16 @@ var GameUI = Backbone.View.extend({
         for (var method in this.gameEvents) {
             this.game.on(method, _.bind(this.gameEvents[method], this));
         }
+
+        var type = this.game.type;
+        var prefix = "dl-" + type + "-";
+
+        // Update the high score
+        localforage.getItem(prefix + "highscore", _.bind(function(err, highScore) {
+            if (highScore) {
+                this.$el.find(".score .text").text("High: " + highScore);
+            }
+        }, this));
     },
 
     bind: function() {
@@ -349,13 +359,16 @@ var GameUI = Backbone.View.extend({
 
             var gameID = (new Date).getTime();
             var state = this.game.getState();
-            var type = state.settings.type;
+            var type = this.game.type;
             var prefix = "dl-" + type + "-";
 
             // Update the high score
             localforage.getItem(prefix + "highscore", function(err, highScore) {
-                if (state.results.score > highScore) {
-                    localforage.setItem(prefix + "highscore", highScore);
+                if (!highScore || state.results.score > highScore) {
+                    highScore = state.results.score;
+                    localforage.setItem(prefix + "highscore", highScore, function() {
+                        //console.log("High score saved.");
+                    });
                 }
             });
 
@@ -370,7 +383,7 @@ var GameUI = Backbone.View.extend({
 
                 localforage.setItem(prefix + "scores", scores, function() {
                     localforage.setItem(prefix + "score-" + gameID, state, function() {
-                        console.log("Game Saved.");
+                        //console.log("Game Saved.");
                     });
                 });
             });
