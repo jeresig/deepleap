@@ -64,15 +64,7 @@ var GameUI = Backbone.View.extend({
             this.game.on(method, _.bind(this.gameEvents[method], this));
         }
 
-        var type = this.game.type;
-        var prefix = "dl-" + type + "-";
-
-        // Update the high score
-        localforage.getItem(prefix + "highscore", _.bind(function(err, highScore) {
-            if (highScore) {
-                this.$el.find(".score .text").text("High: " + highScore);
-            }
-        }, this));
+        this.resetHighScore();
     },
 
     bind: function() {
@@ -120,7 +112,10 @@ var GameUI = Backbone.View.extend({
                             .text("0"),
                         $("<span>")
                             .addClass("text")
-                            .text("points")
+                            .html([
+                                $("<span>").text("High: "),
+                                $("<span>").addClass("highscore").text("0")
+                            ])
                     ])
             ]);
 
@@ -193,7 +188,46 @@ var GameUI = Backbone.View.extend({
 
         this.$el.width(this.options.maxWidth);
 
+        this.resetHighScore();
+
         return this;
+    },
+
+    resetHighScore: function() {
+        var type = this.game.type;
+        var prefix = "dl-" + type + "-";
+
+        // Update the high score
+        localforage.getItem(prefix + "highscore", _.bind(function(err, highScore) {
+            this.updateHighScore(highScore);
+        }, this));
+    },
+
+    updateHighScore: function(score) {
+        if (!score) {
+            return;
+        }
+
+        var newHigh = this.curHighScore && score > this.curHighScore;
+
+        this.curHighScore = score;
+
+        if (newHigh) {
+            this.updateNumber(".score .highscore", score);
+        } else {
+            this.$el.find(".score .highscore").text(score);
+        }
+
+        this.$el.find(".score .text").toggleClass("active", !!newHigh);
+    },
+
+    updateNumber: function(selector, number) {
+        var comma = $.animateNumber.numberStepFactories.separator(",");
+
+        this.$el.find(selector).animateNumber({
+            number: number,
+            numberStep: comma
+        });
     },
 
     toggleOverlay: function(name, toggle) {
@@ -319,11 +353,13 @@ var GameUI = Backbone.View.extend({
                         "Letter not used.")
                ).prependTo(this.$el.find(".words"));
 
-            this.$el.find(".points").text(this.game.score);
             this.$el.find(".multiplier")
                 .text(Math.round(result.lengthMultiplier) + "x");
             this.$el.find(".streak-bar .bar")
                 .css("width", (result.streak * 10) + "%");
+
+            this.updateNumber(".points", this.game.score);
+            this.updateHighScore(this.game.score);
         },
 
         reset: function() {

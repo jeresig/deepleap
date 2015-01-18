@@ -236,6 +236,10 @@ canvas.update-timer {
     left: 9px;
 }
 
+.score .text.active {
+    font-weight: bold;
+}
+
 button.saveword {
     border: 1px solid #000;
     height: 40px;
