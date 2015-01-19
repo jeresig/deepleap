@@ -210,11 +210,13 @@ var GameUI = Backbone.View.extend({
 
         var newHigh = this.curHighScore && score > this.curHighScore;
 
-        this.curHighScore = score;
-
         if (newHigh) {
+            this.curHighScore = score;
+
             this.updateNumber(".score .highscore", score);
-        } else {
+        } else if (!this.curHighScore) {
+            this.curHighScore = score;
+
             this.$el.find(".score .highscore").text(score);
         }
 
