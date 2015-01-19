@@ -210,14 +210,9 @@ var GameUI = Backbone.View.extend({
 
         var newHigh = this.curHighScore && score > this.curHighScore;
 
-        if (newHigh) {
+        if (newHigh || !this.curHighScore) {
             this.curHighScore = score;
-
-            this.updateNumber(".score .highscore", score);
-        } else if (!this.curHighScore) {
-            this.curHighScore = score;
-
-            this.$el.find(".score .highscore").text(score);
+            this.updateNumber(".score .highscore", this.curHighScore);
         }
 
         this.$el.find(".score .text").toggleClass("active", !!newHigh);
