@@ -53,6 +53,10 @@ var GameUI = Backbone.View.extend({
             dict: options.dict
         });
 
+        this.leaderboard = new Leaderboard({
+            type: "infinite"
+        });
+
         this.rack.off("swap");
 
         this.rack.on("swap", _.bind(function(a, b) {
@@ -194,11 +198,7 @@ var GameUI = Backbone.View.extend({
     },
 
     resetHighScore: function() {
-        var type = this.game.type;
-        var prefix = "dl-" + type + "-";
-
-        // Update the high score
-        localforage.getItem(prefix + "highscore", _.bind(function(err, highScore) {
+        this.leaderboard.getHighScore(_.bind(function(highScore) {
             this.updateHighScore(highScore);
         }, this));
     },
@@ -396,14 +396,14 @@ var GameUI = Backbone.View.extend({
             var prefix = "dl-" + type + "-";
 
             // Update the high score
-            localforage.getItem(prefix + "highscore", function(err, highScore) {
+            this.leaderboard.getHighScore(_.bind(function(highScore) {
                 if (!highScore || state.results.score > highScore) {
                     highScore = state.results.score;
-                    localforage.setItem(prefix + "highscore", highScore, function() {
+                    this.leaderboard.setHighScore(highScore, function() {
                         //console.log("High score saved.");
                     });
                 }
-            });
+            }, this));
 
             // Save scores
             localforage.getItem(prefix + "scores", function(err, scores) {
