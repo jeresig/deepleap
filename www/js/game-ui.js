@@ -390,36 +390,8 @@ var GameUI = Backbone.View.extend({
             // - Get # of dropped tiles
             // - Get longest streak
 
-            var gameID = (new Date).getTime();
-            var state = this.game.getState();
-            var type = this.game.type;
-            var prefix = "dl-" + type + "-";
-
-            // Update the high score
-            this.leaderboard.getHighScore(_.bind(function(highScore) {
-                if (!highScore || state.results.score > highScore) {
-                    highScore = state.results.score;
-                    this.leaderboard.setHighScore(highScore, function() {
-                        //console.log("High score saved.");
-                    });
-                }
-            }, this));
-
-            // Save scores
-            localforage.getItem(prefix + "scores", function(err, scores) {
-                scores = scores || [];
-
-                scores.push({
-                    id: gameID,
-                    results: state.results
-                });
-
-                localforage.setItem(prefix + "scores", scores, function() {
-                    localforage.setItem(prefix + "score-" + gameID, state, function() {
-                        //console.log("Game Saved.");
-                    });
-                });
-            });
+            // Record the score
+            this.leaderboard.addGame(this.game.getState());
 
             // TODO: Store game state
             // TODO: Determine if a new high score was set
