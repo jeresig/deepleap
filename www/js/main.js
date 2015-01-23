@@ -1,10 +1,7 @@
 $(function() {
-    console.log("ready")
-
     function dictReady(dict) {
-        console.log("dictReady")
         // Need to start the game
-        var gameUI = new GameUI({
+        window.gameUI = new GameUI({
             el: "#main",
 
             // Pass the dictionary into the game
@@ -14,6 +11,16 @@ $(function() {
             // and set the seed on the game
             seed: parseInt((/game=(\d+)/.exec(location.search) || [0,0])[1])
         });
+
+        document.addEventListener("deviceready", function() {
+            if (typeof gamecenter !== "undefined") {
+                gamecenter.auth(function(user) {
+                    gameUI.setUser(user);
+                }, function() {
+                    // Failure.
+                });
+            }
+        }, false);
     }
 
     // See if the property that we want is pre-cached in the localStorage
@@ -39,17 +46,3 @@ $(function() {
         });
     }
 });
-
-document.addEventListener("deviceready", function() {
-    console.log("deviceready");
-    if (typeof gamecenter !== "undefined") {
-        console.log("gamecenter");
-        gamecenter.auth(function(user) {
-            console.log("auth", user);
-            //gameUI.setUser(user);
-        }, function() {
-            console.log("auth failure");
-            // Failure.
-        });
-    }
-}, false);
