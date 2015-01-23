@@ -71,6 +71,12 @@ var GameUI = Backbone.View.extend({
         this.resetHighScore();
     },
 
+    setUser: function(user) {
+        this.user = user;
+
+        this.leaderboard.setUser(user);
+    },
+
     bind: function() {
         this.$el.on("click", ".restart", _.bind(function() {
             this.toggleOverlay("endgame", false);

@@ -1,5 +1,8 @@
 $(function() {
+    console.log("ready")
+
     function dictReady(dict) {
+        console.log("dictReady")
         // Need to start the game
         var gameUI = new GameUI({
             el: "#main",
@@ -36,3 +39,17 @@ $(function() {
         });
     }
 });
+
+document.addEventListener("deviceready", function() {
+    console.log("deviceready");
+    if (typeof gamecenter !== "undefined") {
+        console.log("gamecenter");
+        gamecenter.auth(function(user) {
+            console.log("auth", user);
+            //gameUI.setUser(user);
+        }, function() {
+            console.log("auth failure");
+            // Failure.
+        });
+    }
+}, false);

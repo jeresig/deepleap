@@ -4,6 +4,10 @@ var Leaderboard = Backbone.Model.extend({
         this.prefix = "dl-" + options.type + "-";
     },
 
+    setUser: function(user) {
+        this.user = user;
+    },
+
     addGame: function(state) {
         // TODO: Add in more identifying info
         var gameID = (new Date).getTime();
@@ -54,5 +58,7 @@ var Leaderboard = Backbone.Model.extend({
 
     syncServer: function() {
         // Sync local scores with the server
+        // TODO: Only sync if the user has logged in
+        // TODO: Send user details to the server
     }
 });
