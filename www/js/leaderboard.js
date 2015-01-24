@@ -25,7 +25,8 @@ var Leaderboard = Backbone.Model.extend({
 
             scores.push({
                 id: gameID,
-                // TODO: Add in the user account details
+                user: this.user,
+                type: this.type,
                 results: state.results,
                 saved: false,
                 verified: false
@@ -60,5 +61,44 @@ var Leaderboard = Backbone.Model.extend({
         // Sync local scores with the server
         // TODO: Only sync if the user has logged in
         // TODO: Send user details to the server
+
+        localforage.getItem(this.prefix + "scores", _.bind(function(err, scores) {
+            var toSave = scores.filter(function(score) {
+                return !score.saved;
+            });
+
+            async.mapLimit(toSave, _.bind(function(score, callback) {
+                localforage.getItem(this.prefix + "score-" + gameID, _.bind(function(err, data) {
+                    score.log = data.log;
+                    score.settings = data.settings;
+                    callback(null, score);
+                });
+            }, this), function(err, toSave) {
+                $.ajax({
+                    url: "/scores",
+                    data: toSave,
+                    success: function(results) {
+                        var done = {};
+
+                        results.forEach(function(result) {
+                            done[result.id] = result;
+                        });
+
+                        scores.forEach(function(score) {
+                            if (score.id in done) {
+                                var result = done[score.id];
+
+                                score.saved = result.saved;
+                                score.verified = result.verified;
+                            }
+                        });
+
+                        localforage.setItem(this.prefix + "scores", scores, function() {
+                            // Scores saved
+                        });
+                    }
+                });
+            });
+        }, this));
     }
 });
