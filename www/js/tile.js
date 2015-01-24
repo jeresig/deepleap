@@ -61,12 +61,13 @@ var Tile = Backbone.View.extend({
         if (couldDrop && !this.found) {
             if (!this.wiggleInterval) {
                 var wiggle = 0;
+                var self = this;
 
-                this.wiggleInterval = setInterval(_.bind(function() {
-                    this.setRotate(wiggle % 2 === 0 ?
+                this.wiggleInterval = setInterval(function() {
+                    self.setRotate(wiggle % 2 === 0 ?
                         2 : -2);
                     wiggle += 1;
-                }, this), 100);
+                }, 100);
             }
         } else {
             clearInterval(this.wiggleInterval);
@@ -84,9 +85,10 @@ var Tile = Backbone.View.extend({
 
         this.$el.toggleClass("leaving", !!leaving);
 
-        this.leavingTimer = setTimeout(_.bind(function() {
-            this.remove();
-        }, this), 300);
+        var self = this;
+        this.leavingTimer = setTimeout(function() {
+            self.remove();
+        }, 300);
     },
 
     setScale: function(scale) {

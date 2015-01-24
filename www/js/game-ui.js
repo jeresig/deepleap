@@ -23,6 +23,9 @@ var GameUI = Backbone.View.extend({
             rackSize: this.options.rackSize
         });
 
+        // Remember the server to which scores are saved
+        this.server = options.server;
+
         // Expand the rack to take up the full width
         this.options.maxWidth = Math.min($(window).width(), 1024);
         this.options.scale = this.options.maxWidth / this.rack.rackWidth();
@@ -35,6 +38,8 @@ var GameUI = Backbone.View.extend({
     },
 
     initGame: function(options) {
+        var self = this;
+
         options = options || {};
 
         if (this.game) {
@@ -53,15 +58,16 @@ var GameUI = Backbone.View.extend({
             dict: options.dict
         });
 
-        this.leaderboard = new Leaderboard({
-            type: "infinite"
+        this.scores = new Scores({
+            type: "infinite",
+            server: this.server
         });
 
         this.rack.off("swap");
 
-        this.rack.on("swap", _.bind(function(a, b) {
-            this.game.swap(a, b);
-        }, this));
+        this.rack.on("swap", function(a, b) {
+            self.game.swap(a, b);
+        });
 
         // Attach all the game events
         for (var method in this.gameEvents) {
@@ -74,19 +80,21 @@ var GameUI = Backbone.View.extend({
     setUser: function(user) {
         this.user = user;
 
-        this.leaderboard.setUser(user);
+        this.scores.setUser(user);
     },
 
     bind: function() {
-        this.$el.on("click", ".restart", _.bind(function() {
-            this.toggleOverlay("endgame", false);
-            this.restart();
-        }, this));
+        var self = this;
 
-        this.$el.on("click", ".start", _.bind(function() {
-            this.toggleOverlay("startgame", false);
-            this.start();
-        }, this));
+        this.$el.on("click", ".restart", function() {
+            self.toggleOverlay("endgame", false);
+            self.restart();
+        });
+
+        this.$el.on("click", ".start", function() {
+            self.toggleOverlay("startgame", false);
+            self.start();
+        });
 
         if (typeof FastClick !== "undefined") {
             FastClick.attach(this.el);
@@ -204,9 +212,11 @@ var GameUI = Backbone.View.extend({
     },
 
     resetHighScore: function() {
-        this.leaderboard.getHighScore(_.bind(function(highScore) {
-            this.updateHighScore(highScore);
-        }, this));
+        var self = this;
+
+        this.scores.getHighScore(function(highScore) {
+            self.updateHighScore(highScore);
+        });
     },
 
     updateHighScore: function(score) {
@@ -293,30 +303,31 @@ var GameUI = Backbone.View.extend({
         },
 
         updateDone: function() {
+            var self = this;
             var totalTime = this.game.updateRate * this.game.rack.length;
             var startTime = (new Date).getTime();
 
             // Make sure any previous circle animations are stopped
             clearInterval(this.circleTimer);
 
-            this.circleTimer = setInterval(_.bind(function() {
+            this.circleTimer = setInterval(function() {
                 var timeDiff = (new Date).getTime() - startTime;
                 var nearEnd = totalTime - timeDiff <= totalTime / 4;
 
-                this.updateTimer.update(
+                self.updateTimer.update(
                     Math.min(timeDiff / totalTime, 1),
                     nearEnd,
-                    !!this.game.foundWord
+                    !!self.game.foundWord
                 );
 
-                if (!this.game.foundWord && nearEnd) {
-                    this.rack.setCouldDrop(true);
+                if (!self.game.foundWord && nearEnd) {
+                    self.rack.setCouldDrop(true);
                 }
 
                 if (timeDiff >= totalTime) {
-                    clearInterval(this.circleTimer);
+                    clearInterval(self.circleTimer);
                 }
-            }, this), 13);
+            }, 13);
         },
 
         dropTile: function(letter) {
@@ -397,7 +408,7 @@ var GameUI = Backbone.View.extend({
             // - Get longest streak
 
             // Record the score
-            this.leaderboard.addGame(this.game.getState());
+            this.scores.addGame(this.game.getState());
 
             // TODO: Store game state
             // TODO: Determine if a new high score was set

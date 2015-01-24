@@ -8,6 +8,7 @@ var board = new Leaderboard("deepleap", {pageSize: 20}, redis);
 
 var server = restify.createServer();
 
+server.use(restify.CORS());
 server.use(restify.bodyParser());
 
 server.get("/leaderboard", function(req, res, next) {
