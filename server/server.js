@@ -4,7 +4,16 @@ var Leaderboard = require("leaderboard");
 
 var client = redis.createClient();
 
-var board = new Leaderboard("deepleap", {pageSize: 20}, redis);
+var boards = {};
+
+var getHighScoreBoard = function(type) {
+    if (!(type in boards)) {
+        boards[type] = new Leaderboard("snp-highscores-" + type,
+            {pageSize: 20}, redis);
+    }
+
+    return boards[type];
+};
 
 var server = restify.createServer();
 
@@ -20,30 +29,33 @@ server.get("/leaderboard", function(req, res, next) {
 
 server.post("/scores", function(req, res, next) {
     var user = req.params.name;
-    var results;
-
-    // TODO: Get the board from the result type
-
-    // TODO: Work on an array of scores
+    var games;
 
     try {
-        results = JSON.parse(req.body);
+        games = JSON.parse(req.body);
     } catch(e) {
         return next(new Error("Malformed request object."));
     }
 
-    // TODO: Validate the score from the log
+    // TODO: Work on an array of scores
+    async.eachLimit(games, 1, function(game, callback) {
+        // TODO: Get the board from the result type
 
-    var score = results.score;
-    var user = results.user.playerID;
+        // TODO: Validate the score from the log
 
-    board.add(user, score, function(err) {
-        board.score(user, function(err, score) {
-            // TODO: Return an array of objects showing if
-            // the score was saved and if it was validated
-            res.send(200, score);
-            next();
+        var score = results.score;
+        var user = results.user.playerID;
+
+        board.add(user, score, function(err) {
+            board.score(user, function(err, score) {
+                // TODO: Return an array of objects showing if
+                // the score was saved and if it was validated
+                res.send(200, score);
+                next();
+            });
         });
+    }, function() {
+        
     });
 });
 
