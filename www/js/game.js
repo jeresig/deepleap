@@ -613,6 +613,18 @@ var Game = Backbone.Model.extend({
     }
 });
 
+Game.validate = function(state, dict) {
+	var game = new Game(_.extend({dict: dict}, state.settings));
+
+    game.playback(true, state.log);
+
+    var endState = game.getState();
+    var origResults = _.pick(state.results, ["score", "words"]);
+    var endResults = _.pick(endState.results, ["score", "words"]);
+
+    return _.isEqual(origResults, endResults);
+};
+
 // If we're using Node.js, export the Game
 if (typeof exports !== "undefined") {
     exports.Game = Game;

@@ -1,8 +1,11 @@
 var restify = require("restify");
 var redis = require("redis");
 var Leaderboard = require("leaderboard");
+var Game = require("../www/js/game.js").Game;
 
 var client = redis.createClient();
+
+// TODO: Load all necessary dictionaries
 
 var boards = {};
 
@@ -40,6 +43,8 @@ server.post("/scores", function(req, res, next) {
     // TODO: Work on an array of scores
     async.eachLimit(games, 1, function(game, callback) {
         // TODO: Get the board from the result type
+        // TODO: Get right dict from lang
+        Game.validate(game, dict);
 
         // TODO: Validate the score from the log
 
