@@ -614,7 +614,7 @@ var Game = Backbone.Model.extend({
 });
 
 Game.validate = function(state, dict) {
-	var game = new Game(_.extend({dict: dict}, state.settings));
+    var game = new Game(_.extend({dict: dict}, state.settings));
 
     game.playback(true, state.log);
 
