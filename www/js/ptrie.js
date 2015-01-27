@@ -245,4 +245,8 @@
 		// Expose PackedTrie globally
     this.PackedTrie = PackedTrie;
 
+    // If we're using Node.js, export PackedTrie
+    if (typeof exports !== "undefined") {
+        exports.PackedTrie = PackedTrie;
+    }
 })();

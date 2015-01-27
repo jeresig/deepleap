@@ -1,11 +1,24 @@
+var fs = require("fs");
+
 var restify = require("restify");
 var redis = require("redis");
 var Leaderboard = require("leaderboard");
+
 var Game = require("../www/js/game.js").Game;
+var PackedTrie = require("../www/js/ptrie.js").PackedTrie;
 
 var client = redis.createClient();
 
-// TODO: Load all necessary dictionaries
+var dicts = {};
+
+var getDict = function(lang) {
+    if (!(lang in dicts)) {
+        dicts[lang] = new PackedTrie(
+            fs.readFileSync("../dict/ptrie/" + lang + ".ptrie"));
+    }
+
+    return dicts[lang];
+};
 
 var boards = {};
 
@@ -40,13 +53,15 @@ server.post("/scores", function(req, res, next) {
         return next(new Error("Malformed request object."));
     }
 
-    // TODO: Work on an array of scores
-    async.eachLimit(games, 1, function(game, callback) {
-        // TODO: Get the board from the result type
-        // TODO: Get right dict from lang
-        Game.validate(game, dict);
+    // TODO: Get current max score
 
-        // TODO: Validate the score from the log
+    // Work through an array of scores
+    async.eachLimit(games, 1, function(game, callback) {
+        // Get right dict from lang
+        var dict = getDict(game.settings.lang);
+
+        // Validate the score from the log
+        Game.validate(game, dict);
 
         var score = results.score;
         var user = results.user.playerID;
@@ -60,7 +75,9 @@ server.post("/scores", function(req, res, next) {
             });
         });
     }, function() {
-        
+        // TODO: Render results
+        res.send(200, []);
+        next();
     });
 });
 

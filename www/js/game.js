@@ -9,6 +9,11 @@
  *   game.start();
  */
 
+if (typeof Backbone === "undefined" && typeof require !== "undefined") {
+    var Backbone = require("backbone");
+    var _ = require("lodash");
+}
+
 // Instantiate a new Game object
 var Game = Backbone.Model.extend({
     // Callbacks and Triggering
@@ -622,7 +627,11 @@ Game.validate = function(state, dict) {
     var origResults = _.pick(state.results, ["score", "words"]);
     var endResults = _.pick(endState.results, ["score", "words"]);
 
-    return _.isEqual(origResults, endResults);
+    if (_.isEqual(origResults, endResults)) {
+        return endState.results;
+    }
+
+    return false;
 };
 
 // If we're using Node.js, export the Game
