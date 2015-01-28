@@ -80,8 +80,11 @@ var Scores = Backbone.Model.extend({
             });
 
             $.ajax({
+                type: "POST",
                 url: self.server + "/scores",
-                data: games,
+                contentType: "application/json",
+                data: JSON.stringify(games),
+                dataType: "json",
                 success: function(results) {
                     // TODO: Only reset if verified successfully
                     // Wipe out saved games
