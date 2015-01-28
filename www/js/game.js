@@ -38,7 +38,8 @@ var Game = Backbone.Model.extend({
             rackSize: this.rackSize,
             scaledScore: this.scaledScore,
             useLengthBonus: this.useLengthBonus,
-            seed: this.seed
+            seed: this.seed,
+            lang: this.lang
         };
 
         // A method for loading a string-based dictionary file

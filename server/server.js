@@ -1,5 +1,6 @@
 var fs = require("fs");
 
+var async = require("async");
 var restify = require("restify");
 var redis = require("redis");
 var Leaderboard = require("leaderboard");
@@ -13,8 +14,11 @@ var dicts = {};
 
 var getDict = function(lang) {
     if (!(lang in dicts)) {
-        dicts[lang] = new PackedTrie(
-            fs.readFileSync("../dict/ptrie/" + lang + ".ptrie"));
+        var dict = fs.readFileSync("../dict/ptrie/" + lang + ".ptrie", {
+            encoding: "utf8"
+        });
+
+        dicts[lang] = new PackedTrie(dict);
     }
 
     return dicts[lang];
@@ -45,13 +49,7 @@ server.get("/leaderboard", function(req, res, next) {
 
 server.post("/scores", function(req, res, next) {
     var user = req.params.name;
-    var games;
-
-    try {
-        games = JSON.parse(req.body);
-    } catch(e) {
-        return next(new Error("Malformed request object."));
-    }
+    var games = req.body;
 
     // TODO: Get current max score
 
@@ -61,11 +59,15 @@ server.post("/scores", function(req, res, next) {
         var dict = getDict(game.settings.lang);
 
         // Validate the score from the log
-        Game.validate(game, dict);
+        var validResults = Game.validate(game, dict);
 
-        var score = results.score;
-        var user = results.user.playerID;
+        var score = validResults.score;
+        var user = game.user.playerID;
 
+        //console.log(user, score, validResults);
+
+        callback();
+        /*
         board.add(user, score, function(err) {
             board.score(user, function(err, score) {
                 // TODO: Return an array of objects showing if
@@ -74,6 +76,7 @@ server.post("/scores", function(req, res, next) {
                 next();
             });
         });
+        */
     }, function() {
         // TODO: Render results
         res.send(200, []);

@@ -49,6 +49,7 @@ var GameUI = Backbone.View.extend({
         // Initialize a copy of the game
         this.game = new Game({
             type: "infinite",
+            lang: "en",
             maxTiles: this.options.maxTiles,
             rackSize: this.options.rackSize,
             scaledScore: this.options.scaledScore,

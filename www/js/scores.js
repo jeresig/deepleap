@@ -2,6 +2,7 @@ var Scores = Backbone.Model.extend({
     initialize: function(options) {
         this.type = options.type;
         this.prefix = "snp-" + options.type + "-";
+        this.server = options.server
     },
 
     setUser: function(user) {
@@ -71,12 +72,14 @@ var Scores = Backbone.Model.extend({
         }
 
         var self = this;
+        var gamesKey = this.prefix + "games";
 
-        this.getKey(this.prefix + "games", function(err, games) {
+        this.getKey(gamesKey, function(err, games) {
             // Fill in any missing user details
             // (in case the user wasn't logged in at the time)
             games = games.map(function(game) {
                 game.user = game.user || self.user;
+                return game;
             });
 
             $.ajax({
