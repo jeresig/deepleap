@@ -9,8 +9,10 @@ var Game = require("../www/js/game.js").Game;
 var PackedTrie = require("../www/js/ptrie.js").PackedTrie;
 
 var client = redis.createClient();
+var server = restify.createServer();
 
 var dicts = {};
+var boards = {};
 
 var getDict = function(lang) {
     if (!(lang in dicts)) {
@@ -24,62 +26,86 @@ var getDict = function(lang) {
     return dicts[lang];
 };
 
-var boards = {};
-
 var getHighScoreBoard = function(type) {
     if (!(type in boards)) {
         boards[type] = new Leaderboard("snp-highscores-" + type,
-            {pageSize: 20}, redis);
+            {pageSize: 50}, redis);
     }
 
     return boards[type];
 };
 
-var server = restify.createServer();
-
 server.use(restify.CORS());
 server.use(restify.bodyParser());
 
-server.get("/leaderboard", function(req, res, next) {
+server.get("/leaderboard/:type", function(req, res, next) {
+    var board = getHighScoreBoard(req.params.type);
+
     board.list(0, function(err, list) {
         res.send(list);
         next();
     });
 });
 
+server.get("/scores/:user", function(req, res, next) {
+    var user = req.params.user;
+
+    var types = Object.keys(boards);
+    var results = {};
+
+    async.each(types, function(type, callback) {
+        var board = getHighScoreBoard(type);
+
+        board.score(user, function(err, curHighScore) {
+            results[type] = curHighScore || 0;
+            callback();
+        });
+    }, function() {
+        res.send(200, results);
+        next();
+    });
+});
+
 server.post("/scores", function(req, res, next) {
-    var user = req.params.name;
     var games = req.body;
 
-    // TODO: Get current max score
-
     // Work through an array of scores
-    async.eachLimit(games, 1, function(game, callback) {
+    async.mapLimit(games, 4, function(game, callback) {
         // Get right dict from lang
         var dict = getDict(game.settings.lang);
 
         // Validate the score from the log
         var validResults = Game.validate(game, dict);
 
+        var ret = {
+            id: game.id,
+            validated: !!validResults
+        };
+
+        if (!validResults) {
+            return callback(null, ret);
+        }
+
         var score = validResults.score;
         var user = game.user.playerID;
 
-        //console.log(user, score, validResults);
+        var board = getHighScoreBoard(game.settings.type);
 
-        callback();
-        /*
-        board.add(user, score, function(err) {
-            board.score(user, function(err, score) {
-                // TODO: Return an array of objects showing if
-                // the score was saved and if it was validated
-                res.send(200, score);
-                next();
-            });
+        // TODO: Save game state, as well
+
+        // Get current max score
+        board.score(user, function(err, curHighScore) {
+            if (!curHighScore || score > curHighScore) {
+                board.add(user, score, function() {
+                    callback(err, ret);
+                });
+            } else {
+                callback(err, ret);
+            }
         });
-        */
-    }, function() {
-        // TODO: Render results
-        res.send(200, []);
+    }, function(err, results) {
+        // Render results
+        res.send(200, results);
         next();
     });
 });
