@@ -89,10 +89,21 @@ var Scores = Backbone.Model.extend({
                 data: JSON.stringify(games),
                 dataType: "json",
                 success: function(results) {
-                    // TODO: Only reset if verified successfully
-                    // Wipe out saved games
-                    self.setKey(gamesKey, [], function() {
-                        // Scores saved
+                    var done = {};
+
+                    results.forEach(function(result) {
+                        done[result.id] = true;
+                    });
+
+                    self.getKey(gamesKey, function(err, games) {
+                        // Only reset verified games
+                        games = games.filter(function(game) {
+                            return !(game.id in done);
+                        });
+
+                        self.setKey(gamesKey, games, function() {
+                            // Scores saved
+                        });
                     });
                 }
             });
