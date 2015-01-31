@@ -173,7 +173,7 @@ var Game = Backbone.Model.extend({
 
         // A semi-unique id for the game
         // (probably unique to the user)
-        this.id = (new Date).getTime();
+        this.gid = (new Date).getTime();
 
         // Store statistics about the game
         this.results = {
@@ -204,7 +204,7 @@ var Game = Backbone.Model.extend({
         this.genStats();
 
         return {
-            id: this.id,
+            gid: this.gid,
             type: this.type,
             results: this.results,
             settings: this.settings,

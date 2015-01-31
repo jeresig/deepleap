@@ -91,14 +91,17 @@ var Scores = Backbone.Model.extend({
                 success: function(results) {
                     var done = {};
 
-                    results.forEach(function(result) {
-                        done[result.id] = true;
+                    // Load updated user data
+                    user.updateFromData(results.user);
+
+                    results.games.forEach(function(result) {
+                        done[result.gid] = true;
                     });
 
                     self.getKey(gamesKey, function(err, games) {
                         // Only reset verified games
                         games = games.filter(function(game) {
-                            return !(game.id in done);
+                            return !(game.gid in done);
                         });
 
                         self.setKey(gamesKey, games, function() {
