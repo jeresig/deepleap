@@ -4,13 +4,23 @@ var User = Backbone.Model.extend({
         this.auth = options.auth;
     },
 
-    updateFromData: function(data) {
-        // TODO: Update user object
-        // TODO: Update localforage record
+    updateFromData: function(data, callback) {
+        this.data = data;
+        this.cacheLocally(callback);
     },
 
-    syncWithServer: function() {
+    verifyAuth: function(auth) {
+        if (this.auth) {
+            return !!(this.auth.playerID === auth.playerID);
+        }
+
+        return false;
+    },
+
+    syncWithServer: function(callback) {
         var self = this;
+
+        // TODO: Timeout after a certain amount
 
         // /auth/gamecenter
         $.ajax({
@@ -21,9 +31,25 @@ var User = Backbone.Model.extend({
             dataType: "json",
             success: function(results) {
                 // Load updated user data
-                user.updateFromData(results.user);
+                user.updateFromData(results.user, callback);
             }
         });
+    },
+
+    cacheLocally: function(callback) {
+        localforage.setItem("snp-user", this.toJSON(), function(err) {
+            // Cached.
+            if (callback) {
+                callback(err);
+            }
+        });
+    },
+
+    toJSON: function() {
+        return {
+            data: this.data,
+            auth: this.auth
+        }
     }
 }, {
     setCurrentUser: function(user) {
@@ -35,8 +61,17 @@ var User = Backbone.Model.extend({
         return this.currentUser;
     },
 
-    createUserFromAuth: function(auth) {
-        
+    createUserFromAuth: function(auth, callback) {
+        var user = new User({
+            data: {},
+            auth: auth
+        });
+
+        user.syncWithServer(function() {
+            if (callback) {
+                callback(null, user);
+            }
+        });
     },
 
     autoAuth: function() {
@@ -51,8 +86,9 @@ var User = Backbone.Model.extend({
                         var curUser = User.getCurrentUser();
 
                         if (curUser && !curUser.verifyAuth(auth) || !curUser) {
-                            var user = User.createUserFromAuth(auth);
-                            User.setCurrentUser(user);
+                            User.createUserFromAuth(auth, function(err, user) {
+                                User.setCurrentUser(user);
+                            });
                         }
                     }, function() {
                         // Failure.
