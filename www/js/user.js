@@ -1,5 +1,6 @@
 var User = Backbone.Model.extend({
     initialize: function(options) {
+        this.data = options.data;
         this.auth = options.auth;
     },
 

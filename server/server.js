@@ -36,8 +36,9 @@ var getHighScoreBoard = function(type) {
 server.use(restify.CORS());
 server.use(restify.bodyParser());
 
-var User = function(data) {
-    this.data = data;
+var User = function(options) {
+    this.data = options.data;
+    this.auth = options.auth;
 };
 
 User.prototype = {
@@ -110,7 +111,7 @@ User.getByID = function(id, callback) {
             return callback(err);
         }
 
-        callback(null, new User(data));
+        callback(null, new User({data: data}));
     });
 };
 
@@ -122,7 +123,10 @@ User.loginUsingGameCenter = function(auth, callback) {
             return cursor.toArray();
         }).then(function(results) {
             if (results.length === 0) {
-                callback(null, new User(results[0]));
+                callback(null, new User({
+                    data: results[0].right,
+                    auth: results[0].left
+                }));
             } else {
                 // Let's hope this doesn't go into a never-ending loop!
                 User.createFromGameCenter(auth, callback);
