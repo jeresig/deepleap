@@ -74,26 +74,33 @@ var User = Backbone.Model.extend({
         });
     },
 
+    hasGameCenter: function() {
+        return typeof gamecenter !== "undefined";
+    },
+
     autoAuth: function() {
         localforage.getItem("snp-user", function(err, userData) {
             if (userData) {
                 User.setCurrentUser(new User(userData));
             }
 
-            document.addEventListener("deviceready", function() {
-                if (typeof gamecenter !== "undefined") {
-                    gamecenter.auth(function(auth) {
-                        var curUser = User.getCurrentUser();
+            if (!User.hasGameCenter()) {
+                // TODO: Defer the auth until later?
+                return;
+            }
 
-                        if (curUser && !curUser.verifyAuth(auth) || !curUser) {
-                            User.createUserFromAuth(auth, function(err, user) {
-                                User.setCurrentUser(user);
-                            });
-                        }
-                    }, function() {
-                        // Failure.
-                    });
-                }
+            document.addEventListener("deviceready", function() {
+                gamecenter.auth(function(auth) {
+                    var curUser = User.getCurrentUser();
+
+                    if (curUser && !curUser.verifyAuth(auth) || !curUser) {
+                        User.createUserFromAuth(auth, function(err, user) {
+                            User.setCurrentUser(user);
+                        });
+                    }
+                }, function() {
+                    // Failure.
+                });
             }, false);
         });
     }
