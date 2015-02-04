@@ -77,7 +77,7 @@ var User = Backbone.Model.extend({
     autoAuth: function() {
         localforage.getItem("snp-user", function(err, userData) {
             if (userData) {
-                User.setCurrentUser(new User(userData)));
+                User.setCurrentUser(new User(userData));
             }
 
             document.addEventListener("deviceready", function() {
