@@ -15,15 +15,7 @@ $(function() {
             seed: parseInt((/game=(\d+)/.exec(location.search) || [0,0])[1])
         });
 
-        document.addEventListener("deviceready", function() {
-            if (typeof gamecenter !== "undefined") {
-                gamecenter.auth(function(user) {
-                    gameUI.setUser(user);
-                }, function() {
-                    // Failure.
-                });
-            }
-        }, false);
+        gameUI.autoAuth();
     }
 
     // See if the property that we want is pre-cached in the localStorage

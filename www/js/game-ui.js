@@ -414,5 +414,32 @@ var GameUI = Backbone.View.extend({
             // TODO: Store game state
             // TODO: Determine if a new high score was set
         }
+    },
+
+    autoAuth: function() {
+        localforage.getItem("snp-user", function(err, userData) {
+            if (userData) {
+                User.setCurrentUser(new User(userData));
+            }
+
+            if (!User.hasGameCenter()) {
+                // TODO: Defer the auth until later?
+                return;
+            }
+
+            document.addEventListener("deviceready", function() {
+                gamecenter.auth(function(auth) {
+                    var curUser = User.getCurrentUser();
+
+                    if (curUser && !curUser.verifyAuth(auth) || !curUser) {
+                        User.createUserFromAuth(auth, function(err, user) {
+                            User.setCurrentUser(user);
+                        });
+                    }
+                }, function() {
+                    // Failure.
+                });
+            }, false);
+        });
     }
 });
