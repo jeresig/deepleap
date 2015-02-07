@@ -108,6 +108,23 @@ var GameUI = Backbone.View.extend({
             self.start();
         });
 
+        this.$el.on("click", ".showchallenges", function() {
+            self.toggleOverlay("startgame", false);
+
+            self.renderChallenges();
+
+            setTimeout(function() {
+                self.toggleOverlay("challenges", true);
+            }, 350);
+        });
+
+        this.$el.on("click", ".showchallenge", function() {
+            self.toggleOverlay("challenges", false);
+
+            // TODO: Start a challenge-style game
+            self.start();
+        });
+
         if (typeof FastClick !== "undefined") {
             FastClick.attach(this.el);
         }
@@ -160,15 +177,18 @@ var GameUI = Backbone.View.extend({
             ]);
 
         var $startGame = $("<div>")
-            .addClass("startgame")
+            .addClass("startgame full-overlay")
             .html([
                 $("<button>")
                     .addClass("start")
-                    .text("Play")
+                    .text("Play"),
+                $("<button>")
+                    .addClass("showchallenges")
+                    .text("Challenges")
             ]);
 
         var $endGame = $("<div>")
-            .addClass("endgame hidden")
+            .addClass("endgame full-overlay hidden")
             .hide()
             .html([
                 $("<div>")
@@ -176,6 +196,14 @@ var GameUI = Backbone.View.extend({
                 $("<button>")
                     .addClass("restart")
                     .text("Play Again")
+            ]);
+
+        var $challenges = $("<div>")
+            .addClass("challenges full-overlay hidden")
+            .hide()
+            .html([
+                $("<div>")
+                    .addClass("challenge-list")
             ]);
 
         var $overlay = $("<div>")
@@ -205,11 +233,14 @@ var GameUI = Backbone.View.extend({
             // Add the end of game overlay
             $endGame,
 
+            // Add the challenges overlay
+            $challenges,
+
             // The game board
             $board
         ]);
 
-        this.$el.find(".board, .endgame, .startgame")
+        this.$el.find(".board, .full-overlay")
             .css({
                 transform: "translateY(-50%) scale(" +
                     this.options.scale + ")",
@@ -221,6 +252,21 @@ var GameUI = Backbone.View.extend({
         this.resetHighScore();
 
         return this;
+    },
+
+    renderChallenges: function() {
+        var challenges = [];
+
+        for (var i = 1; i <= 25; i++) {
+            challenges.push(
+                $("<button>")
+                    .addClass("showchallenge")
+                    .data("challenge", i)
+                    .text("Challenge #" + i)
+            );
+        }
+
+        this.$el.find(".challenge-list").html(challenges);
     },
 
     resetHighScore: function() {
@@ -264,7 +310,7 @@ var GameUI = Backbone.View.extend({
             $elems.removeClass("hidden").show();
         }
 
-        requestAnimationFrame(function() {
+        setTimeout(function() {
             $elems.toggleClass("hidden", !toggle);
 
             if (!toggle) {
@@ -272,7 +318,7 @@ var GameUI = Backbone.View.extend({
                     $elems.hide();
                 }, 300);
             }
-        });
+        }, 13);
     },
 
     start: function() {

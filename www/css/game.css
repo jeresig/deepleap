@@ -18,7 +18,7 @@ html, body {
     margin: 0 auto;
 }
 
-.board, .endgame, .startgame {
+.board, .full-overlay {
     position: relative;
     padding: 0;
     top: 50%;
@@ -265,11 +265,11 @@ button.saveword {
     user-select: none;
 }
 
-.overlay.hidden, .endgame.hidden, .startgame.hidden {
+.overlay.hidden, .full-overlay.hidden {
     opacity: 0;
 }
 
-.endgame, .startgame {
+.full-overlay {
     position: absolute;
     background: none;
     opacity: 1;
@@ -292,7 +292,7 @@ button.saveword {
     margin-right: 100px;
 }
 
-.endgame .restart, .startgame .start {
+.full-overlay button {
     background: #FFF;
     border: 3px solid #000;
     height: 40px;
