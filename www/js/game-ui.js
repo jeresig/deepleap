@@ -31,10 +31,16 @@ var GameUI = Backbone.View.extend({
         this.options.scale = this.options.maxWidth / this.rack.rackWidth();
         this.rack.options.scale = this.options.scale;
 
-        this.initGame(options);
+        this.autoAuth(function(err, user) {
+            if (user) {
+                self.setUser(user);
+            }
 
-        this.render();
-        this.bind();
+            self.initGame(options);
+
+            self.render();
+            self.bind();
+        });
     },
 
     initGame: function(options) {
@@ -61,7 +67,8 @@ var GameUI = Backbone.View.extend({
 
         this.scores = new Scores({
             type: "infinite",
-            server: this.server
+            server: this.server,
+            user: this.user
         });
 
         this.rack.off("swap");
@@ -74,14 +81,18 @@ var GameUI = Backbone.View.extend({
         for (var method in this.gameEvents) {
             this.game.on(method, _.bind(this.gameEvents[method], this));
         }
-
-        this.resetHighScore();
     },
 
     setUser: function(user) {
         this.user = user;
 
-        this.scores.setUser(user);
+        if (this.scores) {
+            this.scores.setUser(user);
+        }
+    },
+
+    getUser: function() {
+        return this.user;
     },
 
     bind: function() {
@@ -215,7 +226,7 @@ var GameUI = Backbone.View.extend({
     resetHighScore: function() {
         var self = this;
 
-        this.scores.getHighScore(function(highScore) {
+        this.scores.getHighScore(function(err, highScore) {
             self.updateHighScore(highScore);
         });
     },
@@ -271,6 +282,7 @@ var GameUI = Backbone.View.extend({
     reset: function() {
         this.rack.reset();
         this.game.reset();
+        this.resetHighScore();
     },
 
     restart: function() {
@@ -416,25 +428,29 @@ var GameUI = Backbone.View.extend({
         }
     },
 
-    autoAuth: function() {
+    autoAuth: function(callback) {
+        var self = this;
+
         User.getCachedUser(function(err, user) {
             if (user) {
-                User.setCurrentUser(user);
+                callback(err, user);
             }
 
             if (!User.hasGameCenter()) {
                 // TODO: Defer the auth until later?
+                if (!user) {
+                    User.createAnonUser(callback);
+                }
+
                 return;
             }
 
             document.addEventListener("deviceready", function() {
                 gamecenter.auth(function(auth) {
-                    var curUser = User.getCurrentUser();
+                    var curUser = self.getUser();
 
                     if (curUser && !curUser.verifyAuth(auth) || !curUser) {
-                        User.createUserFromAuth(auth, function(err, user) {
-                            User.setCurrentUser(user);
-                        });
+                        User.createUserFromAuth(auth, callback);
                     }
                 }, function() {
                     // Failure.

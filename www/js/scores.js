@@ -2,7 +2,8 @@ var Scores = Backbone.Model.extend({
     initialize: function(options) {
         this.type = options.type;
         this.prefix = "snp-" + options.type + "-";
-        this.server = options.server
+        this.server = options.server;
+        this.user = options.user;
     },
 
     setUser: function(user) {
@@ -18,22 +19,13 @@ var Scores = Backbone.Model.extend({
     },
 
     setHighScore: function(highScore, callback) {
-        var scoreKey = this.prefix + "highscore";
-        this.setKey(scoreKey, highScore, function() {
-            if (callback) {
-                callback(highScore);
-            }
-        });
+        this.user.data.state.scores[this.type] = highScore;
+        this.user.cacheLocally(callback);
     },
 
     getHighScore: function(callback) {
         // Update the high score
-        var scoreKey = this.prefix + "highscore";
-        this.getKey(scoreKey, function(err, highScore) {
-            if (callback) {
-                callback(highScore);
-            }
-        });
+        callback(null, this.user.data.state.scores[this.type]);
     },
 
     addGame: function(game) {
@@ -41,7 +33,7 @@ var Scores = Backbone.Model.extend({
         var gamesKey = this.prefix + "games";
 
         // Update the high score
-        this.getHighScore(function(highScore) {
+        this.getHighScore(function(err, highScore) {
             if (!highScore || game.results.score > highScore) {
                 self.setHighScore(game.results.score);
             }
@@ -89,23 +81,12 @@ var Scores = Backbone.Model.extend({
                 data: JSON.stringify(games),
                 dataType: "json",
                 success: function(results) {
-                    var done = {};
-
-                    // Load updated user data
-                    user.updateFromData(results.user);
-
-                    results.games.forEach(function(result) {
-                        done[result.gid] = true;
-                    });
-
-                    self.getKey(gamesKey, function(err, games) {
-                        // Only reset verified games
-                        games = games.filter(function(game) {
-                            return !(game.gid in done);
-                        });
-
-                        self.setKey(gamesKey, games, function() {
-                            // Scores saved
+                    // TODO: Only reset if verified successfully
+                    // Wipe out saved games
+                    self.setKey(gamesKey, [], function() {
+                        // Scores saved
+                        self.user.syncServer(function() {
+                            // Scores should be updated from server
                         });
                     });
                 }

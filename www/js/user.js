@@ -1,6 +1,10 @@
 var User = Backbone.Model.extend({
     initialize: function(options) {
-        this.data = options.data;
+        this.data = options.data || {
+            state: {
+                scores: {}
+            }
+        };
         this.auth = options.auth;
     },
 
@@ -17,10 +21,8 @@ var User = Backbone.Model.extend({
         return false;
     },
 
-    syncWithServer: function(callback) {
+    syncServer: function(callback) {
         var self = this;
-
-        // TODO: Timeout after a certain amount
 
         // /auth/gamecenter
         $.ajax({
@@ -29,9 +31,13 @@ var User = Backbone.Model.extend({
             contentType: "application/json",
             data: JSON.stringify(this.auth),
             dataType: "json",
+            timeout: 5000,
             success: function(results) {
                 // Load updated user data
                 user.updateFromData(results.user, callback);
+            },
+            error: function() {
+                callback();
             }
         });
     },
@@ -52,22 +58,24 @@ var User = Backbone.Model.extend({
         }
     }
 }, {
-    setCurrentUser: function(user) {
-        // TODO: Notify gameUI
-        this.currentUser = user;
-    },
-
-    getCurrentUser: function() {
-        return this.currentUser;
-    },
-
     createUserFromAuth: function(auth, callback) {
         var user = new User({
-            data: {},
             auth: auth
         });
 
-        user.syncWithServer(function() {
+        user.cacheLocally(function() {
+            user.syncServer(function() {
+                if (callback) {
+                    callback(null, user);
+                }
+            });
+        });
+    },
+
+    createAnonUser: function(callback) {
+        var user = new User({});
+
+        user.cacheLocally(function() {
             if (callback) {
                 callback(null, user);
             }

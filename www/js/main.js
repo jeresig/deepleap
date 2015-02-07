@@ -14,8 +14,6 @@ $(function() {
             // and set the seed on the game
             seed: parseInt((/game=(\d+)/.exec(location.search) || [0,0])[1])
         });
-
-        gameUI.autoAuth();
     }
 
     // See if the property that we want is pre-cached in the localStorage
