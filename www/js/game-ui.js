@@ -417,9 +417,9 @@ var GameUI = Backbone.View.extend({
     },
 
     autoAuth: function() {
-        localforage.getItem("snp-user", function(err, userData) {
-            if (userData) {
-                User.setCurrentUser(new User(userData));
+        User.getCachedUser(function(err, user) {
+            if (user) {
+                User.setCurrentUser(user);
             }
 
             if (!User.hasGameCenter()) {

@@ -74,6 +74,12 @@ var User = Backbone.Model.extend({
         });
     },
 
+    getCachedUser: function(callback) {
+        localforage.getItem("snp-user", function(err, userData) {
+            callback(err, userData ? new User(userData) : null);
+        });
+    },
+
     hasGameCenter: function() {
         return typeof gamecenter !== "undefined";
     }
