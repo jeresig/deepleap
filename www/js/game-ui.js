@@ -124,31 +124,30 @@ var GameUI = Backbone.View.extend({
             .addClass("background overlay")
             .appendTo("body");
 
-        this.$el.html([
-            // A background overlay
-            $overlay,
+        this.$el
+            .width(this.maxWidth)
+            .html([
+                // A background overlay
+                $overlay,
 
-            // Add the start of game overlay
-            $startGame,
+                // Add the start of game overlay
+                $startGame,
 
-            // Add the end of game overlay
-            $endGame,
+                // Add the end of game overlay
+                $endGame,
 
-            // Add the challenges overlay
-            $challenges,
+                // Add the challenges overlay
+                $challenges,
 
-            // The game board
-            this.board.render().el
-        ]);
+                // The game board
+                this.board.render().el
+            ]);
 
         this.$el.find(".full-overlay")
             .css({
-                transform: "translateY(-50%) scale(" +
-                    this.scale + ")",
+                transform: "translateY(-50%) scale(" + this.scale + ")",
                 width: Rack.width(this.rackSize)
             });
-
-        this.$el.width(this.maxWidth);
 
         this.bind();
 

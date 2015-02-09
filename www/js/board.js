@@ -40,6 +40,11 @@ var Board = Backbone.View.extend({
                 this.updateTimer.render().el,
 
                 $("<div>")
+                    .addClass("tiles-left hidden")
+                    .text("100"),
+
+                // Render the streak bar and multiplier
+                $("<div>")
                     .addClass("streak")
                     .html([
                         $("<span>")
@@ -81,8 +86,7 @@ var Board = Backbone.View.extend({
         this.$el
             .addClass("board")
             .css({
-                transform: "translateY(-50%) scale(" +
-                    this.scale + ")",
+                transform: "translateY(-50%) scale(" + this.scale + ")",
                 width: Rack.width(this.rackSize)
             })
             .html([
@@ -128,7 +132,7 @@ var Board = Backbone.View.extend({
         });
 
         this.scores = new Scores({
-            id: options.id,
+            id: options.id || options.type,
             type: options.type,
             server: this.server,
             user: this.user
@@ -144,6 +148,12 @@ var Board = Backbone.View.extend({
         for (var method in this.gameEvents) {
             this.game.on(method, _.bind(this.gameEvents[method], this));
         }
+
+        var showTilesLeft = this.game.maxTiles > 0;
+
+        this.$el.find(".tiles-left")
+            .toggleClass("hidden", !showTilesLeft)
+            .text(this.game.maxTiles - this.game.droppedTiles);
     },
 
     start: function(options) {
@@ -223,7 +233,7 @@ var Board = Backbone.View.extend({
             this.rack.swap(activePos, thisPos);
         },
 
-        updateDone: function() {
+        updated: function() {
             var self = this;
             var totalTime = this.game.updateRate * this.game.rack.length;
             var startTime = (new Date).getTime();
@@ -249,6 +259,16 @@ var Board = Backbone.View.extend({
                     clearInterval(self.circleTimer);
                 }
             }, 13);
+
+            var showTilesLeft = this.game.maxTiles > 0;
+            var $tilesLeft = this.$el.find(".tiles-left");
+
+            $tilesLeft.toggleClass("hidden", !showTilesLeft);
+
+            if (showTilesLeft) {
+                this.updateNumber(".tiles-left",
+                    this.game.maxTiles - this.game.droppedTiles);
+            }
         },
 
         dropTile: function(letter) {

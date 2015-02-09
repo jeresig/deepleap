@@ -92,7 +92,7 @@ var Game = Backbone.Model.extend({
 
         challenge: {
             rackSize: 7,
-            maxTiles: 75,
+            maxTiles: 100,
             scaledScore: false,
             useLengthBonus: true
         }
@@ -270,26 +270,29 @@ var Game = Backbone.Model.extend({
                 (this.rack.length === this.rackSize ||
                     (this.maxTiles > 0 &&
                         this.droppedTiles >= this.maxTiles))) {
-            if (!this.foundWord && this.maxTiles < 0) {
+            if (!this.foundWord) {
                 this.gameOver();
                 return;
             } else {
-                // Remove a word, if found, otherwise drop a tile
-                this.removeWord(this.foundWord || this.rack[0]);
+                // Remove a word, if found
+                this.removeWord(this.foundWord);
             }
         }
 
         // Figure out how many tiles need to drop and drop them in
         for (var i = 0, l = this.rackSize - this.rack.length; i < l; i++) {
-            this.addTile();
-            this.dropTile();
+            // Make sure we don't drop too many tiles
+            if (this.maxTiles < 0 || this.droppedTiles < this.maxTiles) {
+                this.addTile();
+                this.dropTile();
+            }
         }
 
         // Check to see if we've found a new word
         this.findWord();
 
         // Notify the UI that the updated tiles are ready to be displayed
-        this.trigger("updateDone");
+        this.trigger("updated");
 
         // If no tiles are left then the game is over.
         if (this.rack.length === 0) {

@@ -175,6 +175,25 @@ canvas.update-timer {
     vertical-align: bottom;
 }
 
+.tiles-left {
+    position: absolute;
+    top: 0;
+    left: 60px;
+    display: block;
+    border-radius: 10px;
+    background: rgba(0, 0, 0, 0.2);
+    height: 40px;
+    min-width: 48px;
+    text-align: right;
+    padding: 0 6px;
+    font-size: 28px;
+    line-height: 40px;
+}
+
+.tiles-left.hidden {
+    display: none;
+}
+
 .streak {
     position: relative;
     margin: 0 auto;
