@@ -1,6 +1,6 @@
 var Scores = Backbone.Model.extend({
     initialize: function(options) {
-        this.type = options.type;
+        this.id = options.id;
         this.prefix = "snp-" + options.type + "-";
         this.server = options.server;
         this.user = options.user;
@@ -19,13 +19,13 @@ var Scores = Backbone.Model.extend({
     },
 
     setHighScore: function(highScore, callback) {
-        this.user.data.state.scores[this.type] = highScore;
+        this.user.data.state.scores[this.id] = highScore;
         this.user.cacheLocally(callback);
     },
 
     getHighScore: function(callback) {
         // Update the high score
-        callback(null, this.user.data.state.scores[this.type]);
+        callback(null, this.user.data.state.scores[this.id]);
     },
 
     addGame: function(game) {

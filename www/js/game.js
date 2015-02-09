@@ -27,6 +27,14 @@ var Game = Backbone.Model.extend({
             }
         }
 
+        var typeOptions = this.types[options.type];
+
+        for (var prop in typeOptions) {
+            if (typeOptions.hasOwnProperty(prop)) {
+                this[prop] = typeOptions[prop];
+            }
+        }
+
         // The random seed for the game (allows for re-playable games with
         // identical drops)
         // Be sure to intialize this before starting the game
@@ -71,6 +79,22 @@ var Game = Backbone.Model.extend({
             this.letterPoints[letter] = this.scaledScore ?
                 Math.round((this.data.total / num) / 8.5) :
                 1;
+        }
+    },
+
+    types: {
+        infinite: {
+            rackSize: 7,
+            maxTiles: -1,
+            scaledScore: false,
+            useLengthBonus: true
+        },
+
+        challenge: {
+            rackSize: 7,
+            maxTiles: 75,
+            scaledScore: false,
+            useLengthBonus: true
         }
     },
 

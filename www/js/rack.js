@@ -259,9 +259,7 @@ var Rack = Backbone.View.extend({
     },
 
     rackWidth: function() {
-        return this.options.tileMargin +
-            ((this.options.tileMargin + this.options.tileWidth) *
-            this.options.rackSize);
+        return Rack.width();
     },
 
     rackHeight: function() {
@@ -277,5 +275,12 @@ var Rack = Backbone.View.extend({
     posFromLeft: function(left) {
         return Math.floor((left - this.options.tileMargin) /
             (this.options.tileMargin + this.options.tileWidth));
+    }
+}, {
+    width: function() {
+        var options = this.prototype.options;
+        return options.tileMargin +
+            ((options.tileMargin + options.tileWidth) *
+            options.rackSize);
     }
 });

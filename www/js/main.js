@@ -7,6 +7,9 @@ $(function() {
             // Pass the dictionary into the game
             dict: dict,
 
+            // The language we're using for the dictionary
+            lang: "en",
+
             // The server to which scores are saved
             server: apiServer,
 
