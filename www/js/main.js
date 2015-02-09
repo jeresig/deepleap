@@ -11,11 +11,7 @@ $(function() {
             lang: "en",
 
             // The server to which scores are saved
-            server: apiServer,
-
-            // Get the seed from the query string (if it exists)
-            // and set the seed on the game
-            seed: parseInt((/game=(\d+)/.exec(location.search) || [0,0])[1])
+            server: apiServer
         });
     }
 

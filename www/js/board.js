@@ -10,24 +10,14 @@ var Board = Backbone.View.extend({
         this.scale = options.scale;
         this.user = options.user;
 
-        this.game = options.game;
-
         this.updateTimer = new UpdateTimer({
             size: 100
         });
 
         this.rack = new Rack({
-            rackSize: options.rackSize || this.rackSize
+            rackSize: this.rackSize,
+            scale: this.scale
         });
-
-        this.rack.on("swap", function(a, b) {
-            self.game.swap(a, b);
-        });
-
-        // Attach all the game events
-        for (var method in this.gameEvents) {
-            this.game.on(method, _.bind(this.gameEvents[method], this));
-        }
     },
 
     setUser: function(user) {
@@ -90,6 +80,11 @@ var Board = Backbone.View.extend({
 
         this.$el
             .addClass("board")
+            .css({
+                transform: "translateY(-50%) scale(" +
+                    this.scale + ")",
+                width: Rack.width(this.rackSize)
+            })
             .html([
                 // Insert the points bar
                 $pointsBar,
@@ -139,11 +134,49 @@ var Board = Backbone.View.extend({
             user: this.user
         });
 
-        // TODO: Init board?
+        this.rack.off("swap");
+
+        this.rack.on("swap", function(a, b) {
+            self.game.swap(a, b);
+        });
+
+        // Attach all the game events
+        for (var method in this.gameEvents) {
+            this.game.on(method, _.bind(this.gameEvents[method], this));
+        }
+    },
+
+    start: function(options) {
+        this.initGame(options);
+        this.game.start();
+    },
+
+    reset: function() {
+        this.rack.reset();
+        this.game.reset();
+        this.resetHighScore();
+    },
+
+    restart: function() {
+        this.reset();
+        this.initGame();
+        this.start();
+    },
+
+    playback: function(data) {
+        if (typeof data === "string") {
+            data = $.parseJSON(data)
+        }
+
+        this.game.playback(false, data);
     },
 
     resetHighScore: function() {
         var self = this;
+
+        if (!this.scores) {
+            return;
+        }
 
         this.scores.getHighScore(function(err, highScore) {
             self.updateHighScore(highScore);
@@ -288,18 +321,12 @@ var Board = Backbone.View.extend({
         gameover: function() {
             this.rack.removeTiles(this.game.rackSize);
 
-            this.toggleOverlay("endgame", true);
-
-            // TODO:
-            // - Get longest word
-            // - Get # of dropped tiles
-            // - Get longest streak
-
             // Record the score
-            this.scores.addGame(this.game.getState());
+            var state = this.game.getState();
 
-            // TODO: Store game state
-            // TODO: Determine if a new high score was set
+            this.scores.addGame(state);
+
+            this.trigger("gameover", state);
         }
     }
 });

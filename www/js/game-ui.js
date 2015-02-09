@@ -5,28 +5,29 @@ var GameUI = Backbone.View.extend({
     initialize: function(options) {
         var self = this;
 
+        this.lang = options.lang;
+        this.dict = options.dict;
+
         // Remember the server to which scores are saved
         this.server = options.server;
 
         // Expand the rack to take up the full width
         this.maxWidth = Math.min($(window).width(), 1024);
-        this.scale = this.maxWidth / Rack.width();
-        this.rack.options.scale = this.scale;
+        this.scale = this.maxWidth / Rack.width(this.rackSize);
 
         this.board = new Board({
             scale: this.scale,
             rackSize: this.rackSize
         });
 
+        this.board.on("gameover", _.bind(this.gameover, this));
+
         this.autoAuth(function(err, user) {
             if (user) {
                 self.setUser(user);
             }
 
-            self.initGame(options);
-
             self.render();
-            self.bind();
         });
     },
 
@@ -45,12 +46,17 @@ var GameUI = Backbone.View.extend({
 
         this.$el.on("click", ".restart", function() {
             self.toggleOverlay("endgame", false);
-            self.restart();
+            self.board.restart();
         });
 
         this.$el.on("click", ".start", function() {
             self.toggleOverlay("startgame", false);
-            self.start();
+
+            self.board.start({
+                type: "infinite",
+                lang: self.lang,
+                dict: self.dict
+            });
         });
 
         this.$el.on("click", ".showchallenges", function() {
@@ -66,8 +72,16 @@ var GameUI = Backbone.View.extend({
         this.$el.on("click", ".showchallenge", function() {
             self.toggleOverlay("challenges", false);
 
-            // TODO: Start a challenge-style game
-            self.start();
+            var id = $(this).data("challenge");
+
+            // Start a challenge-style game
+            self.board.start({
+                id: "challenge-" + id,
+                type: "challenge",
+                seed: 1000 + id,
+                lang: self.lang,
+                dict: self.dict
+            });
         });
 
         if (typeof FastClick !== "undefined") {
@@ -127,16 +141,28 @@ var GameUI = Backbone.View.extend({
             this.board.render().el
         ]);
 
-        this.$el.find(".board, .full-overlay")
+        this.$el.find(".full-overlay")
             .css({
                 transform: "translateY(-50%) scale(" +
                     this.scale + ")",
-                width: Rack.width()
+                width: Rack.width(this.rackSize)
             });
 
         this.$el.width(this.maxWidth);
 
+        this.bind();
+
         return this;
+    },
+
+    gameover: function(state) {
+        // TODO:
+        // - Get longest word
+        // - Get # of dropped tiles
+        // - Get longest streak
+        this.$el.find(".endgame .points").text(state.results.score);
+
+        this.toggleOverlay("endgame", true);
     },
 
     renderChallenges: function() {
@@ -172,30 +198,6 @@ var GameUI = Backbone.View.extend({
                 }, 300);
             }
         }, 13);
-    },
-
-    start: function() {
-        this.game.start();
-    },
-
-    reset: function() {
-        this.rack.reset();
-        this.game.reset();
-        this.resetHighScore();
-    },
-
-    restart: function() {
-        this.reset();
-        this.initGame();
-        this.start();
-    },
-
-    playback: function(data) {
-        if (typeof data === "string") {
-            data = $.parseJSON(data)
-        }
-
-        this.game.playback(false, data);
     },
 
     autoAuth: function(callback) {
