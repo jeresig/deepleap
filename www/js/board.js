@@ -203,6 +203,9 @@ var Board = Backbone.View.extend({
         if (newHigh || !this.curHighScore) {
             this.curHighScore = score;
             this.updateNumber(".score .highscore", this.curHighScore);
+
+            // Save the high score
+            this.scores.setHighScore(score);
         }
 
         this.$el.find(".score .text").toggleClass("active", !!newHigh);
