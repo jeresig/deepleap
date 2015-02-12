@@ -100,8 +100,6 @@ var Board = Backbone.View.extend({
                 $buttons
             ]);
 
-        this.resetHighScore();
-
         return this;
     },
 
@@ -154,6 +152,8 @@ var Board = Backbone.View.extend({
         this.$el.find(".tiles-left")
             .toggleClass("hidden", !showTilesLeft)
             .text(this.game.maxTiles - this.game.droppedTiles);
+
+        this.resetHighScore();
     },
 
     start: function(options) {
