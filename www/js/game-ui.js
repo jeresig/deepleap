@@ -69,6 +69,16 @@ var GameUI = Backbone.View.extend({
             }, 350);
         });
 
+        this.$el.on("click", ".newchallenge", function() {
+            self.toggleOverlay("endgame", false);
+
+            self.renderChallenges();
+
+            setTimeout(function() {
+                self.toggleOverlay("challenges", true);
+            }, 350);
+        });
+
         this.$el.on("click", ".showchallenge", function() {
             self.toggleOverlay("challenges", false);
 
@@ -109,7 +119,10 @@ var GameUI = Backbone.View.extend({
                     .addClass("points"),
                 $("<button>")
                     .addClass("restart")
-                    .text("Play Again")
+                    .text("Play Again"),
+                $("<button>")
+                    .addClass("newchallenge")
+                    .text("New Challenge")
             ]);
 
         var $challenges = $("<div>")
