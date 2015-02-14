@@ -13,12 +13,19 @@ var dicts = {};
 var boards = {};
 
 var getDict = function(lang) {
-    if (!(lang in dicts)) {
-        var dict = fs.readFileSync("../dict/ptrie/" + lang + ".ptrie", {
-            encoding: "utf8"
-        });
+    // Clean up the lang string
+    lang = lang.replace(/[^a-z]/g, "");
 
-        dicts[lang] = new PackedTrie(dict);
+    if (!(lang in dicts)) {
+        try {
+            var dict = fs.readFileSync("../dict/ptrie/" + lang + ".ptrie", {
+                encoding: "utf8"
+            });
+
+            dicts[lang] = new PackedTrie(dict);
+        } catch(e) {
+            return;
+        }
     }
 
     return dicts[lang];
@@ -46,9 +53,17 @@ User.prototype = {
         return this.data;
     },
 
-    addGame: function(game) {
+    addGame: function(game, callback) {
+        if (!game.settings) {
+            return callback(new Error("Malformed game object."));
+        }
+
         // Get right dict from lang
         var dict = getDict(game.settings.lang);
+
+        if (!dict) {
+            return callback(new Error("No valid game language."));
+        }
 
         // Validate the score from the log
         var validResults = Game.validate(game, dict);
@@ -57,7 +72,7 @@ User.prototype = {
         game.results = validResults;
 
         var ret = {
-            id: game.gid,
+            gid: game.gid,
             validated: !!validResults
         };
 
@@ -66,22 +81,37 @@ User.prototype = {
         }
 
         var score = validResults.score;
-        var user = game.user.playerID;
+        var type = game.settings.type;
 
-        var board = getHighScoreBoard(game.settings.type);
+        if (!this.data.state) {
+            this.data.state = {};
+        }
 
-        // TODO: Save game state, as well
+        if (!this.data.state.scores) {
+            this.data.state.scores = {};
+        }
 
-        // Get current max score
-        board.score(user, function(err, curHighScore) {
-            if (!curHighScore || score > curHighScore) {
-                board.add(user, score, function() {
-                    callback(err, ret);
-                });
-            } else {
-                callback(err, ret);
-            }
+        if (score > this.data.state.scores[type]) {
+            this.data.state.scores[type] = score;
+        }
+
+        if (!this.data.state.playCount) {
+            this.data.state.playCount = {};
+        }
+
+        this.data.state.playCount[type] =
+            (this.data.state.playCount[type] || 0) + 1;
+
+        game.userID = this.id;
+
+        r.table("games").insert(game).run(conn, function(err, result) {
+            callback(err, ret);
         });
+    },
+
+    addGames: function(games, callback) {
+        // Work through an array of games
+        async.eachLimit(games, 1, this.addGame.bind(this), callback);
     }
 };
 
@@ -122,7 +152,7 @@ User.loginUsingGameCenter = function(auth, callback) {
         .run(conn).then(function(err, cursor) {
             return cursor.toArray();
         }).then(function(results) {
-            if (results.length === 0) {
+            if (results.length === 1) {
                 callback(null, new User({
                     data: results[0].right,
                     auth: results[0].left
@@ -134,7 +164,7 @@ User.loginUsingGameCenter = function(auth, callback) {
         });
 };
 
-server.get("/auth/gamecenter", function(req, res, next) {
+server.get("/user/auth/gamecenter", function(req, res, next) {
     var auth = req.body;
 
     User.loginUsingGameCenter(auth, function(err, user) {
@@ -143,16 +173,7 @@ server.get("/auth/gamecenter", function(req, res, next) {
     });
 });
 
-server.get("/leaderboard/:type", function(req, res, next) {
-    var board = getHighScoreBoard(req.params.type);
-
-    board.list(0, function(err, list) {
-        res.send(list);
-        next();
-    });
-});
-
-server.get("/scores/:userID", function(req, res, next) {
+server.get("/user/:userID", function(req, res, next) {
     var userID = req.params.userID;
 
     User.getByID(userID, function(err, user) {
@@ -161,26 +182,12 @@ server.get("/scores/:userID", function(req, res, next) {
             return;
         }
 
-        user.
-    });
-
-    var types = Object.keys(boards);
-    var results = {};
-
-    async.each(types, function(type, callback) {
-        var board = getHighScoreBoard(type);
-
-        board.score(user, function(err, curHighScore) {
-            results[type] = curHighScore || 0;
-            callback();
-        });
-    }, function() {
-        res.send(200, results);
+        res.send(200, user.toJSON());
         next();
     });
 });
 
-server.post("/games", function(req, res, next) {
+server.post("/user/games", function(req, res, next) {
     var data = req.body;
     var userID = data.userID;
     var games = data.games;
@@ -191,48 +198,25 @@ server.post("/games", function(req, res, next) {
             return next();
         }
 
-        // Work through an array of scores
-        async.eachLimit(games, 1, function(game, callback) {
-            // Get right dict from lang
-            var dict = getDict(game.settings.lang);
-
-            // Validate the score from the log
-            var validResults = Game.validate(game, dict);
-
-            var ret = {
-                id: game.id,
-                validated: !!validResults
-            };
-
-            if (!validResults) {
-                return callback(null, ret);
-            }
-
-            var score = validResults.score;
-            var user = game.user.playerID;
-
-            var board = getHighScoreBoard(game.settings.type);
-
-            // TODO: Save game state, as well
-
-            // Get current max score
-            board.score(user, function(err, curHighScore) {
-                if (!curHighScore || score > curHighScore) {
-                    board.add(user, score, function() {
-                        callback(err, ret);
-                    });
-                } else {
-                    callback(err, ret);
-                }
+        user.addGames(function(err, results) {
+            user.save(function() {
+                // Render results
+                res.send(200, {
+                    user: user.toJSON(),
+                    games: results
+                });
+                next();
             });
-        }, function(err, results) {
-            // Render results
-            res.send(200, {
-                user: user.toJSON(),
-                games: results
-            });
-            next();
         });
+    });
+});
+
+server.get("/leaderboard/:type", function(req, res, next) {
+    var board = getHighScoreBoard(req.params.type);
+
+    board.list(0, function(err, list) {
+        res.send(list);
+        next();
     });
 });
 
