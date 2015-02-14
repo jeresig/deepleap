@@ -79,6 +79,14 @@ var GameUI = Backbone.View.extend({
             }, 350);
         });
 
+        this.$el.on("click", ".home", function() {
+            self.toggleOverlay("endgame", false);
+
+            setTimeout(function() {
+                self.toggleOverlay("startgame", true);
+            }, 350);
+        });
+
         this.$el.on("click", ".showchallenge", function() {
             self.toggleOverlay("challenges", false);
 
@@ -122,7 +130,10 @@ var GameUI = Backbone.View.extend({
                     .text("Play Again"),
                 $("<button>")
                     .addClass("newchallenge")
-                    .text("New Challenge")
+                    .text("New Challenge"),
+                $("<button>")
+                    .addClass("home")
+                    .text("Home")
             ]);
 
         var $challenges = $("<div>")
