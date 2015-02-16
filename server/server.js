@@ -59,6 +59,10 @@ User.prototype = {
         // Validate the score from the log
         var validResults = Game.validate(game, dict);
 
+        // Set the right date on the results
+        validResults.startTime = game.results.startTime;
+        validResults.endTime = game.results.endTime;
+
         // Override any erroneous results
         game.results = validResults;
 
@@ -203,15 +207,33 @@ server.post("/user/games", function(req, res, next) {
 });
 
 server.get("/leaderboard/:type/:duration", function(req, res, next) {
-    t.table("games")
-        .filter(r.row("settings")("type").eq(req.params.type))
-        .orderBy({index: r.desc("results")("score")})
-    var board = getHighScoreBoard(req.params.type);
+    var type = req.params.type;
+    var startPos = parseFloat(req.query.pos) || 0;
+    var startTime = 0;
 
-    board.list(0, function(err, list) {
-        res.send(list);
-        next();
-    });
+    if (req.params.duration === "last_week") {
+        startTime = (new Date).getTime() - (7 * 24 * 3600);
+    }
+
+    t.table("games")
+        .filter(
+            r.row("settings")("type").eq(type).and(
+                r.row("results")("startTime").gt(startTime))
+        )
+        .without("log")
+        .eqJoin("userID", r.table("users"))
+        .orderBy({index: r.desc("results")("score")})
+        .skip(startPos)
+        .limit(50)
+        .run(conn, function(err, pairs) {
+            res.send(pairs.map(function(pair, i) {
+                type: type,
+                rank: startPos + i + 1,
+                game: pair.left.results,
+                user: pair.right.data
+            }));
+            next();
+        });
 });
 
 r.connect({host: "localhost"}, function(err, _conn) {
