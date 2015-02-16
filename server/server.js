@@ -31,15 +31,6 @@ var getDict = function(lang) {
     return dicts[lang];
 };
 
-var getHighScoreBoard = function(type) {
-    if (!(type in boards)) {
-        boards[type] = new Leaderboard("snp-highscores-" + type,
-            {pageSize: 50}, redis);
-    }
-
-    return boards[type];
-};
-
 server.use(restify.CORS());
 server.use(restify.bodyParser());
 
@@ -211,7 +202,10 @@ server.post("/user/games", function(req, res, next) {
     });
 });
 
-server.get("/leaderboard/:type", function(req, res, next) {
+server.get("/leaderboard/:type/:duration", function(req, res, next) {
+    t.table("games")
+        .filter(r.row("settings")("type").eq(req.params.type))
+        .orderBy({index: r.desc("results")("score")})
     var board = getHighScoreBoard(req.params.type);
 
     board.list(0, function(err, list) {
