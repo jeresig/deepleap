@@ -79,6 +79,16 @@ var GameUI = Backbone.View.extend({
             }, 350);
         });
 
+        this.$el.on("click", ".showleaderboard", function() {
+            self.toggleOverlay("endgame", false);
+
+            self.renderLeaderboard();
+
+            setTimeout(function() {
+                self.toggleOverlay("leaderboard", true);
+            }, 350);
+        });
+
         this.$el.on("click", ".home", function() {
             self.toggleOverlay("endgame", false);
 
@@ -144,6 +154,14 @@ var GameUI = Backbone.View.extend({
                     .addClass("challenge-list")
             ]);
 
+        var $leaderboard = $("<div>")
+            .addClass("leaderboard full-overlay hidden")
+            .hide()
+            .html([
+                $("<div>")
+                    .addClass("leaderboard-list")
+            ]);
+
         var $overlay = $("<div>")
             .addClass("background overlay")
             .appendTo("body");
@@ -162,6 +180,9 @@ var GameUI = Backbone.View.extend({
 
                 // Add the challenges overlay
                 $challenges,
+
+                // Add the leaderboard overlay
+                $leaderboard,
 
                 // The game board
                 this.board.render().el
@@ -186,6 +207,11 @@ var GameUI = Backbone.View.extend({
         this.$el.find(".endgame .points").text(state.results.score);
 
         this.toggleOverlay("endgame", true);
+    },
+
+    renderLeaderboard: function() {
+        // TODO: Ajax request to get leaderboard data for current game type
+        this.$el.find(".leaderboard-list").html("");
     },
 
     renderChallenges: function() {
