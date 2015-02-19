@@ -52,8 +52,10 @@ var GameUI = Backbone.View.extend({
         this.$el.on("click", ".start", function() {
             self.toggleOverlay("startgame", false);
 
+            self.curType = "infinite";
+
             self.board.start({
-                type: "infinite",
+                type: self.curType,
                 lang: self.lang,
                 dict: self.dict
             });
@@ -92,6 +94,8 @@ var GameUI = Backbone.View.extend({
         this.$el.on("click", ".home", function() {
             self.toggleOverlay("endgame", false);
 
+            self.curType = null;
+
             setTimeout(function() {
                 self.toggleOverlay("startgame", true);
             }, 350);
@@ -102,10 +106,12 @@ var GameUI = Backbone.View.extend({
 
             var id = $(this).data("challenge");
 
+            self.curType = "challenge";
+
             // Start a challenge-style game
             self.board.start({
                 id: "challenge-" + id,
-                type: "challenge",
+                type: self.curType,
                 seed: 1000 + id,
                 lang: self.lang,
                 dict: self.dict
@@ -209,9 +215,30 @@ var GameUI = Backbone.View.extend({
         this.toggleOverlay("endgame", true);
     },
 
-    renderLeaderboard: function() {
-        // TODO: Ajax request to get leaderboard data for current game type
-        this.$el.find(".leaderboard-list").html("");
+    renderLeaderboard: function(type) {
+        type = type || this.curType;
+
+        var $list = this.$el.find(".leaderboard-list").empty();
+
+        // Ajax request to get leaderboard data for current game type
+        $.ajax({
+            type: "GET",
+            url: self.server + "/leaderboard/" + type + "/all_time",
+            dataType: "json",
+            success: function(games) {
+                $list.html(_.map(games, function(data) {
+                    return $("<div>")
+                        .html([
+                            "<span class='rank'>" + data.rank + "</span>",
+                            "<span class='user'>" + data.user + "</span>",
+                            "<span class='score'>" + data.score + "</span>"
+                        ]);
+                }));
+            }
+        });
+
+        // TODO: Show loading indicator
+        // TODO: Add pagination nav
     },
 
     renderChallenges: function() {

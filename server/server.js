@@ -230,7 +230,7 @@ server.get("/leaderboard/:type/:duration", function(req, res, next) {
                 type: type,
                 rank: startPos + i + 1,
                 game: pair.left.results,
-                user: pair.right.data
+                user: pair.right.name
             }));
             next();
         });
