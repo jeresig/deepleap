@@ -91,6 +91,14 @@ var GameUI = Backbone.View.extend({
             }, 350);
         });
 
+        this.$el.on("click", ".leaderboard-back", function() {
+            self.renderLeaderboard(this.curType, this.curPos - 50);
+        });
+
+        this.$el.on("click", ".leaderboard-forward", function() {
+            self.renderLeaderboard(this.curType, this.curPos + 50);
+        });
+
         this.$el.on("click", ".home", function() {
             self.toggleOverlay("endgame", false);
 
@@ -165,7 +173,13 @@ var GameUI = Backbone.View.extend({
             .hide()
             .html([
                 $("<div>")
-                    .addClass("leaderboard-list")
+                    .addClass("leaderboard-list"),
+                $("<button>")
+                    .addClass("leaderboard-back")
+                    .text("&laquo; Back"),
+                $("<button>")
+                    .addClass("leaderboard-forward")
+                    .text("More &raquo;")
             ]);
 
         var $overlay = $("<div>")
@@ -215,15 +229,18 @@ var GameUI = Backbone.View.extend({
         this.toggleOverlay("endgame", true);
     },
 
-    renderLeaderboard: function(type) {
+    renderLeaderboard: function(type, pos) {
         type = type || this.curType;
+        pos = pos || this.curPos || 0;
 
         var $list = this.$el.find(".leaderboard-list").empty();
+
+        // TODO: Show loading indicator
 
         // Ajax request to get leaderboard data for current game type
         $.ajax({
             type: "GET",
-            url: self.server + "/leaderboard/" + type + "/all_time",
+            url: self.server + "/leaderboard/" + type + "/all_time?pos=" + pos,
             dataType: "json",
             success: function(games) {
                 $list.html(_.map(games, function(data) {
@@ -237,8 +254,7 @@ var GameUI = Backbone.View.extend({
             }
         });
 
-        // TODO: Show loading indicator
-        // TODO: Add pagination nav
+        // TODO: Disable pagination nav
     },
 
     renderChallenges: function() {
