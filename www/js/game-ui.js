@@ -82,7 +82,7 @@ var GameUI = Backbone.View.extend({
         });
 
         this.$el.on("click", ".showleaderboard", function() {
-            self.toggleOverlay("endgame", false);
+            self.toggleOverlay("startgame", false);
 
             self.renderLeaderboard();
 
@@ -140,7 +140,10 @@ var GameUI = Backbone.View.extend({
                     .text("Play"),
                 $("<button>")
                     .addClass("showchallenges")
-                    .text("Challenges")
+                    .text("Challenges"),
+                $("<button>")
+                    .addClass("showleaderboard")
+                    .text("Leaderboard")
             ]);
 
         var $endGame = $("<div>")
@@ -174,12 +177,15 @@ var GameUI = Backbone.View.extend({
             .html([
                 $("<div>")
                     .addClass("leaderboard-list"),
+                $("<div>")
+                    .addClass("leaderboard-loading")
+                    .text("Loading..."),
                 $("<button>")
                     .addClass("leaderboard-back")
-                    .text("&laquo; Back"),
+                    .html("&laquo; Back"),
                 $("<button>")
                     .addClass("leaderboard-forward")
-                    .text("More &raquo;")
+                    .html("More &raquo;")
             ]);
 
         var $overlay = $("<div>")
@@ -230,7 +236,7 @@ var GameUI = Backbone.View.extend({
     },
 
     renderLeaderboard: function(type, pos) {
-        type = type || this.curType;
+        type = type || this.curType || "infinite";
         pos = pos || this.curPos || 0;
 
         var $list = this.$el.find(".leaderboard-list").empty();
@@ -240,16 +246,15 @@ var GameUI = Backbone.View.extend({
         // Ajax request to get leaderboard data for current game type
         $.ajax({
             type: "GET",
-            url: self.server + "/leaderboard/" + type + "/all_time?pos=" + pos,
+            url: this.server + "/leaderboard/" + type + "/all_time?pos=" + pos,
             dataType: "json",
             success: function(games) {
                 $list.html(_.map(games, function(data) {
-                    return $("<div>")
-                        .html([
-                            "<span class='rank'>" + data.rank + "</span>",
-                            "<span class='user'>" + data.user + "</span>",
-                            "<span class='score'>" + data.score + "</span>"
-                        ]);
+                    return $("<div>").html([
+                        "<span class='rank'>" + data.rank + "</span>",
+                        "<span class='user'>" + data.user + "</span>",
+                        "<span class='score'>" + data.score + "</span>"
+                    ]);
                 }));
             }
         });
