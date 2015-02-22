@@ -62,17 +62,7 @@ var GameUI = Backbone.View.extend({
         });
 
         this.$el.on("click", ".showchallenges", function() {
-            self.toggleOverlay("startgame", false);
-
-            self.renderChallenges();
-
-            setTimeout(function() {
-                self.toggleOverlay("challenges", true);
-            }, 350);
-        });
-
-        this.$el.on("click", ".newchallenge", function() {
-            self.toggleOverlay("endgame", false);
+            self.hideCurOverlay();
 
             self.renderChallenges();
 
@@ -82,7 +72,7 @@ var GameUI = Backbone.View.extend({
         });
 
         this.$el.on("click", ".showleaderboard", function() {
-            self.toggleOverlay("startgame", false);
+            self.hideCurOverlay();
 
             self.renderLeaderboard();
 
@@ -156,7 +146,7 @@ var GameUI = Backbone.View.extend({
                     .addClass("restart")
                     .text("Play Again"),
                 $("<button>")
-                    .addClass("newchallenge")
+                    .addClass("showchallenges")
                     .text("New Challenge"),
                 $("<button>")
                     .addClass("home")
@@ -295,6 +285,12 @@ var GameUI = Backbone.View.extend({
                 }, 300);
             }
         }, 13);
+    },
+
+    hideCurOverlay: function() {
+        var className = $(".full-overlay:not(.hidden)").first().attr("class");
+        var curName = className.replace(/\s.*$/, "");
+        this.toggleOverlay(curName, false);
     },
 
     autoAuth: function(callback) {
