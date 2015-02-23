@@ -239,6 +239,12 @@ var GameUI = Backbone.View.extend({
             url: this.server + "/leaderboard/" + type + "/all_time?pos=" + pos,
             dataType: "json",
             success: function(games) {
+                this.$el.find(".leaderboard-back")
+                    .toggleClass("disabled", pos === 0);
+
+                this.$el.find(".leaderboard-forward")
+                    .toggleClass("disabled", games.length < 50);
+
                 $list.html(_.map(games, function(data) {
                     return $("<div>").html([
                         "<span class='rank'>" + data.rank + "</span>",
@@ -249,7 +255,9 @@ var GameUI = Backbone.View.extend({
             }
         });
 
-        // TODO: Disable pagination nav
+        // Disable pagination nav
+        this.$el.find(".leaderboard-back .leaderboard-forward")
+            .addClass("disabled");
     },
 
     renderChallenges: function() {
