@@ -1,0 +1,413 @@
+html, body {
+    background: #BBB;
+    color: #000;
+    font-family: Helvetica, Arial, Sans-Serif;
+    font-size: 14px;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    width: 100%;
+    height: 100%;
+    background: #EEE url(../images/texture.png);
+}
+
+#main {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    margin: 0 auto;
+}
+
+.board, .full-overlay {
+    position: relative;
+    padding: 0;
+    top: 50%;
+    margin: 0;
+    -webkit-transform-origin: 0 50%;
+    transform-origin: 0 50%;
+    -moz-user-select: none;
+    -khtml-user-select: none;
+    -webkit-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+p.note {
+    background: yellow;
+    padding: 4px;
+    width: 766px;
+    border: 4px solid black;
+}
+
+span.points-wrap {
+    padding-left: 10px;
+    font-size: 20px;
+}
+
+span.points-wrap .right {
+    float: right;
+    padding-right: 10px;
+}
+
+span.points-wrap .right .ui-btn {
+    cursor: default;
+}
+
+span.points-wrap .drop {
+    background-image: none;
+}
+
+li.pass {
+    color: green;
+}
+
+li.fail, li.drop {
+    color: red;
+}
+
+.letters {
+    text-align: left;
+    overflow-x: visible;
+    overflow-y: visible;
+    position: relative;
+    background: url(../images/wood-tile3.jpg);
+    -moz-border-radius-topleft: 6px;
+    -moz-border-radius-topright: 6px;
+    -webkit-border-top-left-radius: 6px;
+    -webkit-border-top-right-radius: 6px;
+    border-top-left-radius: 6px;
+    border-top-right-radius: 6px;
+    z-index: 1;
+    margin: 0;
+    -webkit-user-select: none;
+    user-select: none;
+}
+
+.letters-extra-before {
+    position: relative;
+    top: -4px;
+    height: 10px;
+    margin: 0 0 -10px 0;
+    -moz-border-radius: 100px / 10px;
+    border-radius: 100px / 10px;
+    -webkit-box-shadow: 0 0 25px rgba(0,0,0,1);
+    -moz-box-shadow: 0 0 25px rgba(0,0,0,1);
+    box-shadow: 0 0 25px rgba(0,0,0,1);
+    z-index: 2;
+}
+
+.letters-extra {
+    background: url(../images/wood-tile3.jpg) 300px 80px;
+    -moz-box-shadow: 0 0 4px rgba(0, 0, 0, 0.8) inset;
+    -webkit-box-shadow: 0 0 4px rgba(0, 0, 0, 0.8) inset;
+    box-shadow: 0 0 4px rgba(0, 0, 0, 0.8) inset;
+    margin: 0;
+    position: relative;
+    -moz-border-radius: 6px;
+    border-radius: 6px;
+    z-index: 2;
+}
+
+.letters span {
+    display: block;
+    text-align: center;
+    background: #F4D1A3 url(../images/wood-tile.jpg);
+    position: absolute !important;
+    top: 6px;
+    left: 0px;
+    opacity: 1;
+    overflow: hidden;
+    -moz-border-radius: 6px;
+    border-radius: 6px;
+    text-shadow: 1px 1px #F4D1A3, -1px -1px #444;
+    z-index: 11;
+    cursor: pointer;
+    -webkit-transform: translateX(1000px);
+    transform: translateX(1000px);
+    -webkit-transition: -webkit-transform 0.3s ease, opacity 0.3s ease;
+    transition: transform 0.3s ease, opacity 0.3s ease;
+    box-shadow: 0 0 4px rgba(0,0,0,1);
+}
+
+.letters span.active {
+    -webkit-box-shadow: 0 0 20px rgba(0,0,0,1);
+    -moz-box-shadow: 0 0 20px rgba(0,0,0,1);
+    box-shadow: 0 0 20px rgba(0,0,0,1);
+    z-index: 20;
+    -webkit-transition: none;
+    transition: none;
+}
+
+.letters span.leaving {
+    opacity: 0;
+}
+
+.letters span.dragging {
+    opacity: 0;
+}
+
+.letters span.coulddrop {
+    color: rgb(205, 2, 2);
+}
+
+.letters span.coulddrop:not(.active) {
+    -webkit-transition: -webkit-transform 0.1s ease, opacity 0.1s ease;
+    transition: transform 0.1s ease, opacity 0.1s ease;
+}
+
+.letters span.active.found,
+.letters span.coulddrop.found,
+.letters span.found {
+    color: white;
+}
+
+.buttons {
+    height: 40px;
+    margin: 0 13px 6px 13px;
+}
+
+canvas.update-timer {
+    position: absolute;
+    top: 0;
+    left: 13px;
+    width: 40px;
+    height: 40px;
+    vertical-align: bottom;
+}
+
+.tiles-left {
+    position: absolute;
+    top: 0;
+    left: 60px;
+    display: block;
+    border-radius: 10px;
+    background: rgba(0, 0, 0, 0.2);
+    height: 40px;
+    min-width: 48px;
+    text-align: right;
+    padding: 0 6px;
+    font-size: 28px;
+    line-height: 40px;
+}
+
+.tiles-left.hidden {
+    display: none;
+}
+
+.streak {
+    position: relative;
+    margin: 0 auto;
+    height: 40px;
+    width: 300px;
+    padding-top: 5px;
+}
+
+.streak .multiplier {
+    position: absolute;
+    top: 0px;
+    left: -85px;
+    width: 80px;
+    text-align: right;
+    font-size: 28px;
+    line-height: 40px;
+}
+
+.streak .streak-bar {
+    width: 100%;
+    height: 100%;
+    border-radius: 15px;
+    height: 30px;
+    border: 1px solid #000;
+    overflow: hidden;
+}
+
+.streak .streak-bar .bar {
+    display: block;
+    background: green;
+    width: 0%;
+    height: 100%;
+    -webkit-transition: width 0.3s ease;
+    transition: width 0.3s ease;
+}
+
+.score {
+    position: absolute;
+    top: 0;
+    right: 13px;
+    display: block;
+    border-radius: 10px;
+    background: rgba(0, 0, 0, 0.2);
+    height: 40px;
+    min-width: 78px;
+    text-align: right;
+    padding: 0 6px;
+}
+
+.score .points {
+    font-size: 28px;
+    line-height: 40px;
+}
+
+.score .text {
+    font-size: 14px;
+    position: absolute;
+    top: -13px;
+    left: 9px;
+}
+
+.score .text.active {
+    font-weight: bold;
+}
+
+button.saveword {
+    border: 1px solid #000;
+    height: 40px;
+    font-size: 27px;
+}
+
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: #000;
+    opacity: 0.3;
+    z-index: 10;
+    cursor: default;
+    -webkit-transition: opacity 0.3s ease;
+    transition: opacity 0.3s ease;
+    -moz-user-select: none;
+    -khtml-user-select: none;
+    -webkit-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+.overlay.hidden, .full-overlay.hidden {
+    opacity: 0;
+}
+
+.full-overlay {
+    position: absolute;
+    background: none;
+    opacity: 1;
+    z-index: 11;
+    text-align: center;
+}
+
+.endgame .points {
+    display: inline-block;
+    border-radius: 10px;
+    color: #000;
+    border: 3px solid darkgreen;
+    background: rgba(0, 255, 0, 0.9);
+    height: 40px;
+    min-width: 78px;
+    text-align: right;
+    padding: 0 6px;
+    font-size: 28px;
+    line-height: 40px;
+    margin-right: 100px;
+}
+
+.full-overlay button {
+    background: #FFF;
+    border: 3px solid #000;
+    height: 40px;
+    font-size: 28px;
+    line-height: 28px;
+}
+
+.words {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.words li {
+    margin: 3px;
+    padding: 2px;
+    background: #F4D1A3;
+    border: 1px outset black;
+    width: 500px;
+}
+
+.help {
+    width: 250px;
+    float: right;
+}
+
+.help a {
+    color: darkgreen;
+}
+
+#twitter_update_list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+#twitter_update_list li {
+    margin: 4px 0;
+}
+
+
+#mini-main {
+    display: none;
+    position: absolute;
+    top: 267px;
+    left: 672px;
+}
+
+#mini-main .letters-extra {
+    margin-bottom: 0px;
+}
+
+#mini-main .letters span {
+    -moz-border-radius: 3px;
+    border-radius: 3px;
+}
+
+#mini-main .letters span.found {
+    background: white;
+}
+
+#mini-main span.points-wrap {
+    font-size: 20px;
+    padding-left: 0px;
+}
+
+#overview-all {
+    width: 480px;
+}
+
+#overview-all h2 {
+    text-align: center;
+    font-weight: normal;
+    font-style: italic;
+    font-size: 20px;
+}
+
+#overview-all .ui-listview {
+    width: 50%;
+}
+
+#overview-all .ui-li .ui-btn-text {
+    overflow: visible;
+}
+
+#overview-all .ui-li .ui-icon {
+    background-image: url(../images/icons-18-white.png);
+}
+
+#overview-desc {
+    float: right;
+    width: 50%;
+    overflow: hidden;
+    text-align: center;
+}
+
+.ui-dialog .ui-dialog-content {
+    padding: .5em .2em;
+}

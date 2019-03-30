@@ -1,0 +1,24 @@
+{
+  "name": "deepleap",
+  "version": "0.0.0",
+  "homepage": "https://github.com/jeresig/deepleap",
+  "authors": [
+    "John Resig <jeresig@gmail.com>"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "backbone": "~1.1.2",
+    "jquery": "~2.1.3",
+    "lodash": "~2.4.1",
+    "jquery-ui": "~1.11.2",
+    "fastclick": "~1.0.3",
+    "localforage": "~1.2.1"
+  }
+}
